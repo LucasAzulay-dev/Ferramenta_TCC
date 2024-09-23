@@ -3,7 +3,7 @@ from Teste_Driver_Creator import Create_Test_Driver
 from instrument_code import Create_Intrumented_Code
 
 # Defina o caminho para o arquivo Excel
-excel_file_path = "testvec1.xlsx"
+excel_file_path = "testvec2.xlsx"
 
 # Defina o nome do arquivo .c do SUT
 code_path = "SUT.c"

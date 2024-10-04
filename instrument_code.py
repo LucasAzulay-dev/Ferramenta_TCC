@@ -51,9 +51,12 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             new_block_items = []
             for stmt in (node.block_items or []):
                 if isinstance(stmt, c_ast.FuncCall):
-                    # Substitui a chamada de função pela versão instrumentada
+                    # Instrumentada a chamada de funções
                     instrumented_statements = self.visit_FuncCall(stmt)
                     new_block_items.extend(instrumented_statements)
+                else:
+                    # Mantém outros statements (como x = 1)
+                    new_block_items.append(stmt)
             node.block_items = new_block_items
         super().generic_visit(node)
 

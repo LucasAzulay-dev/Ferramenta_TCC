@@ -23,6 +23,7 @@ void CompD (int DI1, int DI2, int *DO1){
 int AO1, AO2, BO1, CO1;
 
 void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1){
+    int x = 1;
     CompA(SUTI1, SUTI2, SUTI3, &AO1, &AO2);
     CompB(SUTI4, SUTI5, SUTI6, SUTI7, &BO1);
     CompC(AO1, BO1, &CO1);

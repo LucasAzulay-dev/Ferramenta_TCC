@@ -48,3 +48,10 @@ void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int S
   printf("sut_output_variables_and_final_values: [{SUTO1:%d, SUTO2:%d}}]\n", *SUTO1, *SUTO2);
 }
 
+int main()
+{
+    int SUTO1 = 0;
+    int SUTO2 = 0;
+    SUT(1, 2, 3, 4, 5, 6, 7, &SUTO1, &SUTO2);
+    return 0;
+}

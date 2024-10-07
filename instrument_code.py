@@ -1,16 +1,33 @@
 from pycparser import c_ast, c_generator, parse_file
 
+c_type_to_printf = {
+    'int': '%d',
+    'unsigned int': '%u',
+    'short': '%hd',
+    'unsigned short': '%hu',
+    'long': '%ld',
+    'unsigned long': '%lu',
+    'float': '%f',
+    'double': '%lf',
+    'char': '%c',
+    'unsigned char': '%c',
+    'void': '%p',   # para ponteiros
+    'char*': '%s',  # strings
+}
+
 class FuncCallVisitor(c_ast.NodeVisitor):
 	def __init__(self):
 		self.generator = c_generator.CGenerator()
 		self.instrument_sut = False  # Para controlar se estamos dentro de SUT
 		self.output_variables = []
+		self.variables = {}  
 
 	def visit_FuncDef(self, node):
 		# Verificar se estamos na definição da função SUT
 		if node.decl.name == "SUT":
 			self.instrument_sut = True
 			self.generic_visit(node)
+			print(self.variables)
 			self.instrument_sut = False
 		else:
 			# Ignorar outras funções
@@ -30,11 +47,11 @@ class FuncCallVisitor(c_ast.NodeVisitor):
 			for arg in node.args.exprs:
 				arg_code = self.generator.visit(arg)
 				if isinstance(arg, c_ast.ID) and (arg_code not in self.output_variables):  # Variável normal
-					args_before.append(f"{arg_code}:%d")
+					args_before.append(f"{arg_code}:{c_type_to_printf.get(self.variables.get(arg_code))}")
 					args_list_before.append(arg_code)
 				elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (arg_code not in self.output_variables):  # Argumento ponteiro
 					pointed_var = self.generator.visit(arg.expr)
-					args_after.append(f"{pointed_var}:%d")
+					args_after.append(f"{pointed_var}:{c_type_to_printf.get(self.variables.get(pointed_var))}")
 					args_list_after.append(pointed_var)
 
 			# Adicionar printf antes da função para valores iniciais
@@ -76,10 +93,9 @@ class FuncCallVisitor(c_ast.NodeVisitor):
 					pointed_var = self.generator.visit(arg.expr)
 					args_list.append(pointed_var)
 
-			# Adicionar printf antes da atribuição
-			printf_code = f'"{func_name}_return_variables_and_initial_values: [{{' + ', '.join([f"{arg}:%d" for arg in args_list]) + '}}]\\n", ' + ', '.join(args_list)
-			printf_before = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=printf_code)]))
-			new_statements.append(printf_before)
+				printf_code = f'"{func_name}_return_variables_and_initial_values: [{{' + ', '.join([f"{arg}:{c_type_to_printf.get(self.variables.get(arg))}" for arg in args_list]) + '}}]\\n", ' + ', '.join(args_list)
+				printf_before = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=printf_code)]))
+				new_statements.append(printf_before)
 
 			# Adicionar a atribuição
 			new_statements.append(node)
@@ -87,7 +103,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
 			# Adicionar printf depois da atribuição, focando no SUTO1 e SUTO2
 			if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID):
 				assigned_var = self.generator.visit(node.lvalue)
-				printf_after_code = f'"{func_name}_return_variables_and_final_values: [{{{assigned_var}:%d}}]\\n", {assigned_var}'
+				printf_after_code = f'"{func_name}_return_variables_and_final_values: [{{{assigned_var}:{c_type_to_printf.get(self.variables.get(assigned_var))}}}]\\n", {assigned_var}'
 				printf_after = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=printf_after_code)]))
 				new_statements.append(printf_after)
 
@@ -100,7 +116,13 @@ class FuncCallVisitor(c_ast.NodeVisitor):
 		initial_sut_output_statements = []
 		final_sut_output_statements = []
 		new_block_items = []
-
+  
+		if isinstance(node, c_ast.TypeDecl):
+			var_name = node.declname
+			var_type = ''.join(node.type.names)
+			self.variables[var_name] = var_type
+    
+			
 		if self.instrument_sut and isinstance(node, c_ast.FuncDecl):
 			# Captura as variáveis de saída se estamos no SUT
 			for params in node.args.params:
@@ -126,12 +148,12 @@ class FuncCallVisitor(c_ast.NodeVisitor):
 				print(self.output_variables)
 				
 				# Instrumentação inicial (valores iniciais das variáveis de saída)
-				initial_sut_outputs = f'"sut_output_variables_and_initial_values: [{{' + ', '.join([f'{var}:%d' for var in self.output_variables]) + '}}]\\n", ' + ', '.join([f'*{var}' for var in self.output_variables])
+				initial_sut_outputs = f'"sut_output_variables_and_initial_values: [{{' + ', '.join([f'{var}:{c_type_to_printf.get(self.variables.get(var))}' for var in self.output_variables]) + '}}]\\n", ' + ', '.join([f'*{var}' for var in self.output_variables])
 				printf_initial_sut_outputs = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=initial_sut_outputs)]))
 				initial_sut_output_statements.append(printf_initial_sut_outputs)
 				
 				# Instrumentação final (valores finais das variáveis de saída)
-				final_sut_outputs = f'"sut_output_variables_and_final_values: [{{' + ', '.join([f'{var}:%d' for var in self.output_variables]) + '}}]\\n", ' + ', '.join([f'*{var}' for var in self.output_variables])
+				final_sut_outputs = f'"sut_output_variables_and_final_values: [{{' + ', '.join([f'{var}:{c_type_to_printf.get(self.variables.get(var))}' for var in self.output_variables]) + '}}]\\n", ' + ', '.join([f'*{var}' for var in self.output_variables])
 				printf_final_sut_outputs = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=final_sut_outputs)]))
 				final_sut_output_statements.append(printf_final_sut_outputs)
 				

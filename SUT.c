@@ -14,9 +14,9 @@ void CompC(int CI1, int CI2, int CI3, int *CO1)
     *CO1 = (CI1 + CI2) * CI1 + CI3;
 }
 
-int CompE(int value)
+long CompE(int value)
 {
-    return value + 1;
+    return value*(long)value;
 }
 
 void CompD(int DI1, int DI2, int *DO1)
@@ -26,7 +26,7 @@ void CompD(int DI1, int DI2, int *DO1)
 
 int AO1, AO2, BO1, CO1;
 
-void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1, int *SUTO2)
+void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1, long *SUTO2)
 {
 
     CompA(SUTI1, SUTI2, SUTI3, &AO1, &AO2);
@@ -38,6 +38,4 @@ void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int S
     *SUTO2 = CompE(CO1);
 
     CompD(CO1, AO2, SUTO1);
-
 }
-

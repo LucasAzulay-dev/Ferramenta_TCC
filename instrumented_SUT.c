@@ -15,9 +15,9 @@ void CompC(int CI1, int CI2, int CI3, int *CO1)
   *CO1 = ((CI1 + CI2) * CI1) + CI3;
 }
 
-int CompE(int value)
+long CompE(int value)
 {
-  return value + 1;
+  return value * ((long) value);
 }
 
 void CompD(int DI1, int DI2, int *DO1)
@@ -29,9 +29,9 @@ int AO1;
 int AO2;
 int BO1;
 int CO1;
-void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1, int *SUTO2)
+void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1, long *SUTO2)
 {
-  printf("sut_output_variables_and_initial_values: [{SUTO1:%d, SUTO2:%d}}]\n", *SUTO1, *SUTO2);
+  printf("sut_output_variables_and_initial_values: [{SUTO1:%d, SUTO2:%ld}}]\n", *SUTO1, *SUTO2);
   printf("CompA_return_variables_and_initial_values: [{SUTI1:%d, SUTI2:%d, SUTI3:%d}}]\n", SUTI1, SUTI2, SUTI3);
   CompA(SUTI1, SUTI2, SUTI3, &AO1, &AO2);
   printf("CompA_return_variables_and_final_values: [{AO1:%d, AO2:%d}}]\n", AO1, AO2);
@@ -45,6 +45,6 @@ void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int S
   *SUTO2 = CompE(CO1);
   printf("CompD_return_variables_and_initial_values: [{CO1:%d, AO2:%d}}]\n", CO1, AO2);
   CompD(CO1, AO2, SUTO1);
-  printf("sut_output_variables_and_final_values: [{SUTO1:%d, SUTO2:%d}}]\n", *SUTO1, *SUTO2);
+  printf("sut_output_variables_and_final_values: [{SUTO1:%d, SUTO2:%ld}}]\n", *SUTO1, *SUTO2);
 }
 

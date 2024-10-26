@@ -1,4 +1,3 @@
-import subprocess
 from Teste_Driver_Creator import Create_Test_Driver
 from instrument_code import Create_Instrumented_Code
 from run_test_drive import Run_Test_Driver

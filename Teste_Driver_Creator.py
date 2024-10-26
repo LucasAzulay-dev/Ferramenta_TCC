@@ -1,5 +1,6 @@
 import pandas as pd
 from Parser import ParseInputOutputs
+from funcoes_extras import skip_lines
 
 # Criar Test_Driver
 def Create_Test_Driver(excel_file_path, function_name, code_path):
@@ -12,8 +13,24 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(code_path, function_name)
 
-    #Definindo o numero de colunas
+    #Definindo o numero de colunas do SUT
     num_colunas = resultado[0]+resultado[1]
+
+    #Definindo o numero de colunas do Test_Vec
+    num_colunas_test_vec = df.shape[1]
+
+    #Print (PROVISORIO) da mensagem de erro
+    if(num_colunas != num_colunas_test_vec):
+        print(f"ERRO: Vetor de testes não possui tamanho equivalente a função desejada(PARAR AQUI) Colunas do SUT: {num_colunas} Colunas do Test_vec: {num_colunas_test_vec}")
+
+    #Sistema para pular e printar as linhas que são incongruentes
+    #skiped_lines = []
+    #for i in range(0,(num_colunas)*2,2):
+    #    linhas_inconsistentes = skip_lines(excel_file_path, i//2, resultado[i+3])
+    #    skiped_lines = list(set(skiped_lines + linhas_inconsistentes))
+    #if skiped_lines:
+    #    print(f"A ferramenta irá pular as linhas: {linhas_inconsistentes}")   #SOMENTE PARA int, float e char
+
 
     #Definicao das strings
     param_tests_def = ""
@@ -139,10 +156,10 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
     with open(testdriver_path, 'a') as file:
         file.write('){\n    '+ print_string_passed+'\n      }else{\n'+print_string_failed+'\n     }\n')
-    #-----------------------------------------------------------------
 
     with open(testdriver_path, 'a') as file:
         file.write('}')
+    #-----------------------------------------------------------------
 
 if __name__ == '__main__':
     # Defina o caminho para o arquivo Excel

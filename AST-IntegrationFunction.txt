@@ -1,0 +1,161 @@
+FileAST: 
+  Decl: CompA, [], [], [], []
+    FuncDecl: 
+      ParamList: 
+        Decl: AI1, [], [], [], []
+          TypeDecl: AI1, [], None
+            IdentifierType: ['int']
+        Decl: AI2, [], [], [], []
+          TypeDecl: AI2, [], None
+            IdentifierType: ['int']
+        Decl: AI3, [], [], [], []
+          TypeDecl: AI3, [], None
+            IdentifierType: ['int']
+        Decl: AO1, [], [], [], []
+          PtrDecl: []
+            TypeDecl: AO1, [], None
+              IdentifierType: ['int']
+        Decl: AO2, [], [], [], []
+          PtrDecl: []
+            TypeDecl: AO2, [], None
+              IdentifierType: ['int']
+      TypeDecl: CompA, [], None
+        IdentifierType: ['int']
+  Decl: CompB, [], [], [], []
+    FuncDecl:
+      ParamList:
+        Decl: BI1, [], [], [], []
+          TypeDecl: BI1, [], None
+            IdentifierType: ['int']
+        Decl: BI2, [], [], [], []
+          TypeDecl: BI2, [], None
+            IdentifierType: ['int']
+        Decl: BI3, [], [], [], []
+          TypeDecl: BI3, [], None
+            IdentifierType: ['int']
+        Decl: BI4, [], [], [], []
+          TypeDecl: BI4, [], None
+            IdentifierType: ['int']
+        Decl: BO1, [], [], [], []
+          PtrDecl: []
+            TypeDecl: BO1, [], None
+              IdentifierType: ['int']
+      TypeDecl: CompB, [], None
+        IdentifierType: ['void']
+  Decl: CompC, [], [], [], []
+    FuncDecl:
+      ParamList:
+        Decl: CI1, [], [], [], []
+          TypeDecl: CI1, [], None
+            IdentifierType: ['int']
+        Decl: CI2, [], [], [], []
+          TypeDecl: CI2, [], None
+            IdentifierType: ['int']
+        Decl: CO1, [], [], [], []
+          PtrDecl: []
+            TypeDecl: CO1, [], None
+              IdentifierType: ['int']
+      TypeDecl: CompC, [], None
+        IdentifierType: ['void']
+  Decl: CompD, [], [], [], []
+    FuncDecl:
+      ParamList:
+        Decl: DI1, [], [], [], []
+          TypeDecl: DI1, [], None
+            IdentifierType: ['int']
+        Decl: DI2, [], [], [], []
+          TypeDecl: DI2, [], None
+            IdentifierType: ['int']
+        Decl: DO1, [], [], [], []
+          PtrDecl: []
+            TypeDecl: DO1, [], None
+              IdentifierType: ['int']
+      TypeDecl: CompD, [], None
+        IdentifierType: ['void']
+  Decl: W, [], [], [], []
+    TypeDecl: W, [], None
+      IdentifierType: ['int']
+  Decl: X, [], [], [], []
+    TypeDecl: X, [], None
+      IdentifierType: ['int']
+  Decl: Y, [], [], [], []
+    TypeDecl: Y, [], None
+      IdentifierType: ['int']
+  Decl: Z, [], [], [], []
+    TypeDecl: Z, [], None
+      IdentifierType: ['int']
+  Decl: retA, [], [], [], []
+    TypeDecl: retA, [], None
+      IdentifierType: ['int']
+  FuncDef:
+    Decl: SUT, [], [], [], []
+      FuncDecl:
+        ParamList:
+          Decl: SUTI1, [], [], [], []
+            TypeDecl: SUTI1, [], None
+              IdentifierType: ['int']
+          Decl: SUTI2, [], [], [], []
+            TypeDecl: SUTI2, [], None
+              IdentifierType: ['int']
+          Decl: SUTI3, [], [], [], []
+            TypeDecl: SUTI3, [], None
+              IdentifierType: ['int']
+          Decl: SUTI4, [], [], [], []
+            TypeDecl: SUTI4, [], None
+              IdentifierType: ['int']
+          Decl: SUTI5, [], [], [], []
+            TypeDecl: SUTI5, [], None
+              IdentifierType: ['int']
+          Decl: SUTI6, [], [], [], []
+            TypeDecl: SUTI6, [], None
+              IdentifierType: ['int']
+          Decl: SUTI7, [], [], [], []
+            TypeDecl: SUTI7, [], None
+              IdentifierType: ['int']
+          Decl: SUTO1, [], [], [], []
+            PtrDecl: []
+              TypeDecl: SUTO1, [], None
+                IdentifierType: ['int']
+        TypeDecl: SUT, [], None
+          IdentifierType: ['void']
+    Compound:
+      Assignment: =
+        ID: retA
+        FuncCall:
+          ID: CompA
+          ExprList:
+            ID: SUTI1
+            ID: SUTI2
+            ID: SUTI3
+            UnaryOp: &
+              ID: W
+            UnaryOp: &
+              ID: X
+      If:
+        BinaryOp: !=
+          ID: retA
+          Constant: int, 0
+        Compound:
+          Return:
+      FuncCall:
+        ID: CompB
+        ExprList:
+          ID: SUTI4
+          ID: SUTI5
+          ID: SUTI6
+          ID: SUTI7
+          UnaryOp: &
+            ID: Y
+      FuncCall:
+        ID: CompC
+        ExprList:
+          ID: W
+          ID: Y
+          UnaryOp: &
+            ID: Z
+      FuncCall: 
+        ID: CompD
+        ExprList:
+          ID: Z
+          ID: X
+          ID: SUTO1

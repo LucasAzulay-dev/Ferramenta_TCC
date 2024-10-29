@@ -69,15 +69,15 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             f'executionOrder: {execution_order_str}, '
             f'in: {{{",".join(args_in_json)}}}, '
             f'out: {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
-            ) + '\\n\"'
+            ) + ',\\n\"'
             
             args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'*{key}' for key in args_sut_out.keys()])
 
-            # Adicionar o sprintf direto para registrar no buffer acumulativamente
+            # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
             new_statements.append(c_ast.FuncCall(
                 c_ast.ID("sprintf"),
                 c_ast.ExprList([
-                    c_ast.BinaryOp('+', c_ast.ID("buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("buffer")]))),
+                    c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
                     c_ast.Constant(type="string", value=json_entry + ','+ args)
                 ])
             ))
@@ -135,15 +135,15 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             f'executionOrder: {execution_order_str}, '
             f'in: {{{",".join(args_in_json)}}}, '
             f'out: {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
-            ) + '\\n\"'
+            ) + ',\\n\"'
             
             args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'*{key}' for key in args_sut_out.keys()])  
 
-            # Adicionar o sprintf direto para registrar no buffer acumulativamente
+            # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
             new_statements.append(c_ast.FuncCall(
                 c_ast.ID("sprintf"),
                 c_ast.ExprList([
-                    c_ast.BinaryOp('+', c_ast.ID("buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("buffer")]))),
+                    c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
                     c_ast.Constant(type="string", value=json_entry + ',' + args)
                 ])
             ))
@@ -180,7 +180,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
            
         super().generic_visit(node)
 
-def Create_Instrumented_Code(code_path):
+def Create_Instrumented_Code(code_path, bufferLength = 4096):
     # Parse o arquivo C
     ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
 
@@ -192,8 +192,8 @@ def Create_Instrumented_Code(code_path):
     generator = c_generator.CGenerator()
     instrumented_code = generator.visit(ast)
     
-    # Adiciona cabeçalho para buffer e sprintf
-    header = '#include <stdio.h>\n#include <string.h>\nextern char buffer[1024];\n'
+    # Adiciona cabeçalho para log_buffer e sprintf
+    header = f'#include <stdio.h>\n#include <string.h>\nextern char log_buffer[{bufferLength}];\n'
     instrumented_code_with_header = header + instrumented_code
 
     # Escreva o código instrumentado em um novo arquivo

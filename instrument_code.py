@@ -19,7 +19,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
     def __init__(self):
         self.generator = c_generator.CGenerator()
         self.instrument_sut = False  # Para controlar se estamos dentro de SUT
-        self.execution_order = 0
+        self.execution_order = 1
         self.variables = {}  # Armazenamento de variáveis e tipos
         self.output_variables = []
 
@@ -60,15 +60,15 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             execution_order_str = f'{self.execution_order}'
             self.execution_order += 1
 
-            args_in_json = [f'{key}: {value}' for key, value in args_in.items()]
-            args_out_json = [f'{key}: {value}' for key, value in args_out.items()]
-            args_sut_out_json = [f'{key}: {value}' for key, value in args_sut_out.items()]
+            args_in_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_in.items()]
+            args_out_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_out.items()]
+            args_sut_out_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_sut_out.items()]
 
             json_entry = '\"' + (
-            f'{{function: {func_name}, '
-            f'executionOrder: {execution_order_str}, '
-            f'in: {{{",".join(args_in_json)}}}, '
-            f'out: {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
+            f'{{\\"function\\": \\"{func_name}\\", '
+            f'\\"executionOrder\\": \\"{execution_order_str}\\", '
+            f'\\"in\\": {{{",".join(args_in_json)}}}, '
+            f'\\"out\\": {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
             ) + ',\\n\"'
             
             args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'*{key}' for key in args_sut_out.keys()])
@@ -126,15 +126,15 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             execution_order_str = f'{self.execution_order}'
             self.execution_order += 1
 
-            args_in_json = [f'{key}: {value}' for key, value in args_in.items()]
-            args_out_json = [f'{key}: {value}' for key, value in args_out.items()]
-            args_sut_out_json = [f'{key}: {value}' for key, value in args_sut_out.items()]
+            args_in_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_in.items()]
+            args_out_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_out.items()]
+            args_sut_out_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_sut_out.items()]
 
             json_entry = '\"' + (
-            f'{{function: {func_name}, '
-            f'executionOrder: {execution_order_str}, '
-            f'in: {{{",".join(args_in_json)}}}, '
-            f'out: {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
+            f'{{\\"function\\": \\"{func_name}\\", '
+            f'\\"executionOrder\\": \\"{execution_order_str}\\", '
+            f'\\"in\\": {{{",".join(args_in_json)}}}, '
+            f'\\"out\\": {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
             ) + ',\\n\"'
             
             args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'*{key}' for key in args_sut_out.keys()])  

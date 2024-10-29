@@ -6,8 +6,7 @@
 
 #define BUFFER_SIZE 4096 //TOMAR CUIDADO PARA NAO ESTOURAR //NOVO
 
-extern char log_buffer[];  // Declara o buffer como extern //NOVO
-extern size_t tamanho_atual; //NOVO
+char log_buffer[BUFFER_SIZE]; //NOVO
 
 void testeX(int num_teste, int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int SUTO1_test, long SUTO2_test);
 int main(){
@@ -15,13 +14,11 @@ int main(){
   //Os próximos prints só vão ser adicionados pelo Test_Driver_Creator se necessários
 
   //Mensagens de erros que que serão adicionadas ao log e código termina
-  tamanho_atual = strlen(log_buffer); //NOVO
-  snprintf(log_buffer + tamanho_atual,BUFFER_SIZE - tamanho_atual,"Arquivo nao encontrado\n"); //NOVO
+  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"Arquivo nao encontrado\n"); //NOVO
   //return 0           
 
   //Mensagens de erros que serão adicionadas ao log mas código continua
-  tamanho_atual = strlen(log_buffer); //NOVO
-  snprintf(log_buffer + tamanho_atual,BUFFER_SIZE - tamanho_atual,"Linhas nao lidas devido a tipos incrongruentes: x, y, z\n"); //NOVO    
+  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"Linhas nao lidas devido a tipos incrongruentes: x, y, z\n"); //NOVO    
 
    struct timeval begin, end;
    int test_vecs_SUTI1[4] = {40, 40, 35, 0};
@@ -40,8 +37,7 @@ int main(){
     }
   gettimeofday(&end,NULL);
   int elapsed = (((end.tv_sec - begin.tv_sec) * 1000000) + (end.tv_usec - begin.tv_usec))/4;
- tamanho_atual = strlen(log_buffer); //NOVO
- snprintf(log_buffer + tamanho_atual,BUFFER_SIZE - tamanho_atual,"Execution time: %d micro seconds\n",elapsed); //NOVO
+ snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"Execution time: %d micro seconds\n",elapsed); //NOVO
  printf("%s", log_buffer); //NOVO
  return 0;
 }
@@ -50,10 +46,8 @@ void testeX(int num_teste, int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5
     long SUTO2;
     SUT( SUTI1, SUTI2, SUTI3, SUTI4, SUTI5, SUTI6, SUTI7, &SUTO1, &SUTO2);
     if( SUTO1 == SUTO1_test && SUTO2 == SUTO2_test ){
-       tamanho_atual = strlen(log_buffer); //NOVO
-       snprintf(log_buffer + tamanho_atual,BUFFER_SIZE - tamanho_atual,"Teste %d : PASSOU\n", num_teste+1); //NOVO
+       snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"Teste %d : PASSOU\n", num_teste+1); //NOVO
       }else{
-        tamanho_atual = strlen(log_buffer); //NOVO
-       snprintf(log_buffer + tamanho_atual,BUFFER_SIZE - tamanho_atual,"Teste %d: FALHOU\n", num_teste+1); //NOVO
+       snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"Teste %d: FALHOU\n", num_teste+1); //NOVO
      }
 }

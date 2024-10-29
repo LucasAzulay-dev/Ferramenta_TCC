@@ -16,180 +16,191 @@ c_type_to_printf = {
 }
 
 class FuncCallVisitor(c_ast.NodeVisitor):
-	def __init__(self):
-		self.generator = c_generator.CGenerator()
-		self.instrument_sut = False  # Para controlar se estamos dentro de SUT
-		self.output_variables = []
-		self.variables = {}  
+    def __init__(self):
+        self.generator = c_generator.CGenerator()
+        self.instrument_sut = False  # Para controlar se estamos dentro de SUT
+        self.execution_order = 0
+        self.variables = {}  # Armazenamento de variáveis e tipos
+        self.output_variables = []
 
-	def visit_FuncDef(self, node):
+    def visit_FuncDef(self, node):
 		# Verificar se estamos na definição da função SUT
-		if node.decl.name == "SUT":
-			self.instrument_sut = True
-			self.generic_visit(node)
-			print(self.variables)
-			self.instrument_sut = False
-		else:
-			# Ignorar outras funções
-			pass
+        if node.decl.name == "SUT":
+            self.instrument_sut = True
+            self.generic_visit(node)
+            print(self.variables)
+            self.instrument_sut = False
+        else:
+            pass
 
-	def visit_FuncCall(self, node):
-		if self.instrument_sut:
-			func_name = self.generator.visit(node.name)
-			new_statements = []
+    def visit_FuncCall(self, node):
+        if self.instrument_sut:
+            func_name = self.generator.visit(node.name)
+            new_statements = []
+            args_in = {}
+            args_out = {}
+            args_sut_out = {}
 
-			# Gerar os argumentos e os printf
-			args_before = []
-			args_after = []
-			args_list_before = []
-			args_list_after = []
+            # Coletar argumentos de entrada
+            for arg in node.args.exprs:
+                var = self.generator.visit(arg)
+                if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
+                    args_in[var] = c_type_to_printf.get(self.variables.get(var))
+                elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (var not in self.output_variables):  # Ponteiro
+                    pointed_var = self.generator.visit(arg.expr)
+                    args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var)) # SUT Output
+                elif (var in self.output_variables):
+                    args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
+                    
 
-			for arg in node.args.exprs:
-				arg_code = self.generator.visit(arg)
-				if isinstance(arg, c_ast.ID) and (arg_code not in self.output_variables):  # Variável normal
-					args_before.append(f"{arg_code}:{c_type_to_printf.get(self.variables.get(arg_code))}")
-					args_list_before.append(arg_code)
-				elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (arg_code not in self.output_variables):  # Argumento ponteiro
-					pointed_var = self.generator.visit(arg.expr)
-					args_after.append(f"{pointed_var}:{c_type_to_printf.get(self.variables.get(pointed_var))}")
-					args_list_after.append(pointed_var)
+            # Chamada da função original
+            new_statements.append(node)
 
-			# Adicionar printf antes da função para valores iniciais
-			if args_before:
-				printf_before_code = f'"{func_name}_return_variables_and_initial_values: [{{' + ', '.join(args_before) + '}}]\\n", ' + ', '.join(args_list_before)
-				printf_before = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=printf_before_code)]))
-				new_statements.append(printf_before)
+            # Adicionar sprintf para registrar dados em JSON após a função
+            execution_order_str = f'{self.execution_order}'
+            self.execution_order += 1
 
-			# A chamada da função original
-			new_statements.append(node)
+            args_in_json = [f'{key}: {value}' for key, value in args_in.items()]
+            args_out_json = [f'{key}: {value}' for key, value in args_out.items()]
+            args_sut_out_json = [f'{key}: {value}' for key, value in args_sut_out.items()]
 
-			# Adicionar printf depois da função para valores finais
-			if args_after:
-				printf_after_code = f'"{func_name}_return_variables_and_final_values: [{{' + ', '.join(args_after) + '}}]\\n", ' + ', '.join(args_list_after)
-				printf_after = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=printf_after_code)]))
-				new_statements.append(printf_after)
+            json_entry = '\"' + (
+            f'{{function: {func_name}, '
+            f'executionOrder: {execution_order_str}, '
+            f'in: {{{",".join(args_in_json)}}}, '
+            f'out: {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
+            ) + '\\n\"'
+            
+            args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'*{key}' for key in args_sut_out.keys()])
 
-			return new_statements
-		else:
-			# Se não estamos em SUT, retorna apenas o node original
-			return node
+            # Adicionar o sprintf direto para registrar no buffer acumulativamente
+            new_statements.append(c_ast.FuncCall(
+                c_ast.ID("sprintf"),
+                c_ast.ExprList([
+                    c_ast.BinaryOp('+', c_ast.ID("buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("buffer")]))),
+                    c_ast.Constant(type="string", value=json_entry + ','+ args)
+                ])
+            ))
 
-	def visit_Assignment(self, node):
-		# Instrumenta atribuições somente dentro de SUT
-		if self.instrument_sut and isinstance(node.rvalue, c_ast.FuncCall):
-			func_call = node.rvalue
-			func_name = self.generator.visit(func_call.name)
+            return new_statements
+        else:
+            return node
+    
+    def visit_Assignment(self, node):
+        if self.instrument_sut and isinstance(node.rvalue, c_ast.FuncCall):
+            func_call = node.rvalue
+            func_name = self.generator.visit(func_call.name)
+            
+            new_statements = []
+            args_in = {}
+            args_out = {}
+            args_sut_out= {}
+			
+            for arg in func_call.args.exprs:
+                var = self.generator.visit(arg)
+                if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
+                    args_in[var] = c_type_to_printf.get(self.variables.get(var))
+                elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (var not in self.output_variables):  # Ponteiro
+                    pointed_var = self.generator.visit(arg.expr)
+                    args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var))
+                elif (var in self.output_variables):
+                    args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
+                    
+            if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID) or isinstance(node.lvalue, c_ast.UnaryOp):
+                var = self.generator.visit(node.lvalue)
+                if isinstance(node.lvalue, c_ast.ID) and (node.lvalue not in self.output_variables):  # Variável normal
+                    args_in[var] = c_type_to_printf.get(self.variables.get(var))
+                elif isinstance(node.lvalue, c_ast.UnaryOp) and node.lvalue.op == '&' and (node.lvalue not in self.output_variables):  # Ponteiro
+                    pointed_var = self.generator.visit(node.lvalue.expr)
+                    args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var))
+                elif (var in self.output_variables):
+                    args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
+                elif (self.generator.visit(node.lvalue.expr) in self.output_variables):
+                    args_sut_out[self.generator.visit(node.lvalue.expr)] = c_type_to_printf.get(self.variables.get(self.generator.visit(node.lvalue.expr)))
+                    
 
-			# Lista de novos statements
-			new_statements = []
+            # Chamada da função original
+            new_statements.append(node)
 
-			# Gerar os argumentos para printf
-			args_list = []
-			for arg in func_call.args.exprs:
-				arg_code = self.generator.visit(arg)
-				if isinstance(arg, c_ast.ID) and (arg_code not in self.output_variables):  # Variável normal
-					args_list.append(arg_code)
-				elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (arg_code not in self.output_variables):  # Argumento ponteiro
-					pointed_var = self.generator.visit(arg.expr)
-					args_list.append(pointed_var)
+            # Adicionar sprintf para registrar dados em JSON após a função
+            execution_order_str = f'{self.execution_order}'
+            self.execution_order += 1
 
-				printf_code = f'"{func_name}_return_variables_and_initial_values: [{{' + ', '.join([f"{arg}:{c_type_to_printf.get(self.variables.get(arg))}" for arg in args_list]) + '}}]\\n", ' + ', '.join(args_list)
-				printf_before = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=printf_code)]))
-				new_statements.append(printf_before)
+            args_in_json = [f'{key}: {value}' for key, value in args_in.items()]
+            args_out_json = [f'{key}: {value}' for key, value in args_out.items()]
+            args_sut_out_json = [f'{key}: {value}' for key, value in args_sut_out.items()]
 
-			# Adicionar a atribuição
-			new_statements.append(node)
+            json_entry = '\"' + (
+            f'{{function: {func_name}, '
+            f'executionOrder: {execution_order_str}, '
+            f'in: {{{",".join(args_in_json)}}}, '
+            f'out: {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
+            ) + '\\n\"'
+            
+            args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'*{key}' for key in args_sut_out.keys()])  
 
-			# Adicionar printf depois da atribuição, focando no SUTO1 e SUTO2
-			if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID):
-				assigned_var = self.generator.visit(node.lvalue)
-				printf_after_code = f'"{func_name}_return_variables_and_final_values: [{{{assigned_var}:{c_type_to_printf.get(self.variables.get(assigned_var))}}}]\\n", {assigned_var}'
-				printf_after = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=printf_after_code)]))
-				new_statements.append(printf_after)
+            # Adicionar o sprintf direto para registrar no buffer acumulativamente
+            new_statements.append(c_ast.FuncCall(
+                c_ast.ID("sprintf"),
+                c_ast.ExprList([
+                    c_ast.BinaryOp('+', c_ast.ID("buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("buffer")]))),
+                    c_ast.Constant(type="string", value=json_entry + ',' + args)
+                ])
+            ))
 
-			return new_statements
+            return new_statements
 
 		# Para outros tipos de atribuição, apenas retorne o node
-		return node
+        return node
 
-	def generic_visit(self, node):
-		initial_sut_output_statements = []
-		final_sut_output_statements = []
-		new_block_items = []
-  
-		if isinstance(node, c_ast.TypeDecl):
-			var_name = node.declname
-			var_type = ''.join(node.type.names)
-			self.variables[var_name] = var_type
-    
-			
-		if self.instrument_sut and isinstance(node, c_ast.FuncDecl):
-			# Captura as variáveis de saída se estamos no SUT
-			for params in node.args.params:
-				if isinstance(params.type, c_ast.PtrDecl):
-					self.output_variables.append(params.name)
+    def generic_visit(self, node):
+        new_block_items = []
 
-		if self.instrument_sut and isinstance(node, c_ast.Compound):
-			# Processa os statements dentro do bloco da função SUT
-			for stmt in (node.block_items or []):
-				if isinstance(stmt, c_ast.FuncCall):
-					# Instrumenta a chamada de funções
-					instrumented_statements = self.visit_FuncCall(stmt)
-					new_block_items.extend(instrumented_statements)
-				elif isinstance(stmt, c_ast.Assignment):
-					# Instrumenta atribuições
-					instrumented_statements = self.visit_Assignment(stmt)
-					new_block_items.extend(instrumented_statements)
-				else:
-					# Mantém outros statements
-					new_block_items.append(stmt)
-						# Adiciona as instrumentações de printf para os valores iniciais e finais
-			if len(self.output_variables) != 0:
-				print(self.output_variables)
-				
-				# Instrumentação inicial (valores iniciais das variáveis de saída)
-				initial_sut_outputs = f'"sut_output_variables_and_initial_values: [{{' + ', '.join([f'{var}:{c_type_to_printf.get(self.variables.get(var))}' for var in self.output_variables]) + '}}]\\n", ' + ', '.join([f'*{var}' for var in self.output_variables])
-				printf_initial_sut_outputs = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=initial_sut_outputs)]))
-				initial_sut_output_statements.append(printf_initial_sut_outputs)
-				
-				# Instrumentação final (valores finais das variáveis de saída)
-				final_sut_outputs = f'"sut_output_variables_and_final_values: [{{' + ', '.join([f'{var}:{c_type_to_printf.get(self.variables.get(var))}' for var in self.output_variables]) + '}}]\\n", ' + ', '.join([f'*{var}' for var in self.output_variables])
-				printf_final_sut_outputs = c_ast.FuncCall(c_ast.ID("printf"), c_ast.ExprList([c_ast.Constant(type="string", value=final_sut_outputs)]))
-				final_sut_output_statements.append(printf_final_sut_outputs)
-				
-				# Limpa a lista de variáveis de saída
-				self.output_variables = []
-			
-			# Insere as instrumentações no início e no fim do bloco da função
-		if len(initial_sut_output_statements) > 0:
-				new_block_items = initial_sut_output_statements + new_block_items + final_sut_output_statements
-
-				node.block_items = new_block_items
-
-
-		super().generic_visit(node)
-
+        if isinstance(node, c_ast.TypeDecl):
+            var_name = node.declname
+            var_type = ''.join(node.type.names)
+            self.variables[var_name] = var_type
+            
+        if self.instrument_sut and isinstance(node, c_ast.FuncDecl):
+            for params in node.args.params:
+                if isinstance(params.type, c_ast.PtrDecl):
+                    self.output_variables.append(params.name)
+        
+        if self.instrument_sut and isinstance(node, c_ast.Compound):
+            for stmt in (node.block_items or []):
+                if isinstance(stmt, c_ast.FuncCall):
+                    instrumented_statements = self.visit_FuncCall(stmt)
+                    new_block_items.extend(instrumented_statements)
+                elif isinstance(stmt, c_ast.Assignment):
+                    instrumented_statements = self.visit_Assignment(stmt)
+                    new_block_items.extend(instrumented_statements)
+                else:
+                     new_block_items.append(stmt)
+            node.block_items = new_block_items
+           
+        super().generic_visit(node)
 
 def Create_Instrumented_Code(code_path):
-	# Parse o arquivo C'
-	ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
+    # Parse o arquivo C
+    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
 
-	# Crie o injetor e aplique ao AST
-	injector = FuncCallVisitor()
-	injector.visit(ast)
+    # Crie o injetor e aplique ao AST
+    injector = FuncCallVisitor()
+    injector.visit(ast)
 
-	# Gere o código C com a injeção
-	generator = c_generator.CGenerator()
-	instrumented_code = generator.visit(ast)
-	
-	header = '#include <stdio.h>\n'
-	instrumented_code_with_header = header + instrumented_code
+    # Gere o código C com a injeção
+    generator = c_generator.CGenerator()
+    instrumented_code = generator.visit(ast)
+    
+    # Adiciona cabeçalho para buffer e sprintf
+    header = '#include <stdio.h>\n#include <string.h>\nextern char buffer[1024];\n'
+    instrumented_code_with_header = header + instrumented_code
 
-	# Escreva o código instrumentado em um novo arquivo
-	with open('instrumented_SUT.c', 'w') as f:
-		f.write(instrumented_code_with_header)
+    # Escreva o código instrumentado em um novo arquivo
+    with open('instrumented_SUT.c', 'w') as f:
+        f.write(instrumented_code_with_header)
 
 if __name__ == '__main__':
-	# Defina o nome do arquivo .c do SUT
-	code_path = "SUT.c"
-	Create_Instrumented_Code(code_path)
+    # Defina o nome do arquivo .c do SUT
+    code_path = "SUT.c"
+    Create_Instrumented_Code(code_path)

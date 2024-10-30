@@ -40,11 +40,11 @@ V7:
     - Nomes das variaveis de entrada da funcao
     - Nomes das variaveis de saida da funcao
 - Informacoes da analise dinamica do log de execucao:
-      - Numero do teste
-      - Nome dos componentes
-      - Ordem de execucao
-      - Nomes das variaveis de entrada dos componentes
-      - Nomes das variaveis de saida dos componentes
-      - Resultado do teste unitario
-      - Resultados obtidos e esperados (caso o teste não passe)
-      - Tempo de execucao
+    - Numero do teste
+    - Nome dos componentes
+    - Ordem de execucao
+    - Nomes das variaveis de entrada dos componentes
+    - Nomes das variaveis de saida dos componentes
+    - Resultado do teste unitario
+    - Resultados obtidos e esperados (caso o teste não passe)
+    - Tempo de execucao

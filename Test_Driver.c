@@ -29,6 +29,10 @@ int main(){
      }
   snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); 
   printf("%s", log_buffer);
+  FILE *arquivo = fopen("executionLog.txt", "w");
+  fputs(log_buffer, arquivo);
+  fputs("\n\n", arquivo);
+  fclose(arquivo);
 return 0;
 }
 void testeX(int num_teste, int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int SUTO1_test, long SUTO2_test){

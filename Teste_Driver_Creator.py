@@ -47,7 +47,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
     fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(code_path, function_name)
 
     inicioJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"' + f'{function_name}' + r'\",\"numberOfTests\": '+f'{num_linhas}'+r',  \"skipedlines\":'+f'{skipedlines}'+r',\"inputs\":'+ f'{fromparserinputs}' + r',\"outputs\": ' + f'{fromparseroutputs}'+ r',\"executions\": [");'
-    fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'+r'  printf("%s", log_buffer);'
+    fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'+r'  printf("%s", log_buffer);'+'\n'
 
     #Definicao das strings
     param_tests_def = ""
@@ -149,9 +149,12 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
         file.seek(-1, 2)
         file.truncate()
 
+    #Print para adicionar o log em um txt
+    print_create_log = r'  FILE *arquivo = fopen("executionLog.txt", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
+
     #Escrever a medicao do tempo de execucao
     with open(testdriver_path, 'a') as file:
-        file.write(');\n        gettimeofday(&end,NULL);\n          int elapsed = (((end.tv_sec - begin.tv_sec) * 1000000) + (end.tv_usec - begin.tv_usec))/'+ num_linhas +';\n '+ print_JSON_end_loop +'\n     }\n'+fimJSON+'\nreturn 0;\n}')    
+        file.write(');\n        gettimeofday(&end,NULL);\n          int elapsed = (((end.tv_sec - begin.tv_sec) * 1000000) + (end.tv_usec - begin.tv_usec))/'+ num_linhas +';\n '+ print_JSON_end_loop +'\n     }\n'+fimJSON+print_create_log+'\nreturn 0;\n}')    
 
     #Escrever a definicao da funcao testeX
     with open(testdriver_path, 'a') as file:
@@ -197,7 +200,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
 if __name__ == '__main__':
     # Defina o caminho para o arquivo Excel
-    excel_file_path = "testvec2.xlsx"
+    excel_file_path = "testvec5.xlsx"
 
     # Defina o nome da função testada
     function_name = "SUT"

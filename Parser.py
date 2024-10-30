@@ -117,6 +117,55 @@ def gerar_arquivo_h_com_pycparser(arquivo_c):
             f.write(decl + '\n')
         f.write('\n#endif // _GENERATED_H_\n')
 
+#------------------------------------------------------------------------------------------------------
+
+class FuncDefVisitor3(c_ast.NodeVisitor):
+    def __init__(self, func_name):
+        self.func_name = func_name
+        self.inputs = []  # Lista para armazenar nomes de variáveis de entrada
+        self.outputs = []  # Lista para armazenar nomes de variáveis de saída
+    
+    def visit_FuncDef(self, node):
+        if node.decl.name == self.func_name:
+            params = node.decl.type.args.params
+            for param in params:
+                param_name = param.name  # Nome da variável
+                param_kind = "O" if self._is_pointer(param.type) else "I"
+                
+                # Adiciona o nome da variável à lista correta
+                if param_kind == "I":
+                    self.inputs.append(param_name)
+                else:
+                    self.outputs.append(param_name)
+    
+    def _is_pointer(self, type_node):
+        """ Função auxiliar para verificar se um nó é ponteiro """
+        return isinstance(type_node, c_ast.PtrDecl)
+
+    def get_results(self):
+        """ Retorna as listas de entradas e saídas como strings formatadas """
+        formatted_inputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.inputs))
+        formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs))
+        return formatted_inputs.replace('"', '\\"'), formatted_outputs.replace('"', '\\"')
+
+
+def ParseNameInputsOutputs(code_path, target_function):
+
+    # Parsing do código C
+
+    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
+
+    # Visitando a árvore de sintaxe
+    visitor = FuncDefVisitor3(target_function)
+    visitor.visit(ast)
+
+    inputs, outputs = visitor.get_results()
+
+    # Exibir a lista de resultados
+    return inputs, outputs
+
+#------------------------------------------------------------------------------------------------------
+
 if __name__ == '__main__':
 
     # Defina o nome do arquivo .c do SUT
@@ -126,6 +175,11 @@ if __name__ == '__main__':
 
     #resultado = ParseInputOutputs(code_path, target_function)
 
-    gerar_arquivo_h_com_pycparser(code_path)
+    #gerar_arquivo_h_com_pycparser(code_path)
+
+    inputs, outputs = ParseNameInputsOutputs(code_path, target_function)
+
+    print("Inputs:", inputs)
+    print("Outputs:", outputs)
 
 

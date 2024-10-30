@@ -1,14 +1,24 @@
 import pandas as pd
-from Parser import ParseInputOutputs
+from Parser import ParseInputOutputs, ParseNameInputsOutputs
 from funcoes_extras import skip_lines
+
+c_type_to_printf = {
+    'int': '%d',
+    'unsigned int': '%u',
+    'short': '%hd',
+    'unsigned short': '%hu',
+    'long': '%ld',
+    'unsigned long': '%lu',
+    'float': '%f',
+    'double': '%lf',
+    'char': '%c',
+    'unsigned char': '%c',
+    'void': '%p',   # para ponteiros
+    'char*': '%s',  # strings
+}
 
 # Criar Test_Driver
 def Create_Test_Driver(excel_file_path, function_name, code_path):
-
-    # Leia o arquivo Excel
-    df = pd.read_excel(excel_file_path, engine='openpyxl', usecols=range(1, len(pd.read_excel(excel_file_path).columns)))
-
-    num_linhas = f'{len(df.index)}'          
 
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(code_path, function_name)
@@ -16,21 +26,28 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
     #Definindo o numero de colunas do SUT
     num_colunas = resultado[0]+resultado[1]
 
+    #Sistema para pular e printar as linhas que são incongruentes
+    skipedlines = []
+    for i in range(0,((num_colunas)*2),2):
+        linhas_inconsistentes = skip_lines(excel_file_path, (i//2)+1, resultado[i+3])
+        skipedlines = list(set(skipedlines + linhas_inconsistentes))
+
+    # Leia o arquivo Excel
+    df = pd.read_excel(excel_file_path, engine='openpyxl', usecols=range(1, len(pd.read_excel(excel_file_path).columns)), dtype=object, skiprows=skipedlines)
+
+    num_linhas = f'{len(df.index)}'          
+
     #Definindo o numero de colunas do Test_Vec
     num_colunas_test_vec = df.shape[1]
 
     #Print (PROVISORIO) da mensagem de erro
     if(num_colunas != num_colunas_test_vec):
-        print(f"ERRO: Vetor de testes não possui tamanho equivalente a função desejada(PARAR AQUI) Colunas do SUT: {num_colunas} Colunas do Test_vec: {num_colunas_test_vec}")
+        print(f"ERRO: Vetor de testes não possui tamanho equivalente a função desejada(PARAR AQUI) Colunas do SUT: {num_colunas} Colunas do Test_vec: {num_colunas_test_vec}") 
 
-    #Sistema para pular e printar as linhas que são incongruentes
-    #skiped_lines = []
-    #for i in range(0,(num_colunas)*2,2):
-    #    linhas_inconsistentes = skip_lines(excel_file_path, i//2, resultado[i+3])
-    #    skiped_lines = list(set(skiped_lines + linhas_inconsistentes))
-    #if skiped_lines:
-    #    print(f"A ferramenta irá pular as linhas: {linhas_inconsistentes}")   #SOMENTE PARA int, float e char
+    fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(code_path, function_name)
 
+    inicioJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"' + f'{function_name}' + r'\",\"numberOfTests\": '+f'{num_linhas}'+r',  \"skipedlines\":'+f'{skipedlines}'+r',\"inputs\":'+ f'{fromparserinputs}' + r',\"outputs\": ' + f'{fromparseroutputs}'+ r',\"executions\": [");'
+    fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'+r'  printf("%s", log_buffer);'
 
     #Definicao das strings
     param_tests_def = ""
@@ -39,6 +56,9 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
     param_outputs = ""
     test_vecs = ""
     test_outputs = ""
+    print_test_outputs = ""
+    print_outputs = ""
+    print_outputs_types = ""
     inputs = 1
     outputs = 1
 
@@ -54,7 +74,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
             #Para print dos test_inputs
             numero_coluna = i//2
             coluna = df.iloc[:, numero_coluna]
-            test_vecs = test_vecs + '   '+resultado[i+3] + ' ' + 'test_vecs_SUTI' + f'{inputs}' + f'[{num_linhas}] =' + ' {'
+            test_vecs = test_vecs + '  '+resultado[i+3] + ' ' + 'test_vecs_SUTI' + f'{inputs}' + f'[{num_linhas}] =' + ' {'
             coluna_string = ', '.join(map(str, coluna.dropna().tolist()))
             test_vecs = test_vecs + coluna_string + '};\n'
             
@@ -73,7 +93,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
             #Para print dos test_inputs
             numero_coluna = i//2
             coluna = df.iloc[:, numero_coluna]
-            test_vecs = test_vecs + '   '+resultado[i+3] + ' ' + 'test_vecs_SUTO' + f'{outputs}' + f'[{num_linhas}] =' + ' {'
+            test_vecs = test_vecs + '  '+resultado[i+3] + ' ' + 'test_vecs_SUTO' + f'{outputs}' + f'[{num_linhas}] =' + ' {'
             coluna_string = ', '.join(map(str, coluna.dropna().tolist()))
             test_vecs = test_vecs + coluna_string + '};\n'     
 
@@ -86,6 +106,19 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
             #Para verificacao dos testes
             test_outputs = test_outputs + ' SUTO' + f'{outputs} == SUTO' + f'{outputs}_test &&' 
 
+            #Para print dos tipos de saida
+            type_output = c_type_to_printf.get(resultado[i+3])
+            if (len(print_outputs_types) == 0):
+                print_outputs_types = print_outputs_types + type_output
+            else:
+                print_outputs_types = print_outputs_types + ',' + type_output
+
+            #Para print da verificação dos testes
+            print_test_outputs = print_test_outputs + ', SUTO' + f'{outputs}_test' 
+
+            #Para print da verificação dos testes
+            print_outputs = print_outputs + ', SUTO' + f'{outputs}' 
+
             outputs = outputs+1
         else:
             print('DEFINIR ERRO')
@@ -97,18 +130,19 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
     #Começar a escrever no arquivo
     with open(testdriver_path, 'a') as file:
-        file.write('#include "'+ 'instrumented_SUT.h' + '"\n#include <stdio.h>\n#include <sys/time.h>\n\nvoid testeX(int num_teste'+ param_tests_def +');\nint main(){\n   struct timeval begin, end;\n')
+        file.write('#include "'+ 'instrumented_SUT.h' + '"\n#include <stdio.h>\n#include <sys/time.h>\n#include <string.h>\n\n#define BUFFER_SIZE 4096\nchar log_buffer[BUFFER_SIZE];\n\nvoid testeX(int num_teste'+ param_tests_def +');\nint main(){\n  struct timeval begin, end;\n')
 
     #Escrever os vetores de teste de cada parametro
     with open(testdriver_path, 'a') as file:
         file.write(test_vecs)
 
     #Escrever os prints
-    print_string_execution_time = r'printf("Execution time: %d micro seconds\n",elapsed);'
+    print_JSON_begin_loop = r'        snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"testNumber\":%d,\"analysis\": [",i+1);'
+    print_JSON_end_loop = r'        snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"\"executionTime\": %d},",elapsed);'
 
     #Escrever a variaveis do testeX
     with open(testdriver_path, 'a') as file:
-        file.write('\n  gettimeofday(&begin,NULL);\n    for(int i=0;i<'+ num_linhas +';i++){\n      testeX(i,' + param_tests)
+        file.write(inicioJSON+'\n    for(int i=0;i<'+ num_linhas +';i++){\n    '+print_JSON_begin_loop+'\n         gettimeofday(&begin,NULL);\n      testeX(i,' + param_tests)
 
     #Apagar "," do ultimo dado 
     with open(testdriver_path, 'rb+') as file:
@@ -117,7 +151,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
     #Escrever a medicao do tempo de execucao
     with open(testdriver_path, 'a') as file:
-        file.write(');\n    }\n  gettimeofday(&end,NULL);\n  int elapsed = (((end.tv_sec - begin.tv_sec) * 1000000) + (end.tv_usec - begin.tv_usec))/'+ num_linhas +';\n '+ print_string_execution_time +'\n return 0;\n}')    
+        file.write(');\n        gettimeofday(&end,NULL);\n          int elapsed = (((end.tv_sec - begin.tv_sec) * 1000000) + (end.tv_usec - begin.tv_usec))/'+ num_linhas +';\n '+ print_JSON_end_loop +'\n     }\n'+fimJSON+'\nreturn 0;\n}')    
 
     #Escrever a definicao da funcao testeX
     with open(testdriver_path, 'a') as file:
@@ -151,8 +185,8 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
             file.truncate()
 
     #Escrever os prints
-    print_string_passed = r'   printf("Teste %d : PASSOU\n", num_teste+1);'
-    print_string_failed = r'        printf("Teste %d: FALHOU\n", num_teste+1);'
+    print_string_passed = r'   snprintf(log_buffer + strlen(log_buffer), BUFFER_SIZE - strlen(log_buffer), "],\"pass\": \"true\",");'
+    print_string_failed = r'   snprintf(log_buffer + strlen(log_buffer), BUFFER_SIZE - strlen(log_buffer), "],\"pass\": \"false\",\"expectedResult\": [' + print_outputs_types + r'],\"actualResult\": [' + print_outputs_types + r'],"' + print_test_outputs + print_outputs + r');'
 
     with open(testdriver_path, 'a') as file:
         file.write('){\n    '+ print_string_passed+'\n      }else{\n'+print_string_failed+'\n     }\n')

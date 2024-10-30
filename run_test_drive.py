@@ -4,9 +4,7 @@ def Run_Test_Driver(compiler):
     match compiler:
         case "gcc":
             #Compila o programa C
-            #subprocess.run(["gcc", "instrumented_SUT.c", "Test_Driver.c", "-o", "Test_Driver"], check=True)   
-
-            subprocess.run(["gcc", "instrumented_SUT.c", "goal_Test_Driver.c", "-o", "Test_Driver"], check=True)    #Para teste
+            subprocess.run(["gcc", "instrumented_SUT.c", "Test_Driver.c", "-o", "Test_Driver"], check=True)   
 
             # Executa o programa C
             subprocess.run([".\Test_Driver.exe"], check=True)

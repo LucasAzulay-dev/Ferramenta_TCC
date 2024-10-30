@@ -33,18 +33,18 @@ V7:
 - Funcao ParseNameInputsOutputs adicionada no Parser.py
 - Funcao skip_lines atualizada no funcoes_extras.py (ainda não juntado com o Parser.py)
 - Log de execucao no formato JSON
-- Informacoes do log de execucao:
+- Informacoes da analise estática do log de execucao:
     - Nome da funcao
     - Numero de testes realizados
     - Linhas do vetor de teste não utilizadas
     - Nomes das variaveis de entrada da funcao
     - Nomes das variaveis de saida da funcao
-    - Execucao dos testes:
-          - Numero do teste
-          - Nome dos componentes
-          - Ordem de execucao
-          - Nomes das variaveis de entrada dos componentes
-          - Nomes das variaveis de saida dos componentes
-          - Resultado do teste unitario
-          - Resultados obtidos e esperados (caso o teste não passe)
-          - Tempo de execucao
+- Informacoes da analise dinamica do log de execucao:
+      - Numero do teste
+      - Nome dos componentes
+      - Ordem de execucao
+      - Nomes das variaveis de entrada dos componentes
+      - Nomes das variaveis de saida dos componentes
+      - Resultado do teste unitario
+      - Resultados obtidos e esperados (caso o teste não passe)
+      - Tempo de execucao

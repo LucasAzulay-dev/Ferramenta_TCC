@@ -109,7 +109,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID) or isinstance(node.lvalue, c_ast.UnaryOp):
                 var = self.generator.visit(node.lvalue)
                 if isinstance(node.lvalue, c_ast.ID) and (node.lvalue not in self.output_variables):  # Variável normal
-                    args_in[var] = c_type_to_printf.get(self.variables.get(var))
+                    args_out[var] = c_type_to_printf.get(self.variables.get(var))
                 elif isinstance(node.lvalue, c_ast.UnaryOp) and node.lvalue.op == '&' and (node.lvalue not in self.output_variables):  # Ponteiro
                     pointed_var = self.generator.visit(node.lvalue.expr)
                     args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var))

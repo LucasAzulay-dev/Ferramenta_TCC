@@ -15,6 +15,21 @@ c_type_to_printf = {
     'char*': '%s',  # strings
 }
 
+c_type_to_printf = {
+    'int': '%d',
+    'unsigned int': '%u',
+    'short': '%hd',
+    'unsigned short': '%hu',
+    'long': '%ld',
+    'unsigned long': '%lu',
+    'float': '%f',
+    'double': '%lf',
+    'char': '%c',
+    'unsigned char': '%c',
+    'void': '%p',   # para ponteiros
+    'char*': '%s',  # strings
+}
+
 class FuncCallVisitor(c_ast.NodeVisitor):
     def __init__(self):
         self.generator = c_generator.CGenerator()
@@ -184,9 +199,9 @@ def Create_Instrumented_Code(code_path, bufferLength = 4096):
     # Parse o arquivo C
     ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
 
-    # Crie o injetor e aplique ao AST
-    injector = FuncCallVisitor()
-    injector.visit(ast)
+	# Crie o injetor e aplique ao AST
+	injector = FuncCallVisitor()
+	injector.visit(ast)
 
     # Gere o código C com a injeção
     generator = c_generator.CGenerator()
@@ -196,9 +211,9 @@ def Create_Instrumented_Code(code_path, bufferLength = 4096):
     header = f'#include <stdio.h>\n#include <string.h>\nextern char log_buffer[{bufferLength}];\n'
     instrumented_code_with_header = header + instrumented_code
 
-    # Escreva o código instrumentado em um novo arquivo
-    with open('instrumented_SUT.c', 'w') as f:
-        f.write(instrumented_code_with_header)
+	# Escreva o código instrumentado em um novo arquivo
+	with open('instrumented_SUT.c', 'w') as f:
+		f.write(instrumented_code_with_header)
 
 if __name__ == '__main__':
     # Defina o nome do arquivo .c do SUT

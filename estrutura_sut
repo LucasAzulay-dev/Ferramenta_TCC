@@ -1,0 +1,96 @@
+// Estrutura Observada do SUT
+digraph {
+	compound=true
+	subgraph cluster_SUT {
+		label=SUT
+		style=dashed
+		CompA [label=CompA shape=box]
+		CompB [label=CompB shape=box]
+		CompC [label=CompC shape=box]
+		CompE [label=CompE shape=box]
+		CompD [label=CompD shape=box]
+		CompA [label=CompA shape=box]
+		CompB [label=CompB shape=box]
+		CompC [label=CompC shape=box]
+		CompE [label=CompE shape=box]
+		CompD [label=CompD shape=box]
+		CompA [label=CompA shape=box]
+		CompB [label=CompB shape=box]
+		CompC [label=CompC shape=box]
+		CompE [label=CompE shape=box]
+		CompD [label=CompD shape=box]
+		CompA [label=CompA shape=box]
+		CompB [label=CompB shape=box]
+		CompC [label=CompC shape=box]
+		CompE [label=CompE shape=box]
+		CompD [label=CompD shape=box]
+	}
+	SUTI1 [label=SUTI1 shape=ellipse]
+	SUTI2 [label=SUTI2 shape=ellipse]
+	SUTI3 [label=SUTI3 shape=ellipse]
+	SUTI4 [label=SUTI4 shape=ellipse]
+	SUTI5 [label=SUTI5 shape=ellipse]
+	SUTI6 [label=SUTI6 shape=ellipse]
+	SUTI7 [label=SUTI7 shape=ellipse]
+	SUTO1 [label=SUTO1 shape=ellipse]
+	SUTO2 [label=SUTO2 shape=ellipse]
+	subgraph cluster_SUT {
+		CompA -> AO1 [label="Calls: 4"]
+	}
+	subgraph cluster_SUT {
+		CompA -> AO2 [label="Calls: 4"]
+	}
+	subgraph cluster_SUT {
+		CompB -> BO1 [label="Calls: 4"]
+	}
+	subgraph cluster_SUT {
+		CompC -> CO1 [label="Calls: 4"]
+	}
+	CompE -> SUTO2 [label="Calls: 4"]
+	subgraph cluster_SUT {
+	}
+	CompD -> SUTO1 [label="Calls: 4"]
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+		AO1 [label=AO1 color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		BO1 [label=BO1 color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+		CO1 [label=CO1 color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		CO1 [label=CO1 color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		AO2 [label=AO2 color=lightblue shape=diamond style=filled]
+	}
+	SUTI1 -> CompA [label="Calls: 4"]
+	SUTI2 -> CompA [label="Calls: 4"]
+	SUTI3 -> CompA [label="Calls: 4"]
+	SUTI4 -> CompB [label="Calls: 4"]
+	SUTI5 -> CompB [label="Calls: 4"]
+	SUTI6 -> CompB [label="Calls: 4"]
+	AO1 -> CompC [label="Calls: 4"]
+	BO1 -> CompC [label="Calls: 4"]
+	SUTI7 -> CompC [label="Calls: 4"]
+	CO1 -> CompE [label="Calls: 4"]
+	CO1 -> CompD [label="Calls: 4"]
+	AO2 -> CompD [label="Calls: 4"]
+}

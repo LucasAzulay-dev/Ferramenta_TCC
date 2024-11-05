@@ -1,0 +1,5 @@
+#parser C
+pycparser
+#verificação
+pytest
+pytest-cov

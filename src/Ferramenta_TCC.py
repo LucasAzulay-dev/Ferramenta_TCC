@@ -1,31 +1,30 @@
-import subprocess
 from Teste_Driver_Creator import Create_Test_Driver
-from instrument_code import Create_Intrumented_Code
+from instrument_code import Create_Instrumented_Code
+from run_test_drive import Run_Test_Driver
+from dc_cc_report_generator import DC_CC_Report_Generator
 
-# Defina o caminho para o arquivo Excel
-excel_file_path = "testvec1.xlsx"
+from Parser import gerar_arquivo_h_com_pycparser  #Mudar para instrument_code.py
 
-# Defina o nome do arquivo .c do SUT
-code_path = "SUT.c"
+# # Defina o caminho para o arquivo Excel
+# excel_file_path = "testvec2.xlsx"
 
-Create_Intrumented_Code(code_path)
+# # Defina o nome do arquivo .c do SUT
+# code_path = "SUT.c"
 
-# Defina o caminho para o arquivo .c do SUT instrumentado
-instrumented_c_path = "SUT.c"     #Substituir por instrumented_SUT.c
+# # Defina o nome da função testada
+# function_name = "SUT"
 
-# Defina o caminho para o arquivo .h do SUT instrumentado
-instrumented_h_path = "SUT.h"     #Substituir por instrumented_SUT.h
+# #Tipo de compilador
+# compiler = "gcc"    #gcc ou clang
 
-# Defina o nome da função testada
-function_name = "SUT"
+def executar_ferramenta(excel_file_path, code_path, function_name, compiler):   
+    Create_Instrumented_Code(code_path)
 
-# Defina a quantidade de outputs
-num_output = 1
+    gerar_arquivo_h_com_pycparser(code_path) #Mudar para instrument_code.py
 
-Create_Test_Driver(excel_file_path, instrumented_h_path, function_name, num_output)  #FI5 não coberto
+    Create_Test_Driver(excel_file_path, function_name, code_path)  #FI5 não coberto
 
-#Compila o programa C
-subprocess.run(["gcc", instrumented_c_path, "Test_Driver.c", "-o", "Test_Driver"], check=True)
+    Run_Test_Driver(compiler)
 
-# Executa o programa C
-subprocess.run([".\Test_Driver.exe"], check=True)
+    DC_CC_Report_Generator("log_data")
+

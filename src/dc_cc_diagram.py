@@ -42,7 +42,7 @@ def diagram_generator(log_data):
                 dot.edge(component, output_var, label=f"Calls: {count}")
             else:
                 c.edge(component, output_var, label=f"Calls: {count}")
-            
+
     # Criar arestas únicas com variáveis de acoplamento destacadas e dentro do SUT
     for (input_var, component), count in input_vars.items():
         keys = [key[0] for key in output_vars.keys()]
@@ -58,9 +58,9 @@ def diagram_generator(log_data):
         else:
             dot.edge(source, target)
 
-    # Renderizar e exibir o diagrama
-    dot.render("estrutura_sut", format="png")
-    dot.view()
+    # Renderizar o diagrama sem abrir
+    dot.render("estrutura_sut", format="pdf")  # Use "pdf" ou "png" conforme a necessidade
+
     report = {
         "totalTests": log_data["numberOfTests"],
         "tests": [],

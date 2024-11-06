@@ -4,6 +4,7 @@ from run_test_drive import Run_Test_Driver
 from dc_cc_report_generator import DC_CC_Report_Generator
 
 def executar_ferramenta(excel_file_path, code_path, function_name, compiler):   
+
     Create_Instrumented_Code(code_path)
 
     Create_Test_Driver(excel_file_path, function_name, code_path)  #FI5 não coberto

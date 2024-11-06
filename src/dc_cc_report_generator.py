@@ -9,7 +9,7 @@ def corrigir_virgulas(conteudo):
     return re.sub(r',(\s*[\}\]])', r'\1', conteudo)
 
 def DC_CC_Report_Generator(log_data):
-    with open('log_buffer.txt', 'r') as file:
+    with open('output/OutputBuffer/log_buffer.txt', 'r') as file:
         conteudo = corrigir_virgulas(file.read())
         log_data = json.loads(conteudo)
         #path para arquivo pdf

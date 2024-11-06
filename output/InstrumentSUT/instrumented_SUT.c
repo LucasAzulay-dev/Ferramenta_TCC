@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "instrumented_SUT.h"
 extern char log_buffer[4096];
 void CompA(int AI1, int AI2, int AI3, int *AO1, int *AO2)
 {

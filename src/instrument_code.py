@@ -1,4 +1,5 @@
 from pycparser import c_ast, c_generator, parse_file
+from Parser import gerar_arquivo_h_com_pycparser
 
 c_type_to_printf = {
     'int': '%d',
@@ -193,14 +194,16 @@ def Create_Instrumented_Code(code_path, bufferLength = 4096):
     instrumented_code = generator.visit(ast)
     
     # Adiciona cabeçalho para log_buffer e sprintf
-    header = f'#include <stdio.h>\n#include <string.h>\nextern char log_buffer[{bufferLength}];\n'
+    header = f'#include <stdio.h>\n#include <string.h>\n#include "instrumented_SUT.h"\nextern char log_buffer[{bufferLength}];\n'
     instrumented_code_with_header = header + instrumented_code
 
     # Escreva o código instrumentado em um novo arquivo
-    with open('instrumented_SUT.c', 'w') as f:
+    with open(r'output\InstrumentSUT\instrumented_SUT.c', 'w') as f:
         f.write(instrumented_code_with_header)
+
+    gerar_arquivo_h_com_pycparser(code_path)
 
 if __name__ == '__main__':
     # Defina o nome do arquivo .c do SUT
-    code_path = "SUT.c"
+    code_path = r"examples\C_proj_mockup\SUT\SUT.c"
     Create_Instrumented_Code(code_path)

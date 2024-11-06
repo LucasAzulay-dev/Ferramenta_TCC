@@ -63,7 +63,11 @@ def mapear_tipo_c(valor,tipo_c):
 # Função para identificar linhas que não correspondem ao tipo especificado em uma coluna
 def skip_lines(arquivo_excel, numero_coluna, tipo_c):
     # Lê o arquivo Excel
-    df = pd.read_excel(arquivo_excel, dtype=object)
+
+    columns_to_skip = ['Time', 'INPUT_COMMENTS', 'OUTPUT_COMMENTS']
+    used_cols = lambda x: x not in columns_to_skip
+
+    df = pd.read_excel(arquivo_excel, header = 1, usecols=used_cols, dtype=object)
     
     # Verifica se o número da coluna é válido
     if numero_coluna < 0 or numero_coluna >= len(df.columns):
@@ -77,14 +81,14 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
     linhas_inconsistentes = []
     for indice, valor in enumerate(df[nome_coluna]):
         if (mapear_tipo_c(valor,tipo_c) == 1):
-            linhas_inconsistentes.append(indice + 1)  # +1 para ajustar o índice para o usuário
+            linhas_inconsistentes.append(indice + 2)  # +2 para ajustar o índice para o usuário
     
     return linhas_inconsistentes
 
 
 if __name__ == '__main__':
     # Exemplo de uso
-    arquivo_excel = 'testvec5.xlsx'
+    arquivo_excel = 'new_testvec1.xlsx'
     numero_coluna = 4  # Número da coluna, começando em 0
     tipo_c = 'int'     # Tipo C desejado (ex: 'int', 'float', 'char', 'string')
 

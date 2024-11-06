@@ -7,32 +7,39 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         self.num_entradas = 0
         self.num_saidas = 0
         self.resultado = []  # Lista que irá armazenar os resultados
-    
+        self.error_message = ''
+   
     def visit_FuncDef(self, node):
         # Verifica se o nome da função corresponde ao procurado
         if node.decl.name == self.func_name:
             self.func_found = True
-            
+
+            # Verifica se a função possui parâmetros
+            if node.decl.type.args is None or len(node.decl.type.args.params) == 0:
+                self.error_message = f"ERROR: function '{self.func_name}' has no parameters."
+                return
+           
             # Obtendo os parâmetros da função
             params = node.decl.type.args.params
             for param in params:
                 param_type = self._get_type(param.type)
                 param_kind = "O" if self._is_pointer(param.type) else "I"
-                
+               
                 # Contagem de entradas e saídas
                 if param_kind == "I":
                     self.num_entradas += 1
                 else:
                     self.num_saidas += 1
 
+
                 # Adicionando à lista separadamente o tipo do parâmetro e se é Entrada (I) ou Saída (O)
                 self.resultado.append(param_kind)  # Primeiro, Entrada (I) ou Saída (O)
                 self.resultado.append(param_type)  # Depois, o tipo do parâmetro
-            
+           
             # Adiciona o número de entradas e saídas ao início da lista
             self.resultado.insert(0, self.num_saidas)  # Segundo item: número de saídas
             self.resultado.insert(0, self.num_entradas)  # Primeiro item: número de entradas
-    
+   
     def _get_type(self, type_node):
         """ Função auxiliar para obter o tipo de um nó """
         if isinstance(type_node, c_ast.PtrDecl):
@@ -41,25 +48,79 @@ class FuncDefVisitor(c_ast.NodeVisitor):
             return ' '.join(type_node.type.names)  # Tipos como "unsigned int"
         return "desconhecido"
 
+
     def _is_pointer(self, type_node):
         """ Função auxiliar para verificar se um nó é ponteiro """
         return isinstance(type_node, c_ast.PtrDecl)
+    
+    def check_errors(self):
+        """ Função que checa se houve erros e retorna as mensagens correspondentes """
+        if not self.func_found:
+            return f"ERROR: function '{self.func_name}' not found."
+        if self.error_message:
+            return self.error_message
+        return None
+
+class FuncReturnVisitor(c_ast.NodeVisitor):
+    def __init__(self, target_function_name):
+        self.target_function_name = target_function_name
+        self.var_return_info = []  # Lista para armazenar "OR" e o tipo da variável
+        self.in_target_function = False
+        self.current_declared_vars = {}
+
+    def visit_FuncDef(self, node):
+        # Verifica se a função atual é a função alvo
+        if node.decl.name == self.target_function_name:
+            self.in_target_function = True
+            self.current_declared_vars = {}  # Limpa o dicionário de variáveis declaradas
+            # Visita o corpo da função
+            self.visit(node.body)
+            self.in_target_function = False
+
+    def visit_Decl(self, node):
+        # Captura as variáveis declaradas dentro da função alvo
+        if self.in_target_function and isinstance(node.type, c_ast.TypeDecl):
+            var_type = node.type.type.names[0]  # Tipo da variável (ex: int, float)
+            self.current_declared_vars[node.name] = var_type
+
+    def visit_Return(self, node):
+        # Verifica se o return está dentro da função alvo e retorna uma variável
+        if self.in_target_function and not self.var_return_info:
+            if isinstance(node.expr, c_ast.ID):
+                var_name = node.expr.name
+                var_type = self.current_declared_vars.get(var_name)
+                if var_type:
+                    # Adiciona "OR" e o tipo como itens separados na lista
+                    self.var_return_info.append("OR")
+                    self.var_return_info.append(var_type)
 
 
 def ParseInputOutputs(code_path, target_function):
 
     # Parsing do código C
-    #parser = c_parser.CParser()
-
     ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
-    #ast = parser.parse(code_path)
 
     # Visitando a árvore de sintaxe
     visitor = FuncDefVisitor(target_function)
     visitor.visit(ast)
 
+
+    visitor_return = FuncReturnVisitor(target_function)
+    visitor_return.visit(ast)
+
+    # Checando se houve erros
+    error = visitor.check_errors()
+
+    if (error):
+        return error
+
+    if(len(visitor_return.var_return_info) > 0):
+        visitor.resultado[1] += 1
+
+    lista_resultante = visitor.resultado + visitor_return.var_return_info
+
     # Exibir a lista de resultados
-    return visitor.resultado
+    return lista_resultante
 
 class FuncDefVisitor2(c_ast.NodeVisitor):
     def __init__(self):
@@ -107,7 +168,7 @@ def gerar_arquivo_h_com_pycparser(arquivo_c):
     visitor = FuncDefVisitor2()
     visitor.visit(ast)
     
-    header_path = f'instrumented_SUT.h'
+    header_path = r'output\InstrumentSUT\instrumented_SUT.h'
 
     # Gerar o arquivo .h com as declarações de função
     with open(header_path, 'w') as f:
@@ -171,15 +232,14 @@ if __name__ == '__main__':
     # Defina o nome do arquivo .c do SUT
     code_path = "SUT.c"
     # Função alvo
-    target_function = "SUT"
+    target_function = "SUT_Teste"
 
-    #resultado = ParseInputOutputs(code_path, target_function)
+    resultado = ParseInputOutputs(code_path, target_function)
+    print(resultado)
 
     #gerar_arquivo_h_com_pycparser(code_path)
 
-    inputs, outputs = ParseNameInputsOutputs(code_path, target_function)
+    #inputs, outputs = ParseNameInputsOutputs(code_path, target_function)
 
-    print("Inputs:", inputs)
-    print("Outputs:", outputs)
-
-
+    #print("Inputs:", inputs)
+    #print("Outputs:", outputs)

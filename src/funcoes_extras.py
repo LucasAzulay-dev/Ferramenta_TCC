@@ -88,7 +88,7 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
 
 if __name__ == '__main__':
     # Exemplo de uso
-    arquivo_excel = 'testvec5.xlsx'
+    arquivo_excel = 'new_testvec1.xlsx'
     numero_coluna = 4  # Número da coluna, começando em 0
     tipo_c = 'int'     # Tipo C desejado (ex: 'int', 'float', 'char', 'string')
 

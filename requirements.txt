@@ -1,0 +1,8 @@
+#parser C
+pycparser
+#outros
+pandas
+graphviz
+#verificação
+pytest
+pytest-cov

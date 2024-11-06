@@ -168,7 +168,7 @@ def gerar_arquivo_h_com_pycparser(arquivo_c):
     visitor = FuncDefVisitor2()
     visitor.visit(ast)
     
-    header_path = f'instrumented_SUT.h'
+    header_path = r'output\InstrumentSUT\instrumented_SUT.h'
 
     # Gerar o arquivo .h com as declarações de função
     with open(header_path, 'w') as f:
@@ -240,8 +240,13 @@ if __name__ == '__main__':
     #gerar_arquivo_h_com_pycparser(code_path)
 
     #inputs, outputs = ParseNameInputsOutputs(code_path, target_function)
+<<<<<<< HEAD:Parser.py
 
     #print("Inputs:", inputs)
     #print("Outputs:", outputs)
 
+=======
+>>>>>>> main:src/Parser.py
 
+    #print("Inputs:", inputs)
+    #print("Outputs:", outputs)

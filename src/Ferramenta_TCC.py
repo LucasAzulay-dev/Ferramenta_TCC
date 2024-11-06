@@ -18,6 +18,7 @@ from Parser import gerar_arquivo_h_com_pycparser  #Mudar para instrument_code.py
 # compiler = "gcc"    #gcc ou clang
 
 def executar_ferramenta(excel_file_path, code_path, function_name, compiler):   
+
     Create_Instrumented_Code(code_path)
 
     gerar_arquivo_h_com_pycparser(code_path) #Mudar para instrument_code.py

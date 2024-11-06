@@ -23,26 +23,50 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(code_path, function_name)
 
+    if(isinstance(resultado, str)):
+        print(resultado)
+        return
+
     #Definindo o numero de colunas do SUT
     num_colunas = resultado[0]+resultado[1]
 
     #Sistema para pular e printar as linhas que são incongruentes
     skipedlines = []
     for i in range(0,((num_colunas)*2),2):
-        linhas_inconsistentes = skip_lines(excel_file_path, (i//2)+1, resultado[i+3])
+        linhas_inconsistentes = skip_lines(excel_file_path, (i//2), resultado[i+3])
         skipedlines = list(set(skipedlines + linhas_inconsistentes))
 
-    # Leia o arquivo Excel
-    df = pd.read_excel(excel_file_path, engine='openpyxl', usecols=range(1, len(pd.read_excel(excel_file_path).columns)), dtype=object, skiprows=skipedlines)
+    columns_to_skip = ['Time', 'INPUT_COMMENTS', 'OUTPUT_COMMENTS']
+    used_cols = lambda x: x not in columns_to_skip
+    #used_cols = range(1, len(pd.read_excel(excel_file_path).columns))
 
-    num_linhas = f'{len(df.index)}'          
+    # Leia o arquivo Excel
+    df = pd.read_excel(excel_file_path,header=1, engine='openpyxl', usecols=used_cols, dtype=object, skiprows=skipedlines)
+
+    num_linhas = len(df.index)    
+
+    #Print da mensagem de erro
+    if(num_linhas <= 0):
+        print(f"ERROR: No valid lines in the Test Vector") 
+        return      
 
     #Definindo o numero de colunas do Test_Vec
     num_colunas_test_vec = df.shape[1]
 
-    #Print (PROVISORIO) da mensagem de erro
+    #Print da mensagem de erro
+    if(resultado[0] <= 0):
+        print(f"ERROR: No inputs detected") 
+        return
+    
+    #Print da mensagem de erro
+    if(resultado[1] <= 0):
+        print(f"ERROR: No outputs detected") 
+        return
+
+    #Print da mensagem de erro
     if(num_colunas != num_colunas_test_vec):
-        print(f"ERRO: Vetor de testes não possui tamanho equivalente a função desejada(PARAR AQUI) Colunas do SUT: {num_colunas} Colunas do Test_vec: {num_colunas_test_vec}") 
+        print(f"ERROR: Test vector does not have a size equivalent to the desired function. SUT columns: {num_colunas} Test_vec columns: {num_colunas_test_vec}") 
+        return
 
     fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(code_path, function_name)
 
@@ -54,6 +78,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
     param_tests = ""
     param_SUT = ""
     param_outputs = ""
+    return_output = ""
     test_vecs = ""
     test_outputs = ""
     print_test_outputs = ""
@@ -83,7 +108,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
             inputs = inputs+1
 
-        elif(resultado[i+2] == 'O'): #se for saida
+        elif(resultado[i+2] == 'O' or resultado[i+2] == 'OR'): #se for saida ponteiros
             #Para print da função testeX
             param_tests_def = param_tests_def + ', '  + resultado[i+3] + ' ' + 'SUTO' + f'{outputs}_test' 
 
@@ -97,8 +122,13 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
             coluna_string = ', '.join(map(str, coluna.dropna().tolist()))
             test_vecs = test_vecs + coluna_string + '};\n'     
 
-            #Para print da função SUT
-            param_SUT = param_SUT + ' &SUTO' + f'{outputs},' 
+            if(resultado[i+2] == 'O'):
+                #Para print da função SUT
+                param_SUT = param_SUT + ' &SUTO' + f'{outputs},'
+            else:
+                #Para receber o return do SUT
+                return_output = 'SUTO' + f'{outputs}'+' = '
+             
 
             #Para definicoes dos outputs     
             param_outputs = param_outputs + resultado[i+3] + ' ' + 'SUTO' + f'{outputs};\n    ' 
@@ -142,7 +172,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
     #Escrever a variaveis do testeX
     with open(testdriver_path, 'a') as file:
-        file.write(inicioJSON+'\n    for(int i=0;i<'+ num_linhas +';i++){\n    '+print_JSON_begin_loop+'\n         gettimeofday(&begin,NULL);\n      testeX(i,' + param_tests)
+        file.write(inicioJSON+'\n    for(int i=0;i<'+ f'{num_linhas}' +';i++){\n    '+print_JSON_begin_loop+'\n         gettimeofday(&begin,NULL);\n      testeX(i,' + param_tests)
 
     #Apagar "," do ultimo dado 
     with open(testdriver_path, 'rb+') as file:
@@ -150,11 +180,11 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
         file.truncate()
 
     #Print para adicionar o log em um txt
-    print_create_log = r'  FILE *arquivo = fopen("executionLog.txt", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
+    print_create_log = r'  FILE *arquivo = fopen("log_buffer.txt", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
 
     #Escrever a medicao do tempo de execucao
     with open(testdriver_path, 'a') as file:
-        file.write(');\n        gettimeofday(&end,NULL);\n          int elapsed = (((end.tv_sec - begin.tv_sec) * 1000000) + (end.tv_usec - begin.tv_usec))/'+ num_linhas +';\n '+ print_JSON_end_loop +'\n     }\n'+fimJSON+print_create_log+'\nreturn 0;\n}')    
+        file.write(');\n        gettimeofday(&end,NULL);\n          int elapsed = (((end.tv_sec - begin.tv_sec) * 1000000) + (end.tv_usec - begin.tv_usec))/'+ f'{num_linhas}' +';\n '+ print_JSON_end_loop +'\n     }\n'+fimJSON+print_create_log+'\nreturn 0;\n}')    
 
     #Escrever a definicao da funcao testeX
     with open(testdriver_path, 'a') as file:
@@ -166,7 +196,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
     #Escrever a funcao SUT
     with open(testdriver_path, 'a') as file:
-        file.write(function_name+'('+param_SUT)
+        file.write(return_output+function_name+'('+param_SUT)
 
     #Apagar "," do ultimo dado 
     with open(testdriver_path, 'rb+') as file:
@@ -200,7 +230,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
 if __name__ == '__main__':
     # Defina o caminho para o arquivo Excel
-    excel_file_path = "testvec5.xlsx"
+    excel_file_path = "new_testvec1.xlsx"
 
     # Defina o nome da função testada
     function_name = "SUT"

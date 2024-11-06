@@ -4,31 +4,27 @@ from run_test_drive import Run_Test_Driver
 
 from Parser import gerar_arquivo_h_com_pycparser  #Mudar para instrument_code.py
 
-#Interface Gráfica
-#-------------------------------------
-# Defina o caminho para o arquivo Excel
-excel_file_path = "testvec2.xlsx"
+def executar_ferramenta(excel_file_path, code_path, function_name, compiler):   
+    Create_Instrumented_Code(code_path)
 
-# Defina o nome do arquivo .c do SUT
-code_path = "SUT.c"
+    gerar_arquivo_h_com_pycparser(code_path) #Mudar para instrument_code.py
 
-# Defina o nome da função testada
-function_name = "SUT"
+    Create_Test_Driver(excel_file_path, function_name, code_path)  #FI5 não coberto
 
-#Tipo de compilador
-compiler = "gcc"    #gcc ou clang
-#-------------------------------------
+    Run_Test_Driver(compiler)
 
-Create_Instrumented_Code(code_path)
+if __name__ == '__main__':
 
-gerar_arquivo_h_com_pycparser(code_path) #Mudar para instrument_code.py
+    #Defina o caminho para o arquivo Excel
+    excel_file_path = "new_testvec1.xlsx"
 
-Create_Test_Driver(excel_file_path, function_name, code_path)  #FI5 não coberto
+    #Defina o nome do arquivo .c do SUT
+    code_path = "SUT.c"
 
-Run_Test_Driver(compiler)
+    #Defina o nome da função testada
+    function_name = "SUT"
 
-#-------------------------------------
-#Interface Gráfica
-#-------------------------------------
+    #Tipo de compilador
+    compiler = "gcc"    #gcc ou clang
 
-#CreateRelatory()
+    executar_ferramenta(excel_file_path, code_path, function_name, compiler)

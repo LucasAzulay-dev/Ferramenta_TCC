@@ -155,7 +155,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
 
     # Apagar resultados antigos
-    testdriver_path = f'output\InstrumentSUT\Test_Driver.c'
+    testdriver_path = f'output\InstrumentedSUT\Test_Driver.c'
     open(testdriver_path, 'w').close()
 
     #Começar a escrever no arquivo

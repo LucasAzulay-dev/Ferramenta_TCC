@@ -198,7 +198,7 @@ def Create_Instrumented_Code(code_path, bufferLength = 4096):
     instrumented_code_with_header = header + instrumented_code
 
     # Escreva o código instrumentado em um novo arquivo
-    with open(r'output\InstrumentSUT\instrumented_SUT.c', 'w') as f:
+    with open(r'output\InstrumentedSUT\instrumented_SUT.c', 'w') as f:
         f.write(instrumented_code_with_header)
 
     gerar_arquivo_h_com_pycparser(code_path)

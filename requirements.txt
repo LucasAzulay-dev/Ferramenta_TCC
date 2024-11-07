@@ -1,8 +1,8 @@
-#parser C
 pycparser
-#outros
 pandas
-graphviz
-#verificação
+graphviz #must also download and add to path
+openpyxl
+
+#tests and code coverage
 pytest
 pytest-cov

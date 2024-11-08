@@ -1,6 +1,7 @@
 import pandas as pd
 from Parser import ParseInputOutputs, ParseNameInputsOutputs
 from funcoes_extras import skip_lines
+from utils import adicionar_ao_log
 
 c_type_to_printf = {
     'int': '%d',
@@ -19,6 +20,7 @@ c_type_to_printf = {
 
 # Criar Test_Driver
 def Create_Test_Driver(excel_file_path, function_name, code_path):
+    adicionar_ao_log("Criando Test Driver...")
 
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(code_path, function_name)

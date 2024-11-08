@@ -1,5 +1,6 @@
 from pycparser import c_ast, c_generator, parse_file
 from Parser import gerar_arquivo_h_com_pycparser
+from utils import adicionar_ao_log
 
 c_type_to_printf = {
     'int': '%d',
@@ -182,6 +183,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         super().generic_visit(node)
 
 def Create_Instrumented_Code(code_path, bufferLength = 4096):
+    adicionar_ao_log("Iniciando instrumentação do código...")
     # Parse o arquivo C
     ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
 
@@ -201,6 +203,7 @@ def Create_Instrumented_Code(code_path, bufferLength = 4096):
     with open(r'output\InstrumentedSUT\instrumented_SUT.c', 'w') as f:
         f.write(instrumented_code_with_header)
 
+    adicionar_ao_log("Instrumentação concluída.")
     gerar_arquivo_h_com_pycparser(code_path)
 
 if __name__ == '__main__':

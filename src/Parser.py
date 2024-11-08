@@ -1,4 +1,5 @@
 from pycparser import c_parser, c_ast, parse_file
+from utils import adicionar_ao_log
 
 class FuncDefVisitor(c_ast.NodeVisitor):
     def __init__(self, func_name):
@@ -161,6 +162,7 @@ class FuncDefVisitor2(c_ast.NodeVisitor):
         return 'void'
 
 def gerar_arquivo_h_com_pycparser(arquivo_c):
+    adicionar_ao_log("Gerando arquivo .h com pycparser...")
     # Usar o pycparser para analisar o arquivo .c
     ast = parse_file(arquivo_c, use_cpp=True)
     
@@ -177,6 +179,8 @@ def gerar_arquivo_h_com_pycparser(arquivo_c):
         for decl in visitor.func_decls:
             f.write(decl + '\n')
         f.write('\n#endif // _GENERATED_H_\n')
+    
+    adicionar_ao_log("Arquivo .h gerado com sucesso.")
 
 #------------------------------------------------------------------------------------------------------
 

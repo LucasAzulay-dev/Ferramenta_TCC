@@ -18,5 +18,5 @@
 {"function": "CompC", "executionOrder": "3", "in": {"AO1": "-10","BO1": "3500","SUTI7": "60"}, "out": {"CO1": "-34840"}},
 {"function": "CompE", "executionOrder": "4", "in": {"CO1": "-34840"}, "out": {"SUTO2": "1213825600"}},
 {"function": "CompD", "executionOrder": "5", "in": {"CO1": "-34840","AO2": "0"}, "out": {"SUTO1": "0"}},
-],"pass": "false","expectedResult": [1,4],"actualResult": [0,1213825600],"executionTime": 1},],}
+],"pass": "false","expectedResult": [1,4],"actualResult": [0,1213825600],"executionTime": 0},],}
 

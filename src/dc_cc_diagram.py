@@ -1,7 +1,5 @@
 from graphviz import Digraph
 from collections import defaultdict
-# import os
-# os.environ["PATH"] += os.pathsep + 'C:\\Program Files\\Graphviz\\bin\\'
 
 def diagram_generator(log_data):
     dot = Digraph(comment="Estrutura Observada do SUT")

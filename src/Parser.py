@@ -230,7 +230,7 @@ def ParseNameInputsOutputs(code_path, target_function):
 if __name__ == '__main__':
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "SUT.c"
+    code_path = r"examples\C_proj_mockup\SUT\SUT.c" 
     # Função alvo
     target_function = "SUT_Teste"
 
@@ -240,13 +240,6 @@ if __name__ == '__main__':
     #gerar_arquivo_h_com_pycparser(code_path)
 
     #inputs, outputs = ParseNameInputsOutputs(code_path, target_function)
-<<<<<<< HEAD:Parser.py
-
-    #print("Inputs:", inputs)
-    #print("Outputs:", outputs)
-
-=======
->>>>>>> main:src/Parser.py
 
     #print("Inputs:", inputs)
     #print("Outputs:", outputs)

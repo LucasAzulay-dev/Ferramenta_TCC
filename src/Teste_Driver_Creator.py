@@ -155,7 +155,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
 
     # Apagar resultados antigos
-    testdriver_path = f'output\InstrumentSUT\Test_Driver.c'
+    testdriver_path = r'output\InstrumentSUT\Test_Driver.c'
     open(testdriver_path, 'w').close()
 
     #Começar a escrever no arquivo
@@ -180,11 +180,8 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
         file.truncate()
 
     #Print para adicionar o log em um txt
-<<<<<<< HEAD:Teste_Driver_Creator.py
-    print_create_log = r'  FILE *arquivo = fopen("log_buffer.txt", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
-=======
     print_create_log = r'  FILE *arquivo = fopen("output/OutputBuffer/log_buffer.txt", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
->>>>>>> main:src/Teste_Driver_Creator.py
+
 
     #Escrever a medicao do tempo de execucao
     with open(testdriver_path, 'a') as file:
@@ -234,17 +231,13 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
 if __name__ == '__main__':
     # Defina o caminho para o arquivo Excel
-<<<<<<< HEAD:Teste_Driver_Creator.py
-    excel_file_path = "new_testvec1.xlsx"
-=======
-    excel_file_path = r"examples\C_proj_mockup\TestInputs\new_testvec3.xlsx"
->>>>>>> main:src/Teste_Driver_Creator.py
+    excel_file_path = "examples/C_proj_mockup/TestInputs/new_testvec1.xlsx"
 
     # Defina o nome da função testada
     function_name = "SUT"
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "examples\C_proj_mockup\SUT\SUT.c" 
+    code_path = "examples/C_proj_mockup/SUT/SUT.c" 
 
     Create_Test_Driver(excel_file_path, function_name, code_path)
         

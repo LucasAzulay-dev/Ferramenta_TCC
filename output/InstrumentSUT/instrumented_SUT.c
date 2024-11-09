@@ -32,8 +32,9 @@ int AO1;
 int AO2;
 int BO1;
 int CO1;
-void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1, long *SUTO2)
+int SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1, long *SUTO2)
 {
+  int teste = 1;
   CompA(SUTI1, SUTI2, SUTI3, &AO1, &AO2);
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"CompA\", \"executionOrder\": \"1\", \"in\": {\"SUTI1\": \"%d\",\"SUTI2\": \"%d\",\"SUTI3\": \"%d\"}, \"out\": {\"AO1\": \"%d\",\"AO2\": \"%d\"}},\n",SUTI1,SUTI2,SUTI3,AO1,AO2);
   CompB(SUTI4, SUTI5, SUTI6, &BO1);
@@ -44,5 +45,6 @@ void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int S
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"CompE\", \"executionOrder\": \"4\", \"in\": {\"CO1\": \"%d\"}, \"out\": {\"SUTO2\": \"%ld\"}},\n",CO1,*SUTO2);
   CompD(CO1, AO2, SUTO1);
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"CompD\", \"executionOrder\": \"5\", \"in\": {\"CO1\": \"%d\",\"AO2\": \"%d\"}, \"out\": {\"SUTO1\": \"%d\"}},\n",CO1,AO2,*SUTO1);
+  return teste;
 }
 

@@ -24,10 +24,10 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(code_path, function_name)
+    print(resultado)
 
     if(isinstance(resultado, str)):
-        print(resultado)
-        return
+        return resultado
 
     #Definindo o numero de colunas do SUT
     num_colunas = resultado[0]+resultado[1]
@@ -49,26 +49,26 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
 
     #Print da mensagem de erro
     if(num_linhas <= 0):
-        print(f"ERROR: No valid lines in the Test Vector") 
-        return      
+        error = f"ERROR: No valid lines in the Test Vector"
+        return error
 
     #Definindo o numero de colunas do Test_Vec
     num_colunas_test_vec = df.shape[1]
 
     #Print da mensagem de erro
     if(resultado[0] <= 0):
-        print(f"ERROR: No inputs detected") 
-        return
+        error = f"ERROR: No inputs detected"
+        return error
     
     #Print da mensagem de erro
     if(resultado[1] <= 0):
-        print(f"ERROR: No outputs detected") 
-        return
+        error = f"ERROR: No outputs detected"
+        return error
 
     #Print da mensagem de erro
     if(num_colunas != num_colunas_test_vec):
-        print(f"ERROR: Test vector does not have a size equivalent to the desired function. SUT columns: {num_colunas} Test_vec columns: {num_colunas_test_vec}") 
-        return
+        error = f"ERROR: Test vector does not have a size equivalent to the desired function. SUT columns: {num_colunas} Test_vec columns: {num_colunas_test_vec}"
+        return error
 
     fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(code_path, function_name)
 
@@ -152,12 +152,10 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
             print_outputs = print_outputs + ', SUTO' + f'{outputs}' 
 
             outputs = outputs+1
-        else:
-            print('DEFINIR ERRO')
 
 
     # Apagar resultados antigos
-    testdriver_path = f'output\InstrumentedSUT\Test_Driver.c'
+    testdriver_path = f'output/InstrumentedSUT/Test_Driver.c'
     open(testdriver_path, 'w').close()
 
     #Começar a escrever no arquivo
@@ -230,15 +228,17 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
         file.write('}')
     #-----------------------------------------------------------------
 
+    return 0
+
 if __name__ == '__main__':
     # Defina o caminho para o arquivo Excel
-    excel_file_path = r"examples\C_proj_mockup\TestInputs\new_testvec3.xlsx"
+    excel_file_path = "examples/C_proj_mockup/TestInputs/new_testvec3.xlsx"
 
     # Defina o nome da função testada
     function_name = "SUT"
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "examples\C_proj_mockup\SUT\SUT.c" 
+    code_path = "examples/C_proj_mockup/SUT/SUT.c" 
 
     Create_Test_Driver(excel_file_path, function_name, code_path)
         

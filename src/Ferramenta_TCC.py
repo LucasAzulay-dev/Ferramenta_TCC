@@ -22,18 +22,18 @@ def relatorio():
     return DC_CC_Report_Generator()  # Retorna os caminhos dos PDFs
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    # Defina o caminho para o arquivo Excel
-    excel_file_path = "examples/C_proj_mockup/TestInputs/new_testvec1.xlsx"
+#     # Defina o caminho para o arquivo Excel
+#     excel_file_path = "examples/C_proj_mockup/TestInputs/new_testvec1.xlsx"
 
-    # Defina o nome do arquivo .c do SUT
-    code_path = "examples/C_proj_mockup/SUT/SUT2.c" 
+#     # Defina o nome do arquivo .c do SUT
+#     code_path = "examples/C_proj_mockup/SUT/SUT2.c" 
 
-    # Defina o nome da função testada
-    function_name = "SUT"
+#     # Defina o nome da função testada
+#     function_name = "SUT"
 
-    #Tipo de compilador
-    compiler = "gcc"    #gcc ou clang
+#     #Tipo de compilador
+#     compiler = "gcc"    #gcc ou clang
 
-    executar_ferramenta(excel_file_path, code_path, function_name, compiler)
+#     executar_ferramenta(excel_file_path, code_path, function_name, compiler)

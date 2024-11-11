@@ -2,7 +2,7 @@ import subprocess
 from utils import adicionar_ao_log
 
 def Run_Test_Driver(compiler):
-    adicionar_ao_log("Executando Test Driver...")
+    adicionar_ao_log("Running Test Driver...")
     match compiler:
         case "gcc":
             try:
@@ -24,7 +24,7 @@ def Run_Test_Driver(compiler):
             # Executa o programa C
             subprocess.run(["./Test_Driver.exe"], check=True)
 
-    adicionar_ao_log("Test Driver executado com sucesso.")
+    adicionar_ao_log("Test Driver executed successfully.")
     return 0
 
 

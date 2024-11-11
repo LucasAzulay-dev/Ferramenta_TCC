@@ -24,9 +24,11 @@ if __name__ == '__main__':
 
     # Defina o caminho para o arquivo Excel
     excel_file_path = r"examples\C_proj_mockup\TestInputs\new_testvec3.xlsx"
+    # excel_file_path = r"examples\C_proj_mockup\TestInputs\new_testvec1.xlsx"
 
     # Defina o nome do arquivo .c do SUT
     code_path = "examples\C_proj_mockup\SUT\SUT.c" 
+    # code_path = "examples\MockupProject\scr\IntegrationFunction\IntegrationFunction.c" 
 
     # Defina o nome da função testada
     function_name = "SUT"

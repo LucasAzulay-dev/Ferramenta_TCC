@@ -5,16 +5,33 @@ from pathlib import Path
 import shutil
 import tempfile
 
-# No meu computador (gabriel) só tá funcionando com isso
-os.environ["PATH"] += os.pathsep + 'C:\\Program Files\\Graphviz\\bin\\'
+# Add graphviz to path, if installed in default folder
+graphvizPathWin = os.pathsep + 'C:\\Program Files\\Graphviz\\bin\\'
+if os.path.exists(graphvizPathWin):
+    os.environ["PATH"] += graphvizPathWin
 
-# Path to example code and test vectors
-sut_path_success = str(Path('examples\\C_proj_mockup\\SUT\\SUT.c').absolute())
-sut_name_success = 'SUT'
-testvec_success = str(Path('examples\\C_proj_mockup\\TestInputs\\new_testvec3.xlsx').absolute())
-testvec_invalid_line = str(Path('examples\\C_proj_mockup\\TestInputs\\new_testvec4.xlsx').absolute())
+num_cases = 2
+CASES = [f"case{i}" for i in range(1, num_cases+1)]
 
-# Path to 
+# Get path to all test cases
+class TestPaths:
+    def __init__(self, case):
+        if case == 'case1':
+            self.get_case_1()
+        if case == 'case2':
+            self.get_case_2()
+    
+    def get_case_1(self):
+        self.sut_path_success = str(Path('tests\\test_cases\\case1\\SUT\\SUT.c').absolute())
+        self.sut_name_success = 'SUT'
+        self.testvec_success = str(Path('tests\\test_cases\\case1\\testInputs\\success_testvec.xlsx').absolute())
+        self.testvec_invalid_line = str(Path('tests\\test_cases\\case1\\testInputs\\invalid_line_testvec.xlsx').absolute())
+
+    def get_case_2(self):
+        self.sut_path_success = str(Path('tests\\test_cases\\case2\\src\\IntegrationFunction\\IntegrationFunction.c').absolute())
+        self.sut_name_success = 'SUT'
+        self.testvec_success = str(Path('tests\\test_cases\\case2\\testInputs\\success_testvec.xlsx').absolute())
+        self.testvec_invalid_line = str(Path('tests\\test_cases\\case2\\testInputs\\invalid_line_testvec.xlsx').absolute())
 
 class ToolParameters():
     def __init__(self, sut_path, sut_name, testvec, compiler):
@@ -74,12 +91,17 @@ def pause_test(pytestconfig):
     input('Test paused. Press enter to resume.')
     yield
 
+# Run tests considering all test cases
+@pytest.fixture(params=CASES)
+def caseConfig(request):
+    return TestPaths(request.param)
+
 # Get parameters for success tests
 @pytest.fixture
-def param_success():
-    param = ToolParameters(sut_path=sut_path_success,
-                           sut_name=sut_name_success,
-                           testvec=testvec_success,
+def param_success(caseConfig):
+    param = ToolParameters(sut_path=caseConfig.sut_path_success,
+                           sut_name=caseConfig.sut_name_success,
+                           testvec=caseConfig.testvec_success,
                            compiler='gcc')
     yield param
 

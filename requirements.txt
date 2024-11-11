@@ -2,7 +2,8 @@ pycparser
 pandas
 graphviz #must also download and add to path
 openpyxl
-
+fpdf
 #tests and code coverage
 pytest
 pytest-cov
+pytest-html

@@ -13,12 +13,12 @@ def executar_ferramenta(excel_file_path, code_path, function_name, compiler):
         adicionar_ao_log(error)
         return
     
-    adicionar_ao_log("Test Driver criado com sucesso.")
+    adicionar_ao_log("Test Driver created successfully.")
     
     Run_Test_Driver(compiler)
 
 def relatorio():
-    adicionar_ao_log("Gerando relatório de DC/CC...")
+    adicionar_ao_log("Generating DC/CC report...")
     return DC_CC_Report_Generator()  # Retorna os caminhos dos PDFs
 
 

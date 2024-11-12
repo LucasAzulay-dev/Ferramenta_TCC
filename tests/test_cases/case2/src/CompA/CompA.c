@@ -1,7 +1,6 @@
 # include "CompA.h"
 
-int CompA (int AI1, int AI2, int AI3, int *AO1, int *AO2){
+void CompA (int AI1, int AI2, int AI3, int *AO1, int *AO2){
     *AO1 = AI1 + AI2;
     *AO2 = AI1 * AI3;
-    return 0;
 }

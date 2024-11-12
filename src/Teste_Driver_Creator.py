@@ -20,7 +20,7 @@ c_type_to_printf = {
 
 # Criar Test_Driver
 def Create_Test_Driver(excel_file_path, function_name, code_path):
-    adicionar_ao_log("Criando Test Driver...")
+    adicionar_ao_log("Creating Test Driver...")
 
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(code_path, function_name)

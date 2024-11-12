@@ -3,6 +3,9 @@ pandas
 graphviz #must also download and add to path
 openpyxl
 fpdf
+pillow
+pymupdf
+frontend
 #tests and code coverage
 pytest
 pytest-cov

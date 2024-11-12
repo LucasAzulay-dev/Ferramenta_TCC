@@ -1,6 +1,6 @@
 import subprocess
 from utils import adicionar_ao_log
-from funcoes_extras import list_c_files
+from funcoes_extras import list_c_directories, list_c_files
 
 def Run_Test_Driver(folder_path, SUT_path, compiler):
     adicionar_ao_log("Running Test Driver...")
@@ -8,8 +8,10 @@ def Run_Test_Driver(folder_path, SUT_path, compiler):
         case "gcc":
             try:
                 #Compila o programa C
-                compile_path = list_c_files(folder_path, SUT_path)
-                subprocess.run(["gcc", compile_path, "output/InstrumentedSUT/instrumented_SUT.c", "output/InstrumentedSUT/Test_Driver.c", "-o", "output/TestDriver/Test_Driver"], check=True, text=True, capture_output=True) 
+                compile_path = list_c_directories(folder_path, SUT_path) + list_c_files(folder_path, SUT_path)
+                args = ['gcc']
+                args = args + (list(filter(None, compile_path))) + ["output/InstrumentedSUT/instrumented_SUT.c", "output/InstrumentedSUT/Test_Driver.c", "-o", "output/TestDriver/Test_Driver"]
+                subprocess.run(args, check=True, text=True, capture_output=True) 
 
                 # Executa o programa C
                 subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True) 

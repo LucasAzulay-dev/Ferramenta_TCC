@@ -1,5 +1,6 @@
 from pycparser import c_parser, c_ast, parse_file
 from utils import adicionar_ao_log
+from funcoes_extras import list_c_directories
 
 class FuncDefVisitor(c_ast.NodeVisitor):
     def __init__(self, func_name):
@@ -96,10 +97,13 @@ class FuncReturnVisitor(c_ast.NodeVisitor):
                     self.var_return_info.append(var_type)
 
 
-def ParseInputOutputs(code_path, target_function):
+def ParseInputOutputs(code_path, folder_path, target_function):
 
     # Parsing do código C
-    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
+    compile_headers_path = list_c_directories(folder_path, code_path)
+    cpp_args = ['-E'] + compile_headers_path
+    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
+
 
     # Visitando a árvore de sintaxe
     visitor = FuncDefVisitor(target_function)
@@ -161,10 +165,10 @@ class FuncDefVisitor2(c_ast.NodeVisitor):
             return self._get_type(tipo.type)
         return 'void'
 
-def gerar_arquivo_h_com_pycparser(arquivo_c):
+def gerar_arquivo_h_com_pycparser(arquivo_c, cpp_args):
     adicionar_ao_log("Generating .h file with pycparser...")
     # Usar o pycparser para analisar o arquivo .c
-    ast = parse_file(arquivo_c, use_cpp=True)
+    ast = parse_file(arquivo_c, use_cpp=True,cpp_args=cpp_args)
     
     # Visitar nós de definição de função
     visitor = FuncDefVisitor2()
@@ -214,11 +218,13 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
         return formatted_inputs.replace('"', '\\"'), formatted_outputs.replace('"', '\\"')
 
 
-def ParseNameInputsOutputs(code_path, target_function):
+def ParseNameInputsOutputs(code_path, folder_path, target_function):
 
     # Parsing do código C
 
-    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
+    compile_headers_path = list_c_directories(folder_path, code_path)
+    cpp_args = ['-E'] + compile_headers_path
+    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
 
     # Visitando a árvore de sintaxe
     visitor = FuncDefVisitor3(target_function)

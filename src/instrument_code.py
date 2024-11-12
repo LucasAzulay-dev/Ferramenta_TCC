@@ -1,6 +1,7 @@
 from pycparser import c_ast, c_generator, parse_file
 from Parser import gerar_arquivo_h_com_pycparser
 from utils import adicionar_ao_log
+from funcoes_extras import list_c_directories
 
 c_type_to_printf = {
     'int': '%d',
@@ -182,10 +183,12 @@ class FuncCallVisitor(c_ast.NodeVisitor):
            
         super().generic_visit(node)
 
-def Create_Instrumented_Code(code_path, bufferLength = 4096):
+def Create_Instrumented_Code(folder_path, SUT_path, bufferLength = 4096):
     adicionar_ao_log("Starting code instrumentation...")
     # Parse o arquivo C
-    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args=['-E'])
+    compile_headers_path = list_c_directories(folder_path, SUT_path)
+    cpp_args = ['-E'] + compile_headers_path
+    ast = parse_file(SUT_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
 
     # Crie o injetor e aplique ao AST
     injector = FuncCallVisitor()
@@ -204,9 +207,4 @@ def Create_Instrumented_Code(code_path, bufferLength = 4096):
         f.write(instrumented_code_with_header)
 
     adicionar_ao_log("Instrumentation completed.")
-    gerar_arquivo_h_com_pycparser(code_path)
-
-if __name__ == '__main__':
-    # Defina o nome do arquivo .c do SUT
-    code_path = r"examples\C_proj_mockup\SUT\SUT.c"
-    Create_Instrumented_Code(code_path)
+    gerar_arquivo_h_com_pycparser(SUT_path, cpp_args)

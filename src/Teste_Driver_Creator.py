@@ -19,11 +19,11 @@ c_type_to_printf = {
 }
 
 # Criar Test_Driver
-def Create_Test_Driver(excel_file_path, function_name, code_path, log_buffer_path):
+def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, log_buffer_path):
     adicionar_ao_log("Creating Test Driver...")
 
     #Parse da quantidade de inputs e outputs, e seus tipos 
-    resultado = ParseInputOutputs(code_path, function_name)
+    resultado = ParseInputOutputs(code_path, folder_path, function_name)
     print(resultado)
 
     if(isinstance(resultado, str)):
@@ -70,7 +70,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path, log_buffer_pat
         error = f"ERROR: Test vector does not have a size equivalent to the desired function. SUT columns: {num_colunas} Test_vec columns: {num_colunas_test_vec}"
         return error
 
-    fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(code_path, function_name)
+    fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(code_path, folder_path, function_name)
 
     inicioJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"' + f'{function_name}' + r'\",\"numberOfTests\": '+f'{num_linhas}'+r',  \"skipedlines\":'+f'{skipedlines}'+r',\"inputs\":'+ f'{fromparserinputs}' + r',\"outputs\": ' + f'{fromparseroutputs}'+ r',\"executions\": [");'
     fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'+r'  printf("%s", log_buffer);'+'\n'

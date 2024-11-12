@@ -5,10 +5,10 @@ from dc_cc import DC_CC_Report_Generator
 from utils import adicionar_ao_log
 
 def executar_ferramenta(excel_file_path, code_path, function_name, folder_path ,compiler): 
-    Create_Instrumented_Code(code_path)
+    Create_Instrumented_Code(folder_path, code_path)
 
     log_buffer_path = "output/OutputBuffer/log_buffer.txt"
-    error = Create_Test_Driver(excel_file_path, function_name, code_path, log_buffer_path)  #FI5 parcialmente coberto
+    error = Create_Test_Driver(excel_file_path, function_name, code_path, folder_path, log_buffer_path)  #FI5 parcialmente coberto
 
     if(error):  
         adicionar_ao_log(error)

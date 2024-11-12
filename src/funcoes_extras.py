@@ -98,10 +98,27 @@ def list_c_files(code_path, exclude):
                         caminhos_c.append(caminho_formatado)
         
         # Junta todos os caminhos com uma vírgula como separador
-        return ', '.join(caminhos_c)
+        return caminhos_c
     except Exception as e:
         print(f"Ocorreu um erro: {e}")
         return ""
+    
+def list_c_directories(code_path, exclude):
+    directories = set()  # Usamos um conjunto para evitar diretórios duplicados
+    try:
+        for root, dirs, files in os.walk(code_path):
+            for file in files:
+                if file.endswith('.c'):
+                    dir_path = os.path.dirname(os.path.join(root, file)).replace("\\", "/")
+                    # Adiciona o diretório apenas se ele não for o caminho a ser excluído
+                    if dir_path != os.path.dirname(exclude.replace("\\", "/")):
+                        directories.add('-I' + dir_path)  # Adiciona o diretório ao conjunto
+        
+        # Retorna a lista de diretórios com -I
+        return list(directories)
+    except Exception as e:
+        print(f"Ocorreu um erro: {e}")
+        return []
 
 
 if __name__ == '__main__':

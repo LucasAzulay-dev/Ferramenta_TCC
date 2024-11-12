@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 import fitz  # PyMuPDF
-from Ferramenta_TCC import executar_ferramenta, relatorio
+from Ferramenta_TCC import executar_ferramenta
 from datetime import datetime
 from utils import adicionar_ao_log, configurar_log_widget
 
@@ -90,8 +90,9 @@ def execute():
     window.update_idletasks()
 
     try:
+        
         executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler)
-        adicionar_ao_log(str(relatorio()))
+
         
         adicionar_ao_log("Execution completed successfully.")
         

@@ -9,8 +9,8 @@ from dc_cc_report import create_report
 def corrigir_virgulas(conteudo):
     return re.sub(r',(\s*[\}\]])', r'\1', conteudo)
 
-def DC_CC_Report_Generator():
-    with open('log_buffer.txt', 'r') as file:
+def DC_CC_Report_Generator(log_buffer_path):
+    with open(log_buffer_path, 'r') as file:
         conteudo = corrigir_virgulas(file.read())
         log_data = json.loads(conteudo)
  

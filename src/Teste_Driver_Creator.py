@@ -19,7 +19,7 @@ c_type_to_printf = {
 }
 
 # Criar Test_Driver
-def Create_Test_Driver(excel_file_path, function_name, code_path):
+def Create_Test_Driver(excel_file_path, function_name, code_path, log_buffer_path):
     adicionar_ao_log("Creating Test Driver...")
 
     #Parse da quantidade de inputs e outputs, e seus tipos 
@@ -180,7 +180,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path):
         file.truncate()
 
     #Print para adicionar o log em um txt
-    print_create_log = r'  FILE *arquivo = fopen("output/OutputBuffer/log_buffer.txt", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
+    print_create_log = f'  FILE *arquivo = fopen("{log_buffer_path}", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
 
     #Escrever a medicao do tempo de execucao
     with open(testdriver_path, 'a') as file:

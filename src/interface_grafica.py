@@ -80,6 +80,7 @@ def execute():
     sut_file_path = entry_sut.get()
     function_name = entry_func_name.get()
     compiler = compiler_var.get()
+    folder_path = entry_folder.get()
 
     if not excel_file_path or not sut_file_path or not function_name:
         messagebox.showwarning("Warning", "Please fill all fields.")
@@ -89,7 +90,7 @@ def execute():
     window.update_idletasks()
 
     try:
-        executar_ferramenta(excel_file_path, sut_file_path, function_name, compiler)
+        executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler)
         adicionar_ao_log(str(relatorio()))
         
         adicionar_ao_log("Execution completed successfully.")

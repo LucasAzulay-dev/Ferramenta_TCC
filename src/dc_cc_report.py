@@ -1,9 +1,9 @@
 from fpdf import FPDF
 
 class PDF(FPDF):
-    def __init__(self, log_data):
+    def __init__(self, data):
         super().__init__()  # Chama o construtor da classe pai
-        self.data = log_data  # Armazena os dados de log
+        self.data = data  # Armazena os dados de log
 
     def header(self):
         self.set_font("Arial", "B", 12)
@@ -20,10 +20,10 @@ class PDF(FPDF):
         self.multi_cell(0, 10, body)
         self.ln()
     
-    def add_dc_cc_coverage_section(self, coupling):
+    def add_dc_cc_coverage_section(self):
         # Adiciona seção de cobertura com cores baseadas no valor
         self.chapter_title("DC/CC Coverage Summary")
-        coverage_percentage = self.dc_cc_coverage * 100
+        coverage_percentage = self.data['dc_cc_coverage'] * 100
         color = (0, 128, 0) if coverage_percentage > 85 else (255, 165, 0) if coverage_percentage > 50 else (255, 69, 0)
         self.set_text_color(*color)
         

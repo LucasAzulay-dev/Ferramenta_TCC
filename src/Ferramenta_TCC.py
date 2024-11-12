@@ -7,7 +7,8 @@ from utils import adicionar_ao_log
 def executar_ferramenta(excel_file_path, code_path, function_name, compiler):  
     Create_Instrumented_Code(code_path)
 
-    error = Create_Test_Driver(excel_file_path, function_name, code_path)  #FI5 parcialmente coberto
+    log_buffer_path = "output/OutputBuffer/log_buffer.txt"
+    error = Create_Test_Driver(excel_file_path, function_name, code_path, log_buffer_path)  #FI5 parcialmente coberto
 
     if(error):  
         adicionar_ao_log(error)
@@ -16,11 +17,10 @@ def executar_ferramenta(excel_file_path, code_path, function_name, compiler):
     adicionar_ao_log("Test Driver created successfully.")
     
     Run_Test_Driver(compiler)
-
-def relatorio():
+    
     adicionar_ao_log("Generating DC/CC report...")
-    return DC_CC_Report_Generator()  # Retorna os caminhos dos PDFs
-
+    
+    DC_CC_Report_Generator(log_buffer_path)  # Retorna os caminhos dos PDFs
 
 # if __name__ == '__main__':
 

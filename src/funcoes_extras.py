@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 # Função para mapear o tipo de dados do Python para tipos de variáveis em C
 def mapear_tipo_c(valor,tipo_c):
@@ -85,16 +86,40 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
     
     return linhas_inconsistentes
 
+def list_c_files(code_path, exclude):
+    caminhos_c = []  # Lista para armazenar os caminhos dos arquivos .c
+    try:
+        for root, dirs, files in os.walk(code_path):
+            for file in files:
+                if file.endswith('.c'):
+                    caminho_formatado = os.path.join(root, file).replace("\\", "/")
+                    # Adiciona o caminho apenas se ele não corresponder ao caminho a ser excluído
+                    if caminho_formatado != exclude.replace("\\", "/"):
+                        caminhos_c.append(caminho_formatado)
+        
+        # Junta todos os caminhos com uma vírgula como separador
+        return ', '.join(caminhos_c)
+    except Exception as e:
+        print(f"Ocorreu um erro: {e}")
+        return ""
+
 
 if __name__ == '__main__':
     # Exemplo de uso
-    arquivo_excel = 'new_testvec1.xlsx'
-    numero_coluna = 4  # Número da coluna, começando em 0
-    tipo_c = 'int'     # Tipo C desejado (ex: 'int', 'float', 'char', 'string')
+    #arquivo_excel = 'new_testvec1.xlsx'
+    #numero_coluna = 4  # Número da coluna, começando em 0
+    #tipo_c = 'int'     # Tipo C desejado (ex: 'int', 'float', 'char', 'string')
 
-    linhas_inconsistentes = skip_lines(arquivo_excel, numero_coluna, tipo_c)
+    #linhas_inconsistentes = skip_lines(arquivo_excel, numero_coluna, tipo_c)
 
-    if linhas_inconsistentes:
-        print(f"As seguintes linhas da coluna {numero_coluna + 1} não são do tipo '{tipo_c}': {linhas_inconsistentes}")
-    else:
-        print(f"Todas as linhas da coluna {numero_coluna + 1} são do tipo '{tipo_c}'.")
+    #if linhas_inconsistentes:
+    #    print(f"As seguintes linhas da coluna {numero_coluna + 1} não são do tipo '{tipo_c}': {linhas_inconsistentes}")
+    #else:
+    #    print(f"Todas as linhas da coluna {numero_coluna + 1} são do tipo '{tipo_c}'.")
+
+    folder_code_path = "examples/C_proj_mockup/SUT"
+    SUT_code_path = "examples/C_proj_mockup/SUT/SUT2.c"
+
+    test = list_c_files(folder_code_path, SUT_code_path)
+    print(test)
+

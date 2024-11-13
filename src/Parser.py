@@ -192,11 +192,14 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
     def __init__(self, func_name):
         self.func_name = func_name
         self.inputs = []  # Lista para armazenar nomes de variáveis de entrada
-        self.outputs = []  # Lista para armazenar nomes de variáveis de saída
-    
+        self.outputs = []  # Lista para armazenar nomes de variáveis de saída (incluindo retornos)
+        self.current_declared_vars = {}  # Dicionário para armazenar as declarações de variáveis locais
+
     def visit_FuncDef(self, node):
+        # Verifica se o nó é a função alvo
         if node.decl.name == self.func_name:
             params = node.decl.type.args.params
+            # Processa os parâmetros da função
             for param in params:
                 param_name = param.name  # Nome da variável
                 param_kind = "O" if self._is_pointer(param.type) else "I"
@@ -206,16 +209,32 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
                     self.inputs.append(param_name)
                 else:
                     self.outputs.append(param_name)
-    
+            
+            # Visita o corpo da função para capturar retornos
+            self.visit(node.body)
+
+    def visit_Decl(self, node):
+        # Captura variáveis declaradas dentro da função
+        if isinstance(node.type, c_ast.TypeDecl):
+            var_type = node.type.type.names[0]
+            self.current_declared_vars[node.name] = var_type
+
+    def visit_Return(self, node):
+        # Verifica se o retorno é uma variável e adiciona seu nome à lista de saídas
+        if isinstance(node.expr, c_ast.ID):
+            var_name = node.expr.name
+            if var_name not in self.outputs:  # Evita duplicações
+                self.outputs.append(var_name)
+
     def _is_pointer(self, type_node):
         """ Função auxiliar para verificar se um nó é ponteiro """
         return isinstance(type_node, c_ast.PtrDecl)
 
     def get_results(self):
         """ Retorna as listas de entradas e saídas como strings formatadas """
-        formatted_inputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.inputs))
-        formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs))
-        return formatted_inputs.replace('"', '\\"'), formatted_outputs.replace('"', '\\"')
+        formatted_inputs = '[{}]'.format(", ".join(f'"{name}"' for name in self.inputs))
+        formatted_outputs = '[{}]'.format(", ".join(f'"{name}"' for name in self.outputs))
+        return formatted_inputs, formatted_outputs
 
 
 def ParseNameInputsOutputs(code_path, folder_path, target_function):
@@ -240,16 +259,18 @@ def ParseNameInputsOutputs(code_path, folder_path, target_function):
 if __name__ == '__main__':
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "SUT.c"
+    code_path = "tests/test_cases/case2/src/SUT/SUT2.c"
     # Função alvo
-    target_function = "SUT_Teste"
+    target_function = "SUT"
 
-    resultado = ParseInputOutputs(code_path, target_function)
-    print(resultado)
+    folder_path= "tests/test_cases/case2/src/SUT"
+
+    #resultado = ParseInputOutputs(code_path, target_function)
+    #print(resultado)
 
     #gerar_arquivo_h_com_pycparser(code_path)
 
-    #inputs, outputs = ParseNameInputsOutputs(code_path, target_function)
+    inputs, outputs = ParseNameInputsOutputs(code_path, folder_path ,target_function)
 
-    #print("Inputs:", inputs)
-    #print("Outputs:", outputs)
+    print("Inputs:", inputs)
+    print("Outputs:", outputs)

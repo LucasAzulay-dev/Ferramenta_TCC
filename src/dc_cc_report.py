@@ -71,7 +71,7 @@ class PDF(FPDF):
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
         self.cell(32, 10, f"- Vector Line: {test_failed['vector_line']}", 10)
-        self.cell(50, 10, f" | Expected Result: {test_failed['expected_result']}", 10)
+        self.cell(52, 10, f" | Expected Result: {test_failed['expected_result']}", 10)
         self.cell(0, 10, f"  | Actual Result: {test_failed['actual_result']}", 10, 1)
         self.set_text_color(0, 0, 0)
         

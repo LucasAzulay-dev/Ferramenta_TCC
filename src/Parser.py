@@ -74,14 +74,14 @@ class FuncReturnVisitor(c_ast.NodeVisitor):
         # Verifica se a função atual é a função alvo
         if node.decl.name == self.target_function_name:
             self.in_target_function = True
-            self.current_declared_vars = {}  # Limpa o dicionário de variáveis declaradas
             # Visita o corpo da função
             self.visit(node.body)
             self.in_target_function = False
+            self.current_declared_vars = {}  # Limpa o dicionário de variáveis declaradas
 
     def visit_Decl(self, node):
         # Captura as variáveis declaradas dentro da função alvo
-        if self.in_target_function and isinstance(node.type, c_ast.TypeDecl):
+        if isinstance(node.type, c_ast.TypeDecl):
             var_type = node.type.type.names[0]  # Tipo da variável (ex: int, float)
             self.current_declared_vars[node.name] = var_type
 

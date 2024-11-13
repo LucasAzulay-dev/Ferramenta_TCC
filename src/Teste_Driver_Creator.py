@@ -19,12 +19,11 @@ c_type_to_printf = {
 }
 
 # Criar Test_Driver
-def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, log_buffer_path):
+def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, log_buffer_path, bufferLength):
     adicionar_ao_log("Creating Test Driver...")
 
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(code_path, folder_path, function_name)
-    print(resultado)
 
     if(isinstance(resultado, str)):
         return resultado
@@ -160,7 +159,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, lo
 
     #Começar a escrever no arquivo
     with open(testdriver_path, 'a') as file:
-        file.write('#include "'+ 'instrumented_SUT.h' + '"\n#include <stdio.h>\n#include <sys/time.h>\n#include <string.h>\n\n#define BUFFER_SIZE 4096\nchar log_buffer[BUFFER_SIZE];\n\nvoid testeX(int num_teste'+ param_tests_def +');\nint main(){\n  struct timeval begin, end;\n')
+        file.write('#include "'+ 'instrumented_SUT.h' + '"\n#include <stdio.h>\n#include <string.h>\n\n#define BUFFER_SIZE '+f'{bufferLength}'+'\nchar log_buffer[BUFFER_SIZE];\n\nvoid testeX(int num_teste'+ param_tests_def +');\nint main(){\n')
 
     #Escrever os vetores de teste de cada parametro
     with open(testdriver_path, 'a') as file:
@@ -172,7 +171,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, lo
 
     #Escrever a variaveis do testeX
     with open(testdriver_path, 'a') as file:
-        file.write(inicioJSON+'\n    for(int i=0;i<'+ f'{num_linhas}' +';i++){\n    '+print_JSON_begin_loop+'\n         gettimeofday(&begin,NULL);\n      testeX(i,' + param_tests)
+        file.write(inicioJSON+'\n    for(int i=0;i<'+ f'{num_linhas}' +';i++){\n    '+print_JSON_begin_loop+'\n      testeX(i,' + param_tests)
 
     #Apagar "," do ultimo dado 
     with open(testdriver_path, 'rb+') as file:
@@ -180,11 +179,11 @@ def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, lo
         file.truncate()
 
     #Print para adicionar o log em um txt
-    print_create_log = f'  FILE *arquivo = fopen("{log_buffer_path}", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
+    print_create_log = f'  FILE *arquivo;\n  fopen_s(&arquivo,"{log_buffer_path}", "w");' +'\n'+ r'  fputs(log_buffer, arquivo);'+'\n'+ r'  fputs("\n\n", arquivo);' +'\n'+ r'  fclose(arquivo);'
 
     #Escrever a medicao do tempo de execucao
     with open(testdriver_path, 'a') as file:
-        file.write(');\n        gettimeofday(&end,NULL);\n          int elapsed = (((end.tv_sec - begin.tv_sec) * 1000000) + (end.tv_usec - begin.tv_usec))/'+ f'{num_linhas}' +';\n '+ print_JSON_end_loop +'\n     }\n'+fimJSON+print_create_log+'\nreturn 0;\n}')    
+        file.write(');\n    int elapsed = 0;\n'+ print_JSON_end_loop +'\n     }\n'+fimJSON+print_create_log+'\nreturn 0;\n}')    
 
     #Escrever a definicao da funcao testeX
     with open(testdriver_path, 'a') as file:
@@ -232,13 +231,19 @@ def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, lo
 
 if __name__ == '__main__':
     # Defina o caminho para o arquivo Excel
-    excel_file_path = "examples/C_proj_mockup/TestInputs/new_testvec3.xlsx"
+    excel_file_path = "examples/C_proj_mockup/TestInputs/test_vector_sut_1.xlsx"
 
     # Defina o nome da função testada
     function_name = "SUT"
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "examples/C_proj_mockup/SUT/SUT.c" 
+    code_path = "tests/test_cases/case1/src/SUT/SUT.c" 
 
-    Create_Test_Driver(excel_file_path, function_name, code_path)
+    folder_path = "tests/test_cases/case1/src"
+
+    log_buffer_path = "output/OutputBuffer/log_buffer.txt"
+
+    bufferLength = 4096
+
+    Create_Test_Driver(excel_file_path, function_name, code_path, folder_path, log_buffer_path,bufferLength)
         

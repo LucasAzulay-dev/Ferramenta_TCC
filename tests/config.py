@@ -1,12 +1,20 @@
 # Config output messages and file paths.
 
-MSG_INSTRUMENTATION_START = "Iniciando instrumentação do código..."
-MSG_INSTRUMENTATION_END = "Instrumentação concluída."
-MSG_HEADER_CREATING = "Gerando arquivo .h com pycparser..."
-MSG_HEADER_CREATED = "Arquivo .h gerado com sucesso."
-MSG_DRIVER_CREATING = "Criando Test Driver..."
-MSG_DRIVER_CREATED = "Test Driver criado com sucesso."
-MSG_DRIVER_EXECUTING = "Executando Test Driver..."
+MSG_INSTRUMENTATION_START = "Starting code instrumentation..."
+MSG_INSTRUMENTATION_END = "Instrumentation completed."
+MSG_HEADER_CREATING = "Generating .h file with pycparser..."
+MSG_HEADER_CREATED = ".h file generated successfully."
+MSG_DRIVER_CREATING = "Creating Test Driver..."
+MSG_DRIVER_CREATED = "Test Driver created successfully."
+MSG_DRIVER_EXECUTING = "Running Test Driver..."
+
+ERROR_NO_VALID_LINES = "ERROR: No valid lines in the Test Vector"
+ERROR_SUT_FCN_NOT_FOUND = "ERROR: function 'SUT' not found."
+ERROR_SUT_NOT_TESTABLE = "ERROR: SUT not testable"
+ERROR_EXEC_ERROR = "ERROR: Runtime execution error"
+ERROR_SUT_WRONG_TYPE = "ERROR: SUT is not a C file"
+ERROR_TESTVEC_WRONG_TYPE = "ERROR: Test Vector is not a xlsx file"
+ERROR_TESTVEC_MISSING_COL = "ERROR: Test Vector has missing columns"
 
 PATH_INSTRUMENTED_SUT_C = "output\\InstrumentedSUT\\instrumented_SUT.c"
 PATH_INSTRUMENTED_SUT_H = "output\\InstrumentedSUT\\instrumented_SUT.h"

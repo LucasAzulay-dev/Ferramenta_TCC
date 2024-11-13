@@ -7,43 +7,85 @@ import tempfile
 import re
 import json
 from .config import *
+import platform
 
-# Add graphviz to path, if installed in default folder
-graphvizPathWin = os.pathsep + 'C:\\Program Files\\Graphviz\\bin\\'
-if os.path.exists(graphvizPathWin):
-    os.environ["PATH"] += graphvizPathWin
-
-num_cases = 2
-CASES = [f"case{i}" for i in range(1, num_cases+1)]
+FUNCTIONAL_CASES = ['case1', 'case2', 'case3']
+ROBUSTNESS_CASES = {
+    'sut_function_not_found' :{
+        'case_folder' : 'sut_function_not_found',
+        'sut_file_name': 'SUT.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec.xlsx'
+    },
+    'sut_not_testable' :{
+        'case_folder' : 'sut_not_testable',
+        'sut_file_name': 'SUT_not_testable.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec.xlsx'
+    },
+    'sut_runtime_error' :{
+        'case_folder' : 'sut_runtime_error',
+        'sut_file_name': 'SUT_exec_error.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec.xlsx'
+    },
+    'sut_wrong_type' :{
+        'case_folder' : 'sut_wrong_type',
+        'sut_file_name': 'SUT_wrong_type.cpp',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec.xlsx'
+    },
+    'testvec_all_invalid_lines' :{
+        'case_folder' : 'testvec_all_invalid_lines',
+        'sut_file_name': 'SUT.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec_all_invalid_lines.xlsx'
+    },
+    'testvec_invalid_line' :{
+        'case_folder' : 'testvec_invalid_line',
+        'sut_file_name': 'SUT.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec_invalid_line.xlsx'
+    },
+    'testvec_missing_column' :{
+        'case_folder' : 'testvec_missing_column',
+        'sut_file_name': 'SUT.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec_missing_column.xlsx'
+    },
+    'testvec_wrong_type' :{
+        'case_folder' : 'testvec_wrong_type',
+        'sut_file_name': 'SUT.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec_wrong_type.csv'
+    },
+}
 
 # Custom exception to pass tests earlier
 class TestPassedException(Exception):
     pass
 
-# Get path to all test cases
-class TestPaths:
+# Get path to all functional test cases
+class FunctionalTestPaths:
     def __init__(self, case):
-        if case == 'case1':
-            self.get_case_1()
-        if case == 'case2':
-            self.get_case_2()
+        self.sut_path = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\src\\SUT\\SUT.c').absolute())
+        self.proj_dir = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\src').absolute())
+        self.sut_name = 'SUT'
+        self.testvec = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\testInputs\\testvec.xlsx').absolute())
+
+# Get path to all robustness test cases
+class RobustnessTestPaths:
+    def __init__(self, robustness_case):
+        self.sut_path = str(Path('tests\\test_cases\\robustness_cases\\'+robustness_case['case_folder']+'\\'+robustness_case['sut_file_name']).absolute())
+        self.proj_dir = str(Path('tests\\test_cases\\robustness_cases\\'+robustness_case['case_folder']).absolute())
+        self.sut_name = robustness_case['sut_fcn_name']
+        self.testvec = str(Path('tests\\test_cases\\robustness_cases\\'+robustness_case['case_folder']+'\\'+robustness_case['testvec_name']).absolute())
     
-    def get_case_1(self):
-        self.sut_path = str(Path('tests\\test_cases\\case1\\src\\SUT\\SUT.c').absolute())
-        self.sut_name = 'SUT'
-        self.testvec_success = str(Path('tests\\test_cases\\case1\\testInputs\\success_testvec.xlsx').absolute())
-        self.testvec_invalid_line = str(Path('tests\\test_cases\\case1\\testInputs\\invalid_line_testvec.xlsx').absolute())
-
-    def get_case_2(self):
-        self.sut_path = str(Path('tests\\test_cases\\case2\\src\\SUT\\SUT.c').absolute())
-        self.sut_name = 'SUT'
-        self.testvec_success = str(Path('tests\\test_cases\\case2\\testInputs\\success_testvec.xlsx').absolute())
-        self.testvec_invalid_line = str(Path('tests\\test_cases\\case2\\testInputs\\invalid_line_testvec.xlsx').absolute())
-
 class ToolParameters():
-    def __init__(self, sut_path, sut_name, testvec, compiler):
+    def __init__(self, sut_path, sut_name, proj_dir, testvec, compiler):
         self.sut_path = sut_path
         self.sut_name = sut_name
+        self.proj_dir = proj_dir
         self.testvec = testvec
         self.compiler = compiler
 
@@ -67,6 +109,20 @@ def cleanup_new_files(monkeypatch):
     for file in new_files:
         if os.path.isfile(file):
             os.remove(file)
+
+# Monkeypatch os.startfile or os.system to prevent the opening of the report after every execution
+@pytest.fixture(autouse=True)
+def dont_open_report(monkeypatch):
+    def mock_startfile(path):
+        pass
+
+    def mock_system(command):
+        pass
+
+    if platform.system() == "Windows":
+        monkeypatch.setattr(os, "startfile", mock_startfile)
+    else:
+        monkeypatch.setattr(os, "system", mock_system)
 
 # Setup: backup the 'output' directory
 # Teardown: restore the original 'output' directory
@@ -118,10 +174,9 @@ def pytest_runtest_makereport(item, call):
 
 # Get JSON outputted to terminal
 @pytest.fixture
-def get_json(capfd):
+def get_log_json(capfd):
     def get_json_output():
         out, _ = capfd.readouterr()
-        
 
         driver_executing_msg_position = out.find(MSG_DRIVER_EXECUTING)
         if driver_executing_msg_position == -1:
@@ -147,26 +202,30 @@ def get_json(capfd):
     
     return get_json_output
 
-# Run tests considering all test cases
-@pytest.fixture(params=CASES)
-def caseConfig(request):
-    return TestPaths(request.param)
+# Run tests considering all functional test cases
+@pytest.fixture(params=FUNCTIONAL_CASES)
+def functional_config(request):
+    return FunctionalTestPaths(request.param)
 
 # Get parameters for success tests
 @pytest.fixture
-def param_success(caseConfig):
-    param = ToolParameters(sut_path=caseConfig.sut_path,
-                           sut_name=caseConfig.sut_name,
-                           testvec=caseConfig.testvec_success,
+def param_success(functional_config : FunctionalTestPaths):
+    param = ToolParameters(sut_path=functional_config.sut_path,
+                           proj_dir=functional_config.proj_dir,
+                           sut_name=functional_config.sut_name,
+                           testvec=functional_config.testvec,
                            compiler='gcc')
-    yield param
+    return param
 
-# Get parameters for tests with faulty lines in the test driver
+# Get parameters for tests with some faulty lines in the test driver
 @pytest.fixture
-def param_invalid_line(caseConfig):
-    param = ToolParameters(sut_path=caseConfig.sut_path,
-                           sut_name=caseConfig.sut_name,
-                           testvec=caseConfig.testvec_invalid_line,
-                           compiler='gcc')
-    yield param
-
+def param_robustness_case():
+    def get_robustness_params(robustness_case):
+        rubustness_config = RobustnessTestPaths(robustness_case)
+        param = ToolParameters(sut_path=rubustness_config.sut_path,
+                            proj_dir=rubustness_config.proj_dir,
+                            sut_name=rubustness_config.sut_name,
+                            testvec=rubustness_config.testvec,
+                            compiler='gcc')
+        return param
+    return get_robustness_params

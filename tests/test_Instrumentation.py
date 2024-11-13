@@ -1,7 +1,7 @@
 import pytest
 from .config import *
 from src.Ferramenta_TCC import executar_ferramenta
-from .conftest import ToolParameters
+from .conftest import ToolParameters, ROBUSTNESS_CASES
 import os.path
 
 # FI#1: The Tool must accept a SUT, the name of the function to be tested, a test suite and a compiler name as input.
@@ -10,6 +10,7 @@ class TestFI_1:
     def test_1(self, param_success, assert_output):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path=param.testvec, 
+                            folder_path=param.proj_dir, 
                             code_path=param.sut_path, 
                             function_name=param.sut_name, 
                             compiler=param.compiler)
@@ -20,6 +21,7 @@ class TestFI_2:
     def test_1(self, param_success):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -31,6 +33,7 @@ class TestFI_3:
     def test_1(self, param_success):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -45,32 +48,127 @@ class TestFI_4:
 # test inputs without compromising the execution of subsequent tests.
 class TestFI_5:
     # On success, no skipped tests
-    def test_1(self, param_success, get_json):
+    def test_1(self, param_success, get_log_json):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
-        json_out = get_json()
+        json_out = get_log_json()
         assert json_out['skipedlines'] == []
 
     # With some faulty tests, some are skipped but execution has no errors
-    def test_2(self, param_invalid_line, get_json):
-        param : ToolParameters = param_invalid_line
+    def test_2(self, param_robustness_case, get_log_json):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['testvec_invalid_line'])
         executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
-        json_out = get_json()
+        json_out = get_log_json()
         assert json_out['skipedlines'] != []
+
+    # all lines are invalid in testvec
+    def test_3(self, param_robustness_case, assert_output):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['testvec_all_invalid_lines'])
+        with pytest.raises(Exception):
+            executar_ferramenta(excel_file_path = param.testvec, 
+                                folder_path=param.proj_dir,
+                                code_path = param.sut_path, 
+                                function_name = param.sut_name, 
+                                compiler = param.compiler)
+            assert_output(ERROR_NO_VALID_LINES)
+
+    
+    # SUT function not found
+    def test_4(self, param_robustness_case, assert_output):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['sut_function_not_found'])
+        with pytest.raises(Exception):
+            executar_ferramenta(excel_file_path = param.testvec, 
+                                folder_path=param.proj_dir,
+                                code_path = param.sut_path, 
+                                function_name = param.sut_name, 
+                                compiler = param.compiler)
+            assert_output(ERROR_SUT_FCN_NOT_FOUND)
+    
+    # SUT not testable
+    def test_5(self, param_robustness_case, assert_output):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['sut_not_testable'])
+        with pytest.raises(Exception):
+            executar_ferramenta(excel_file_path = param.testvec, 
+                                folder_path=param.proj_dir,
+                                code_path = param.sut_path, 
+                                function_name = param.sut_name, 
+                                compiler = param.compiler)
+            assert_output(ERROR_SUT_NOT_TESTABLE)
+    
+    # SUT with runtime error
+    def test_6(self, param_robustness_case, assert_output):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['sut_runtime_error'])
+        with pytest.raises(Exception):
+            executar_ferramenta(excel_file_path = param.testvec, 
+                                folder_path=param.proj_dir,
+                                code_path = param.sut_path, 
+                                function_name = param.sut_name, 
+                                compiler = param.compiler)
+            assert_output(ERROR_EXEC_ERROR)
+    
+    # SUT is not a C file
+    def test_7(self, param_robustness_case, assert_output):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['sut_wrong_type'])
+        with pytest.raises(Exception):
+            executar_ferramenta(excel_file_path = param.testvec, 
+                                folder_path=param.proj_dir,
+                                code_path = param.sut_path, 
+                                function_name = param.sut_name, 
+                                compiler = param.compiler)
+            assert_output(ERROR_SUT_WRONG_TYPE)
+    
+    # Tesvec is not an excel file
+    def test_8(self, param_robustness_case, assert_output):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['testvec_wrong_type'])
+        with pytest.raises(Exception):
+            executar_ferramenta(excel_file_path = param.testvec, 
+                                folder_path=param.proj_dir,
+                                code_path = param.sut_path, 
+                                function_name = param.sut_name, 
+                                compiler = param.compiler)
+            assert_output(ERROR_TESTVEC_WRONG_TYPE)
+    
+    # Tesvec is missing columns
+    def test_9(self, param_robustness_case, assert_output):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['testvec_missing_column'])
+        with pytest.raises(Exception):
+            executar_ferramenta(excel_file_path = param.testvec, 
+                                folder_path=param.proj_dir,
+                                code_path = param.sut_path, 
+                                function_name = param.sut_name, 
+                                compiler = param.compiler)
+            assert_output(ERROR_TESTVEC_MISSING_COL)
 
 # FI#6: The Test Driver must generate an execution log of the tests performed on the instrumented code.
 class TestFI_6:
-    pass
+    def test_1(self, param_success):
+        param : ToolParameters = param_success
+        executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
+                            code_path = param.sut_path, 
+                            function_name = param.sut_name, 
+                            compiler = param.compiler)
+        assert os.path.exists(PATH_LOG_BUFFER)
 
 # FI#7: The execution log must indicate whether each test passed or failed.
 class TestFI_7:
-    pass
+    def test_1(self, param_success, get_log_json):
+        param : ToolParameters = param_success
+        executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
+                            code_path = param.sut_path, 
+                            function_name = param.sut_name, 
+                            compiler = param.compiler)
+        json_out = get_log_json()
+        assert all(execution.get("pass") in ["true", "false"] for execution in json_out.get("executions", []))
 
 # FI#8: The execution log must indicate which components were declared.
 class TestFI_8:

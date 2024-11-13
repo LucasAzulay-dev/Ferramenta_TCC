@@ -1,0 +1,6 @@
+Tolerances,,,,,,,,,,,
+Time,Input1,Input2,Input3,Input4,Input5, Input6,Input7,INPUT_COMMENTS,Output1,Output2,OUTPUT_COMMENTS
+cycle1,40,36,46,35,11,13,11,,4,1,
+cycle2,40,36,34,1,11,13,13,,3,2,
+cycle3,35,30,34,12,11,13,11,,2,3,
+cycle4,0,-10,-1,30,40,50,60,,1,4,

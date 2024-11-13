@@ -206,5 +206,7 @@ def Create_Instrumented_Code(folder_path, SUT_path, bufferLength = 4096):
     with open(r'output\InstrumentedSUT\instrumented_SUT.c', 'w') as f:
         f.write(instrumented_code_with_header)
 
-    adicionar_ao_log("Instrumentation completed.")
     gerar_arquivo_h_com_pycparser(SUT_path, cpp_args)
+
+    adicionar_ao_log("Instrumentation completed.")
+    

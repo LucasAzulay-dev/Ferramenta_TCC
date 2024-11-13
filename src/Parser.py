@@ -232,9 +232,9 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
 
     def get_results(self):
         """ Retorna as listas de entradas e saídas como strings formatadas """
-        formatted_inputs = '[{}]'.format(", ".join(f'"{name}"' for name in self.inputs))
-        formatted_outputs = '[{}]'.format(", ".join(f'"{name}"' for name in self.outputs))
-        return formatted_inputs, formatted_outputs
+        formatted_inputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.inputs))
+        formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs))
+        return formatted_inputs.replace('"', '\\"'), formatted_outputs.replace('"', '\\"')
 
 
 def ParseNameInputsOutputs(code_path, folder_path, target_function):

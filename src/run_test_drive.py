@@ -16,7 +16,7 @@ def Run_Test_Driver(folder_path, SUT_path, compiler):
                 # Executa o programa C
                 subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True) 
             except subprocess.CalledProcessError as e:
-                error = f"ERROR: TestDrive not executed properly." # {e.stderr}
+                error = f"ERROR: TestDrive not executed properly.{e.stderr}" # {e.stderr}
                 adicionar_ao_log(error)
                 return error
             
@@ -32,7 +32,7 @@ def Run_Test_Driver(folder_path, SUT_path, compiler):
                 subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True)
 
             except subprocess.CalledProcessError as e:
-                error = f"ERROR: TestDrive not executed properly." # {e.stderr}
+                error = f"ERROR: TestDrive not executed properly.{e.stderr}" # {e.stderr}
                 adicionar_ao_log(error)
                 return error
 

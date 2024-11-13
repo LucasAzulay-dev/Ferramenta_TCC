@@ -7,23 +7,27 @@ digraph {
 		CompA [label=CompA shape=box]
 		CompB [label=CompB shape=box]
 		CompC [label=CompC shape=box]
-		CompE [label=CompE shape=box]
 		CompD [label=CompD shape=box]
+		CompE [label=CompE shape=box]
+		CompF [label=CompF shape=box]
 		CompA [label=CompA shape=box]
 		CompB [label=CompB shape=box]
 		CompC [label=CompC shape=box]
-		CompE [label=CompE shape=box]
 		CompD [label=CompD shape=box]
+		CompE [label=CompE shape=box]
+		CompF [label=CompF shape=box]
 		CompA [label=CompA shape=box]
 		CompB [label=CompB shape=box]
 		CompC [label=CompC shape=box]
-		CompE [label=CompE shape=box]
 		CompD [label=CompD shape=box]
+		CompE [label=CompE shape=box]
+		CompF [label=CompF shape=box]
 		CompA [label=CompA shape=box]
 		CompB [label=CompB shape=box]
 		CompC [label=CompC shape=box]
-		CompE [label=CompE shape=box]
 		CompD [label=CompD shape=box]
+		CompE [label=CompE shape=box]
+		CompF [label=CompF shape=box]
 	}
 	SUTI1 [label=SUTI1 shape=ellipse]
 	SUTI2 [label=SUTI2 shape=ellipse]
@@ -34,6 +38,7 @@ digraph {
 	SUTI7 [label=SUTI7 shape=ellipse]
 	SUTO1 [label=SUTO1 shape=ellipse]
 	SUTO2 [label=SUTO2 shape=ellipse]
+	teste_return [label=teste_return shape=ellipse]
 	subgraph cluster_SUT {
 		CompA -> AO1 [label="Calls: 4"]
 	}
@@ -46,10 +51,13 @@ digraph {
 	subgraph cluster_SUT {
 		CompC -> CO1 [label="Calls: 4"]
 	}
+	CompD -> SUTO1 [label="Calls: 4"]
+	subgraph cluster_SUT {
+	}
 	CompE -> SUTO2 [label="Calls: 4"]
 	subgraph cluster_SUT {
 	}
-	CompD -> SUTO1 [label="Calls: 4"]
+	CompF -> teste_return [label="Calls: 4"]
 	subgraph cluster_SUT {
 	}
 	subgraph cluster_SUT {
@@ -76,10 +84,13 @@ digraph {
 		CO1 [label=CO1 color=lightblue shape=diamond style=filled]
 	}
 	subgraph cluster_SUT {
+		AO2 [label=AO2 color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
 		CO1 [label=CO1 color=lightblue shape=diamond style=filled]
 	}
 	subgraph cluster_SUT {
-		AO2 [label=AO2 color=lightblue shape=diamond style=filled]
+		CO1 [label=CO1 color=lightblue shape=diamond style=filled]
 	}
 	SUTI1 -> CompA [label="Calls: 4"]
 	SUTI2 -> CompA [label="Calls: 4"]
@@ -90,7 +101,8 @@ digraph {
 	AO1 -> CompC [label="Calls: 4"]
 	BO1 -> CompC [label="Calls: 4"]
 	SUTI7 -> CompC [label="Calls: 4"]
-	CO1 -> CompE [label="Calls: 4"]
 	CO1 -> CompD [label="Calls: 4"]
 	AO2 -> CompD [label="Calls: 4"]
+	CO1 -> CompE [label="Calls: 4"]
+	CO1 -> CompF [label="Calls: 4"]
 }

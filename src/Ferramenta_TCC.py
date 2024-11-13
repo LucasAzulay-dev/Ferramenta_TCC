@@ -41,13 +41,13 @@ def executar_ferramenta(excel_file_path, code_path, function_name, folder_path ,
 if __name__ == '__main__':
 
     # Defina o caminho para o arquivo Excel
-    excel_file_path = "tests\\test_cases\\functional_cases\\case3\\testInputs\\testvec.xlsx"
+    excel_file_path = "tests\\test_cases\\functional_cases\\case2\\testInputs\\testvec.xlsx"
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "tests\\test_cases\\functional_cases\\case3\\src\\SUT\\SUT.c" 
+    code_path = "tests\\test_cases\\functional_cases\\case2\\src\\SUT\\SUT.c" 
 
     # Defina o nome do arquivo .c do SUT
-    folder_path = "tests\\test_cases\\functional_cases\\case3\\src" 
+    folder_path = "tests\\test_cases\\functional_cases\\case2\\src" 
 
     # Defina o nome da função testada
     function_name = "SUT"

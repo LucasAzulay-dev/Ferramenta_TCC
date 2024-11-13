@@ -25,7 +25,6 @@ class TestFI_2:
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
-        
         assert os.path.exists(PATH_TEST_DRIVER_C) and os.path.exists(PATH_TEST_DRIVER_EXE)
 
 # FI#3: The Tool must generate instrumented code from the SUT.
@@ -160,6 +159,7 @@ class TestFI_6:
 
 # FI#7: The execution log must indicate whether each test passed or failed.
 class TestFI_7:
+    # check if property 'pass' exists
     def test_1(self, param_success, get_log_json):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
@@ -170,13 +170,41 @@ class TestFI_7:
         json_out = get_log_json()
         assert all(execution.get("pass") in ["true", "false"] for execution in json_out.get("executions", []))
 
+    # check if result is as expected
+    def test_2(self, param_success, get_log_json, oracle_tests_passed):
+        param : ToolParameters = param_success
+        executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
+                            code_path = param.sut_path, 
+                            function_name = param.sut_name, 
+                            compiler = param.compiler)
+        json_out = get_log_json()
+        actual_tests_passed = [execution.get("pass") for execution in json_out.get("executions", [])]
+        assert actual_tests_passed == oracle_tests_passed
+
 # FI#8: The execution log must indicate which components were declared.
 class TestFI_8:
     pass
 
 # FI#9: The execution log must indicate which components were executed, in an ordered manner.
 class TestFI_9:
-    pass
+    def test_1(self, param_success, get_log_json, oracle_functions_called_ordered):
+        param : ToolParameters = param_success
+        executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
+                            code_path = param.sut_path, 
+                            function_name = param.sut_name, 
+                            compiler = param.compiler)
+        json_out = get_log_json()
+
+        total_executions = len(json_out.get("executions",[]))
+        actual_functions_called_ordered = [
+            analysis.get("function")
+            for execution in json_out.get("executions", [])
+            for analysis in execution.get("analysis",[])
+        ]
+        
+        assert actual_functions_called_ordered == oracle_functions_called_ordered * total_executions
 
 # FI#10: The execution log must report the declared variables and their respective types (DC).
 class TestFI_10:

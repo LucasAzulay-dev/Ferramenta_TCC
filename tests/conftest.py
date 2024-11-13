@@ -72,6 +72,9 @@ class FunctionalTestPaths:
         self.proj_dir = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\src').absolute())
         self.sut_name = 'SUT'
         self.testvec = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\testInputs\\testvec.xlsx').absolute())
+        # oracles
+        self.oracle_tests_passed = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\oracle\\testsPassed.txt').absolute())
+        self.oracle_functions_called_ordered = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\oracle\\functionsCalledOrdered.txt').absolute())
 
 # Get path to all robustness test cases
 class RobustnessTestPaths:
@@ -184,7 +187,6 @@ def get_log_json(capfd):
 
         text_post_driver_execution = out[driver_executing_msg_position + len(MSG_DRIVER_EXECUTING):]
         
-        # Usa expressão regular para identificar o JSON (assumindo que começa com '{' e termina com '}')
         json_match = re.search(r'{.*}', text_post_driver_execution, re.DOTALL)
         if json_match:
             json_text = json_match.group(0)
@@ -229,3 +231,23 @@ def param_robustness_case():
                             compiler='gcc')
         return param
     return get_robustness_params
+
+# return the lines of a text file as a list
+def textFileToList(filePath):
+    with open(filePath, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+    lines = [
+        line.strip() for line in lines
+        if not line.startswith('#')
+        ]
+    return lines
+
+# Get oracle of tests passed
+@pytest.fixture
+def oracle_tests_passed(functional_config : FunctionalTestPaths):
+    return textFileToList(functional_config.oracle_tests_passed)
+
+# Get oracle of tests passed
+@pytest.fixture
+def oracle_functions_called_ordered(functional_config : FunctionalTestPaths):
+    return textFileToList(functional_config.oracle_functions_called_ordered)

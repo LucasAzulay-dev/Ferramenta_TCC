@@ -149,11 +149,26 @@ class TestFI_5:
 
 # FI#6: The Test Driver must generate an execution log of the tests performed on the instrumented code.
 class TestFI_6:
-    pass
+    def test_1(self, param_success):
+        param : ToolParameters = param_success
+        executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
+                            code_path = param.sut_path, 
+                            function_name = param.sut_name, 
+                            compiler = param.compiler)
+        assert os.path.exists(PATH_LOG_BUFFER)
 
 # FI#7: The execution log must indicate whether each test passed or failed.
 class TestFI_7:
-    pass
+    def test_1(self, param_success, get_log_json):
+        param : ToolParameters = param_success
+        executar_ferramenta(excel_file_path = param.testvec, 
+                            folder_path=param.proj_dir,
+                            code_path = param.sut_path, 
+                            function_name = param.sut_name, 
+                            compiler = param.compiler)
+        json_out = get_log_json()
+        assert all(execution.get("pass") in ["true", "false"] for execution in json_out.get("executions", []))
 
 # FI#8: The execution log must indicate which components were declared.
 class TestFI_8:

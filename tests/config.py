@@ -1,12 +1,12 @@
 # Config output messages and file paths.
 
-MSG_INSTRUMENTATION_START = "Iniciando instrumentação do código..."
-MSG_INSTRUMENTATION_END = "Instrumentação concluída."
-MSG_HEADER_CREATING = "Gerando arquivo .h com pycparser..."
-MSG_HEADER_CREATED = "Arquivo .h gerado com sucesso."
-MSG_DRIVER_CREATING = "Criando Test Driver..."
-MSG_DRIVER_CREATED = "Test Driver criado com sucesso."
-MSG_DRIVER_EXECUTING = "Executando Test Driver..."
+MSG_INSTRUMENTATION_START = "Starting code instrumentation..."
+MSG_INSTRUMENTATION_END = "Instrumentation completed."
+MSG_HEADER_CREATING = "Generating .h file with pycparser..."
+MSG_HEADER_CREATED = ".h file generated successfully."
+MSG_DRIVER_CREATING = "Creating Test Driver..."
+MSG_DRIVER_CREATED = "Test Driver created successfully."
+MSG_DRIVER_EXECUTING = "Running Test Driver..."
 
 PATH_INSTRUMENTED_SUT_C = "output\\InstrumentedSUT\\instrumented_SUT.c"
 PATH_INSTRUMENTED_SUT_H = "output\\InstrumentedSUT\\instrumented_SUT.h"

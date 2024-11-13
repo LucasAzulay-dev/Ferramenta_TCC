@@ -12,6 +12,9 @@ class CouplingAnalyzer:
         self.dc_cc_coverarge = 0
         self.couplings_individually_exercised = 0
         self.couplings_individually_exercised_affected_sut = 0
+        self.test_results = {
+            'tests_failed': []
+        }
 
     def identify_couplings_exercised(self):
         self._process_log_data()
@@ -20,10 +23,12 @@ class CouplingAnalyzer:
         self._analyze_couplings_execution()
         self._analyze_individual_coupling_exercises_component_level()
         self._determine_dc_cc_coverage()
+        self._analyse_test_result()
         return {
                 'couplings': self.couplings, 'individual_coupling_exercises': self.individual_coupling_exercises, 'dc_cc_coverage': self.dc_cc_coverage, 
                 'couplings_individually_exercised':self.couplings_individually_exercised, 
-                'couplings_individually_exercised_affected_sut': self.couplings_individually_exercised_affected_sut
+                'couplings_individually_exercised_affected_sut': self.couplings_individually_exercised_affected_sut,
+                'test_results': self.test_results
                 }
 
     def _process_log_data(self):
@@ -209,17 +214,17 @@ class CouplingAnalyzer:
                     return True 
         return False
     
-    def _determine_test_vector_pair_lines(self, pair_values_execution):
-        def adjusted_index(index):
-            adjusted = 0
-            for i in range(index + 1):
+    def _adjusted_index(self,index):
+        adjusted = 0
+        for i in range(index + 1):
                 while adjusted in self.log_data['skipedlines']:
                     adjusted += 1
                 adjusted += 1
-            return adjusted
-
-        value_execution_index = adjusted_index(pair_values_execution[0]['id_log_data_executions'])
-        other_value_execution_index = adjusted_index(pair_values_execution[1]['id_log_data_executions'])
+        return adjusted
+    
+    def _determine_test_vector_pair_lines(self, pair_values_execution):
+        value_execution_index = self._adjusted_index(pair_values_execution[0]['id_log_data_executions'])
+        other_value_execution_index = self._adjusted_index(pair_values_execution[1]['id_log_data_executions'])
 
         return (value_execution_index, other_value_execution_index)
 
@@ -267,3 +272,11 @@ class CouplingAnalyzer:
                     break
         
         self.dc_cc_coverage = self.couplings_individually_exercised_affected_sut / (len(self.couplings))
+        
+    def _analyse_test_result(self):
+        self.test_results['total_tests'] = self.log_data['numberOfTests']
+        self.test_results['total_tests_passed'] = len([passed for passed in self.log_data['executions'] if passed['pass'] == 'true'])
+        self.test_results['total_tests_failed'] = len([failed for failed in self.log_data['executions'] if failed['pass'] == 'false'])
+        for index, failed in enumerate(self.log_data['executions']):
+            if failed['pass'] == 'false':
+                self.test_results['tests_failed'].append({'expected_result': failed['expectedResult'], 'actual_result': failed['actualResult'], 'vector_line': self._adjusted_index(index)})

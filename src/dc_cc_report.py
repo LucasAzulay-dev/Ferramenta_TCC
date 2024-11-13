@@ -19,6 +19,61 @@ class PDF(FPDF):
         self.set_font("Arial", "", 12)
         self.multi_cell(0, 10, body)
         self.ln()
+        
+    def add_test_results(self):
+        # Adiciona seção resultados dos testes
+        self.chapter_title("Tests Results")
+        test_percentage = (self.data['test_results']['total_tests_passed'])/(self.data['test_results']['total_tests']) * 100
+        color = (0, 128, 0) if test_percentage >= 100 else (255, 69, 0)
+        
+        tab_space = 5  # Define o valor do recuo desejado
+        # Exibe a porcentagem de cobertura
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        self.cell(30, 5, "Tests Passed: ", 0)
+        self.set_text_color(*color)
+        self.cell(0, 5, f"{test_percentage:.1f}%", 0, 1)
+        self.set_text_color(0, 0, 0)
+        self.ln(5)
+        
+        # Exibe total de testes
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        self.cell(30, 5, "Total Tests: ", 0)
+        self.set_font("Arial", "", 12)
+        self.cell(0, 5, f"{self.data['test_results']['total_tests']}", 0, 1)
+        self.set_text_color(0, 0, 0)
+        self.ln(5)
+        
+        # Exibe total de testes falharam
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        self.cell(30, 5, "Failed Tests: ", 0)
+        self.set_font("Arial", "", 12)
+        self.cell(0, 5, f"{self.data['test_results']['total_tests_failed']}", 0, 1)
+        self.set_text_color(0, 0, 0)
+        self.ln(5)
+        
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        if(len(self.data['test_results']['tests_failed'])):
+            self.cell(0, 5, "Test Failed Description:", 0, 1)
+            self.set_text_color(0, 0, 0)
+            for test_failed in self.data['test_results']['tests_failed']:
+                self.add_resume_test_failed(test_failed)
+            self.ln(5)
+    
+    def add_resume_test_failed(self, test_failed):
+        tab_space = 10
+        color = (255, 69, 0)
+        self.set_text_color(*color)
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        self.cell(32, 10, f"- Vector Line: {test_failed['vector_line']}", 10)
+        self.cell(50, 10, f" | Expected Result: {test_failed['expected_result']}", 10)
+        self.cell(0, 10, f"  | Actual Result: {test_failed['actual_result']}", 10, 1)
+        self.set_text_color(0, 0, 0)
+        
     
     def add_dc_cc_coverage_section(self):
         # Adiciona seção de cobertura com cores baseadas no valor
@@ -192,6 +247,9 @@ class PDF(FPDF):
 def create_report(data, pdf_file_path):
     pdf = PDF(data)  # Passa os dados de log para a instância da classe PDF
     pdf.add_page()
+    
+    pdf.add_test_results()
+    pdf.add_div()    
     
     pdf.add_dc_cc_coverage_section()
     pdf.add_div()

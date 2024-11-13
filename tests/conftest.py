@@ -7,11 +7,12 @@ import tempfile
 import re
 import json
 from .config import *
+import platform
 
 FUNCTIONAL_CASES = ['case1', 'case2', 'case3']
 ROBUSTNESS_CASES = {
-    'sut_funtion_not_found' :{
-        'case_folder' : 'sut_funtion_not_found',
+    'sut_function_not_found' :{
+        'case_folder' : 'sut_function_not_found',
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec.xlsx'
@@ -56,7 +57,7 @@ ROBUSTNESS_CASES = {
         'case_folder' : 'testvec_wrong_type',
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec_wrong_type.xlsx'
+        'testvec_name' : 'testvec_wrong_type.csv'
     },
 }
 
@@ -108,6 +109,20 @@ def cleanup_new_files(monkeypatch):
     for file in new_files:
         if os.path.isfile(file):
             os.remove(file)
+
+# Monkeypatch os.startfile or os.system to prevent the opening of the report after every execution
+@pytest.fixture(autouse=True)
+def dont_open_report(monkeypatch):
+    def mock_startfile(path):
+        pass
+
+    def mock_system(command):
+        pass
+
+    if platform.system() == "Windows":
+        monkeypatch.setattr(os, "startfile", mock_startfile)
+    else:
+        monkeypatch.setattr(os, "system", mock_system)
 
 # Setup: backup the 'output' directory
 # Teardown: restore the original 'output' directory
@@ -214,48 +229,3 @@ def param_robustness_case():
                             compiler='gcc')
         return param
     return get_robustness_params
-
-# # Get parameters for tests with only faulty lines in the test driver
-# @pytest.fixture
-# def param_all_invalid_lines(functional_config : FunctionalTestPaths):
-#     param = ToolParameters(sut_path=functional_config.sut_success_path,
-#                            sut_name=functional_config.sut_success_name,
-#                            testvec=functional_config.testvec_all_invalid_lines,
-#                            compiler='gcc')
-#     yield param
-
-# # Get parameters for tests with missing columns in the test driver
-# @pytest.fixture
-# def param_missing_column(functional_config : FunctionalTestPaths):
-#     param = ToolParameters(sut_path=functional_config.sut_success_path,
-#                            sut_name=functional_config.sut_success_name,
-#                            testvec=functional_config.testvec_missing_column,
-#                            compiler='gcc')
-#     yield param
-
-# # Get parameters for tests with wrong SUT file type
-# @pytest.fixture
-# def param_wrong_SUT_type(functional_config : FunctionalTestPaths):
-#     param = ToolParameters(sut_path=functional_config.sut_wrong_type_path,
-#                            sut_name=functional_config.sut_success_name,
-#                            testvec=functional_config.testvec_success,
-#                            compiler='gcc')
-#     yield param
-
-# # Get parameters for tests with wrong testvec file type
-# @pytest.fixture
-# def param_wrong_SUT_type(functional_config : FunctionalTestPaths):
-#     param = ToolParameters(sut_path=functional_config.sut_success_path,
-#                            sut_name=functional_config.sut_success_name,
-#                            testvec=functional_config.testvec_wrong_type,
-#                            compiler='gcc')
-#     yield param
-
-# # Get parameters for tests with wrong testvec file type
-# @pytest.fixture
-# def param_wrong_SUT_type(functional_config : FunctionalTestPaths):
-#     param = ToolParameters(sut_path=functional_config.sut_success_path,
-#                            sut_name=functional_config.sut_success_name,
-#                            testvec=functional_config.testvec_wrong_type,
-#                            compiler='gcc')
-#     yield param

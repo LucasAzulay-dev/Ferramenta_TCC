@@ -6,3 +6,6 @@ estrutura_sut.pdf
 estrutura_sut
 .coverage
 tests/report
+bat_scripts/
+!bat_scripts/run_dc_cc_tool.bat
+!bat_scripts/run_tests.bat

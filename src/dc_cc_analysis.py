@@ -10,6 +10,8 @@ class CouplingAnalyzer:
         self.coupling_id = 1
         self.individual_coupling_exercises = []
         self.dc_cc_coverarge = 0
+        self.couplings_individually_exercised = 0
+        self.couplings_individually_exercised_affected_sut = 0
 
     def identify_couplings_exercised(self):
         self._process_log_data()
@@ -18,7 +20,11 @@ class CouplingAnalyzer:
         self._analyze_couplings_execution()
         self._analyze_individual_coupling_exercises_component_level()
         self._determine_dc_cc_coverage()
-        return {'couplings': self.couplings, 'individual_coupling_exercises': self.individual_coupling_exercises, 'dc_cc_coverage': self.dc_cc_coverage}
+        return {
+                'couplings': self.couplings, 'individual_coupling_exercises': self.individual_coupling_exercises, 'dc_cc_coverage': self.dc_cc_coverage, 
+                'couplings_individually_exercised':self.couplings_individually_exercised, 
+                'couplings_individually_exercised_affected_sut': self.couplings_individually_exercised_affected_sut
+                }
 
     def _process_log_data(self):
         for execution in self.log_data['executions']:
@@ -240,8 +246,8 @@ class CouplingAnalyzer:
                         
     def _determine_dc_cc_coverage(self):
         self.dc_cc_coverage = 0
-        couplings_individually_exercised = 0
-        couplings_individually_exercised_affected_sut = 0
+        self.couplings_individually_exercised = 0
+        self.couplings_individually_exercised_affected_sut = 0
         
         # Itera sobre cada acoplamento na estrutura `couplings`
         for id, coupling in self.couplings.items():
@@ -252,14 +258,12 @@ class CouplingAnalyzer:
             ]
             
             if (len(individual_exercises) > 0):
-                couplings_individually_exercised += 1
+                self.couplings_individually_exercised += 1
             
             # Conta quantos desses exercícios afetam a saída
             for exercise in individual_exercises:
                 if exercise['sut_outputs_affected']:
-                    couplings_individually_exercised_affected_sut += 1
+                    self.couplings_individually_exercised_affected_sut += 1
                     break
         
-        self.dc_cc_coverage = (
-                (couplings_individually_exercised - couplings_individually_exercised_affected_sut)
-                + couplings_individually_exercised_affected_sut * 2) / (len(self.couplings)*2)
+        self.dc_cc_coverage = self.couplings_individually_exercised_affected_sut / (len(self.couplings))

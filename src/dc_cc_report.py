@@ -4,6 +4,7 @@ class PDF(FPDF):
     def __init__(self, data):
         super().__init__()  # Chama o construtor da classe pai
         self.data = data  # Armazena os dados de log
+        self.couplings_color = {}
 
     def header(self):
         self.set_font("Arial", "B", 12)
@@ -140,9 +141,11 @@ class PDF(FPDF):
                 if exercise['sut_outputs_affected']: 
                     independent_exercised_and_sut_output_affected = True
                     break
+                
+        self.couplings_color[coupling['id']] =  (0, 100, 0) if independent_exercised_and_sut_output_affected else (255, 0, 0) if independent_exercised else (240, 150, 60)
         
         self.set_font("Arial", "B", 12)
-        color = (0, 100, 0) if independent_exercised_and_sut_output_affected else (255, 0, 0) if independent_exercised else (240, 150, 60)
+        color = self.couplings_color.get(coupling['id'])
         self.set_text_color(*color)
         self.cell(32, 10, f"- Coupling ID: {coupling['id']}", 10)
         independent_exercised_string = "Yes" if independent_exercised else "No"
@@ -155,7 +158,10 @@ class PDF(FPDF):
         tab_space = 5  # Define o valor do recuo desejado
     
         self.set_x(self.get_x() + tab_space)
+        color = self.couplings_color.get(coupling['id'])
+        self.set_text_color(*color)
         self.chapter_title(f"Coupling ID: {coupling['id']}")
+        self.set_text_color(0,0,0)
         self.ln(-1)
         
         tab_space = 10

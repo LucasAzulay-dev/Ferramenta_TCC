@@ -2,6 +2,7 @@ from pycparser import c_ast, c_generator, parse_file
 from Parser import gerar_arquivo_h_com_pycparser
 from utils import adicionar_ao_log
 from funcoes_extras import list_c_directories
+from Parser import ParseVariablesAndSutOutputs
 
 c_type_to_printf = {
     'int': '%d',
@@ -25,8 +26,13 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         self.instrument_sut = False  # Para controlar se estamos dentro de SUT
         self.execution_order = 1
         self.variables = {}  # Armazenamento de variáveis e tipos
-        self.output_variables = []
-
+        self.output_variables = {}
+        
+    def build_sut_variables_and_outputs(self, code_path, folder_path, target_function):
+        nameInputsOutputs = ParseVariablesAndSutOutputs(code_path, folder_path, target_function)
+        self.variables = nameInputsOutputs[0]
+        self.output_variables = {key: '*' for key in nameInputsOutputs[1]}
+        
     def visit_FuncDef(self, node):
 		# Verificar se estamos na definição da função SUT
         if node.decl.name == self.func_name:
@@ -55,7 +61,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                     args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var)) # SUT Output
                 elif (var in self.output_variables):
                     args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
-                    
+
 
             # Chamada da função original
             new_statements.append(node)
@@ -75,7 +81,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             f'\\"out\\": {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
             ) + ',\\n\"'
             
-            args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'*{key}' for key in args_sut_out.keys()])
+            args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'{self.output_variables.get(key)}{key}' for key in args_sut_out.keys()])
 
             # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
             new_statements.append(c_ast.FuncCall(
@@ -112,13 +118,14 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                     
             if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID) or isinstance(node.lvalue, c_ast.UnaryOp):
                 var = self.generator.visit(node.lvalue)
-                if isinstance(node.lvalue, c_ast.ID) and (node.lvalue not in self.output_variables):  # Variável normal
+                if isinstance(node.lvalue, c_ast.ID) and (node.lvalue.name not in self.output_variables):  # Variável normal
                     args_in[var] = c_type_to_printf.get(self.variables.get(var))
                 elif isinstance(node.lvalue, c_ast.UnaryOp) and node.lvalue.op == '&' and (node.lvalue not in self.output_variables):  # Ponteiro
                     pointed_var = self.generator.visit(node.lvalue.expr)
                     args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var))
                 elif (var in self.output_variables):
                     args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
+                    self.output_variables[var] = ''                    
                 elif (self.generator.visit(node.lvalue.expr) in self.output_variables):
                     args_sut_out[self.generator.visit(node.lvalue.expr)] = c_type_to_printf.get(self.variables.get(self.generator.visit(node.lvalue.expr)))
                     
@@ -141,7 +148,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             f'\\"out\\": {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
             ) + ',\\n\"'
             
-            args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'*{key}' for key in args_sut_out.keys()])  
+            args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'{self.output_variables.get(key)}{key}' for key in args_sut_out.keys()])  
 
             # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
             new_statements.append(c_ast.FuncCall(
@@ -160,16 +167,6 @@ class FuncCallVisitor(c_ast.NodeVisitor):
     def generic_visit(self, node):
         new_block_items = []
 
-        if isinstance(node, c_ast.TypeDecl):
-            var_name = node.declname
-            var_type = ''.join(node.type.names)
-            self.variables[var_name] = var_type
-            
-        if self.instrument_sut and isinstance(node, c_ast.FuncDecl):
-            for params in node.args.params:
-                if isinstance(params.type, c_ast.PtrDecl):
-                    self.output_variables.append(params.name)
-        
         if self.instrument_sut and isinstance(node, c_ast.Compound):
             for stmt in (node.block_items or []):
                 if isinstance(stmt, c_ast.FuncCall):
@@ -183,7 +180,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             node.block_items = new_block_items
            
         super().generic_visit(node)
-
+        
 def Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength):
     try:
         adicionar_ao_log("Starting code instrumentation...")
@@ -194,6 +191,7 @@ def Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength)
 
         # Crie o injetor e aplique ao AST
         injector = FuncCallVisitor(function_name)
+        injector.build_sut_variables_and_outputs(SUT_path, folder_path, function_name)
         injector.visit(ast)
 
         # Gere o código C com a injeção
@@ -217,3 +215,18 @@ def Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength)
         adicionar_ao_log(error)
         return error
     
+    
+if __name__ == '__main__':
+
+    # Defina o nome do arquivo .c do SUT
+    SUT_path = "examples\C_proj_mockup\SUT\SUT.c" 
+
+    # Defina o nome do arquivo .c do SUT
+    folder_path = "examples\C_proj_mockup\SUT" 
+
+    # Defina o nome da função testada
+    function_name = "SUT"
+
+    bufferLength = 4096
+
+    Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength)

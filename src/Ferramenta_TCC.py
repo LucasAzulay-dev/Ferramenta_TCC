@@ -36,7 +36,7 @@ def executar_ferramenta(excel_file_path, code_path, function_name, folder_path ,
     adicionar_ao_log("Generating DC/CC report...")
     
 
-    DC_CC_Report_Generator(log_buffer_path)  # Retorna os caminhos dos PDFs
+    return DC_CC_Report_Generator(log_buffer_path)  # Retorna os caminhos dos PDFs
 
 if __name__ == '__main__':
 

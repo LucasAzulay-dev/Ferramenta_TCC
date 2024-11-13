@@ -4,3 +4,5 @@ output/*
 dc_cc_analysis_report.pdf
 estrutura_sut.pdf
 estrutura_sut
+.coverage
+tests/report

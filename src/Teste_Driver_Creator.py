@@ -18,11 +18,11 @@ c_type_to_printf = {
 }
 
 # Criar Test_Driver
-def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, log_buffer_path, bufferLength):
+def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, bufferLength):
     adicionar_ao_log("Creating Test Driver...")
 
     #Parse da quantidade de inputs e outputs, e seus tipos 
-    resultado = ParseInputOutputs(code_path, folder_path, function_name)
+    resultado = ParseInputOutputs(ast, function_name)
 
     if(isinstance(resultado, str)):
         return resultado
@@ -48,7 +48,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, lo
     #Print da mensagem de erro
     if(num_linhas <= 0):
         error = f"ERROR: No valid lines in the Test Vector"
-        return error
+        raise Exception(error)
 
     #Definindo o numero de colunas do Test_Vec
     num_colunas_test_vec = df.shape[1]
@@ -56,19 +56,19 @@ def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, lo
     #Print da mensagem de erro
     if(resultado[0] <= 0):
         error = f"ERROR: No inputs detected"
-        return error
+        raise Exception(error)
     
     #Print da mensagem de erro
     if(resultado[1] <= 0):
         error = f"ERROR: No outputs detected"
-        return error
+        raise Exception(error)
 
     #Print da mensagem de erro
     if(num_colunas != num_colunas_test_vec):
         error = f"ERROR: Test vector does not have a size equivalent to the desired function. SUT columns: {num_colunas} Test_vec columns: {num_colunas_test_vec}"
-        return error
+        raise Exception(error)
 
-    fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(code_path, folder_path, function_name)
+    fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(ast, function_name)
 
     inicioJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"' + f'{function_name}' + r'\",\"numberOfTests\": '+f'{num_linhas}'+r',  \"skipedlines\":'+f'{skipedlines}'+r',\"inputs\":'+ f'{fromparserinputs}' + r',\"outputs\": ' + f'{fromparseroutputs}'+ r',\"executions\": [");'
     fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'
@@ -226,7 +226,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, lo
         file.write('}')
     #-----------------------------------------------------------------
 
-    return 0
+    return testdriver_path
 
 if __name__ == '__main__':
     # Defina o caminho para o arquivo Excel

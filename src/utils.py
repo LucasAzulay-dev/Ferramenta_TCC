@@ -57,7 +57,7 @@ def Create_output_folder(base_path="output"):
         return 0
     except:
         error = f"ERROR: Output folder not created properly." # {e.stderr}
-        return error
+        raise Exception(error)
     
 # Função para mapear o tipo de dados do Python para tipos de variáveis em C
 def mapear_tipo_c(valor,tipo_c):

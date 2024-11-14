@@ -11,8 +11,12 @@ def corrigir_virgulas(conteudo):
 
 def DC_CC_Report_Generator(log_buffer_path):
     with open(log_buffer_path, 'r') as file:
-        conteudo = corrigir_virgulas(file.read())
-        log_data = json.loads(conteudo)
+        try:
+            conteudo = corrigir_virgulas(file.read())
+            log_data = json.loads(conteudo)
+        except:
+            error = "ERROR: Failed to load log_buffer. Consider increasing the buffer length."
+            raise Exception(error)
  
         diagram_directory = 'output/Report/'
         diagram_filename = 'diagram'

@@ -1,7 +1,6 @@
 from pycparser import c_ast, c_generator, parse_file
 from Parser import gerar_arquivo_h_com_pycparser
-from utils import adicionar_ao_log
-from funcoes_extras import list_c_directories
+from utils import adicionar_ao_log, list_c_directories
 from Parser import ParseVariablesAndSutOutputs
 
 c_type_to_printf = {
@@ -211,7 +210,6 @@ def Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength)
         return 0
     except:
         error = f"ERROR: Instrumentation not executed properly." # {e.stderr}
-        adicionar_ao_log(error)
         return error
     
     

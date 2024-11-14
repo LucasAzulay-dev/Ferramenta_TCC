@@ -9,13 +9,13 @@ def executar_ferramenta(excel_file_path, code_path, function_name, folder_path ,
     error_create_output_folder = Create_output_folder()
 
     if(error_create_output_folder):  
-        adicionar_ao_log(error_create_output_folder)
+        adicionar_ao_log_error(error_create_output_folder)
         return
 
     error_create_instrumented_code = Create_Instrumented_Code(folder_path, code_path, function_name, bufferLength)
 
     if(error_create_instrumented_code):  
-        adicionar_ao_log(error_create_instrumented_code)
+        adicionar_ao_log_error(error_create_instrumented_code)
         return
 
     log_buffer_path = "output/OutputBuffer/log_buffer.txt"
@@ -30,7 +30,7 @@ def executar_ferramenta(excel_file_path, code_path, function_name, folder_path ,
     error_run_testdriver = Run_Test_Driver(folder_path, code_path, compiler)
 
     if(error_run_testdriver):  
-        adicionar_ao_log(error_run_testdriver)
+        adicionar_ao_log_error(error_run_testdriver)
         return
     
     adicionar_ao_log("Generating DC/CC report...")
@@ -41,13 +41,13 @@ def executar_ferramenta(excel_file_path, code_path, function_name, folder_path ,
 if __name__ == '__main__':
 
     # Defina o caminho para o arquivo Excel
-    excel_file_path = "tests\\test_cases\\functional_cases\\case2\\testInputs\\testvec.xlsx"
+    excel_file_path = "tests\\test_cases\\functional_cases\\case1\\testInputs\\testvec.xlsx"
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "tests\\test_cases\\functional_cases\\case2\\src\\SUT\\SUT.c" 
+    code_path = "tests\\test_cases\\functional_cases\\case1\\src\\SUT\\SUT.c" 
 
     # Defina o nome do arquivo .c do SUT
-    folder_path = "tests\\test_cases\\functional_cases\\case2\\src" 
+    folder_path = "tests\\test_cases\\functional_cases\\case1\\src" 
 
     # Defina o nome da função testada
     function_name = "SUT"

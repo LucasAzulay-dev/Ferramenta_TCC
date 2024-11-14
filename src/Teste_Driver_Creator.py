@@ -1,7 +1,6 @@
 import pandas as pd
 from Parser import ParseInputOutputs, ParseNameInputsOutputs
-from funcoes_extras import skip_lines
-from utils import adicionar_ao_log
+from utils import skip_lines, adicionar_ao_log 
 
 c_type_to_printf = {
     'int': '%d',
@@ -72,7 +71,7 @@ def Create_Test_Driver(excel_file_path, function_name, code_path,folder_path, lo
     fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(code_path, folder_path, function_name)
 
     inicioJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"' + f'{function_name}' + r'\",\"numberOfTests\": '+f'{num_linhas}'+r',  \"skipedlines\":'+f'{skipedlines}'+r',\"inputs\":'+ f'{fromparserinputs}' + r',\"outputs\": ' + f'{fromparseroutputs}'+ r',\"executions\": [");'
-    fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'+r'  printf("%s", log_buffer);'+'\n'
+    fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'
 
     #Definicao das strings
     param_tests_def = ""

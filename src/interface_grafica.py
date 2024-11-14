@@ -4,7 +4,8 @@ from PIL import Image, ImageTk
 import fitz  # PyMuPDF
 from Ferramenta_TCC import executar_ferramenta
 from datetime import datetime
-from utils import adicionar_ao_log, configurar_log_widget
+from utils import adicionar_ao_log, configurar_log_widget, adicionar_ao_log_error
+import os
 
 pdf_files = []
 pdf_index = 0
@@ -100,16 +101,23 @@ def execute():
         pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler,buffer_length)
         
         if(not pdf_files_path):
+            adicionar_ao_log_error("ERROR: DC/CC report not generated properly.")
             return
+
+        output_path = "output"
+        output_abs_path = os.path.abspath(output_path)
+
+        #os.startfile(output_path, 'open')     #uncomment to open the folder at the end
 
         global pdf_index, page_index
         pdf_index = 0
         page_index = 0
         display_pdf(pdf_files_path, pdf_index, page_index)
         adicionar_ao_log("Execution completed.")
+        adicionar_ao_log(f"Outputs can be find at {output_abs_path}.")
 
     except Exception as e:
-        adicionar_ao_log(f"Execution error: {e}")
+        adicionar_ao_log_error(f"Execution error: {e}")
         messagebox.showerror("Error", f"An error occurred: {e}")
 
 if __name__ == "__main__":
@@ -190,6 +198,8 @@ if __name__ == "__main__":
     log_label.pack(anchor="w")
     log_display = tk.Text(log_frame, wrap="word", height=10, state="normal", relief="sunken", bg="#e6e6e6", font=default_font)
     log_display.pack(fill="both", expand=True)
+    log_display.tag_configure("black", foreground="black")
+    log_display.tag_configure("red", foreground="red")
     log_display.config(state="disable")
     configurar_log_widget(log_display)
 

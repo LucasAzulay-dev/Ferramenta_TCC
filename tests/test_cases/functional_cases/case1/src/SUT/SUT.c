@@ -37,5 +37,5 @@ void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int S
 
     *SUTO2 = CompE(CO1);
 
-    CompD(CO1, AO2, SUTO1);
+    CompD(CO1, AO2, &SUTO1);
 }

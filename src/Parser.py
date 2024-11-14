@@ -74,14 +74,14 @@ class FuncReturnVisitor(c_ast.NodeVisitor):
         # Verifica se a função atual é a função alvo
         if node.decl.name == self.target_function_name:
             self.in_target_function = True
-            self.current_declared_vars = {}  # Limpa o dicionário de variáveis declaradas
             # Visita o corpo da função
             self.visit(node.body)
             self.in_target_function = False
+            self.current_declared_vars = {}  # Limpa o dicionário de variáveis declaradas
 
     def visit_Decl(self, node):
         # Captura as variáveis declaradas dentro da função alvo
-        if self.in_target_function and isinstance(node.type, c_ast.TypeDecl):
+        if isinstance(node.type, c_ast.TypeDecl):
             var_type = node.type.type.names[0]  # Tipo da variável (ex: int, float)
             self.current_declared_vars[node.name] = var_type
 
@@ -194,6 +194,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
         self.inputs = []  # Lista para armazenar nomes de variáveis de entrada
         self.outputs = []  # Lista para armazenar nomes de variáveis de saída (incluindo retornos)
         self.current_declared_vars = {}  # Dicionário para armazenar as declarações de variáveis locais
+        self.variables = {}  # Dicionário para armazenar as declarações de variáveis locais
 
     def visit_FuncDef(self, node):
         # Verifica se o nó é a função alvo
@@ -202,13 +203,17 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
             # Processa os parâmetros da função
             for param in params:
                 param_name = param.name  # Nome da variável
+                print(param.type.type)
                 param_kind = "O" if self._is_pointer(param.type) else "I"
                 
                 # Adiciona o nome da variável à lista correta
                 if param_kind == "I":
                     self.inputs.append(param_name)
+                    self.variables[param_name] = ''.join(param.type.type.names)
                 else:
                     self.outputs.append(param_name)
+                    self.variables[param_name] = ''.join(param.type.type.type.names)
+                
             
             # Visita o corpo da função para capturar retornos
             self.visit(node.body)
@@ -218,6 +223,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
         if isinstance(node.type, c_ast.TypeDecl):
             var_type = node.type.type.names[0]
             self.current_declared_vars[node.name] = var_type
+            self.variables[node.name] = var_type
 
     def visit_Return(self, node):
         # Verifica se o retorno é uma variável e adiciona seu nome à lista de saídas
@@ -231,11 +237,30 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
         return isinstance(type_node, c_ast.PtrDecl)
 
     def get_results(self):
-        """ Retorna as listas de entradas e saídas como strings formatadas """
-        formatted_inputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.inputs))
-        formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs))
-        return formatted_inputs.replace('"', '\\"'), formatted_outputs.replace('"', '\\"')
+            """ Retorna as listas de entradas e saídas como strings formatadas """
+            formatted_inputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.inputs))
+            formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs))
+            return formatted_inputs.replace('"', '\\"'), formatted_outputs.replace('"', '\\"')
+        
+    def get_variables_and_sut_outputs(self):
+            return self.variables, self.outputs
 
+
+def ParseVariablesAndSutOutputs(code_path, folder_path, target_function):
+    # Parsing do código C
+
+    compile_headers_path = list_c_directories(folder_path, code_path)
+    cpp_args = ['-E'] + compile_headers_path
+    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
+
+    # Visitando a árvore de sintaxe
+    visitor = FuncDefVisitor3(target_function)
+    visitor.visit(ast)
+
+    inputs, outputs = visitor.get_variables_and_sut_outputs()
+
+    # Exibir a lista de resultados
+    return inputs, outputs
 
 def ParseNameInputsOutputs(code_path, folder_path, target_function):
 

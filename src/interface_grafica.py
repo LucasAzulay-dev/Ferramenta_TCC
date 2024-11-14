@@ -6,7 +6,7 @@ from Ferramenta_TCC import executar_ferramenta
 from datetime import datetime
 from utils import adicionar_ao_log, configurar_log_widget
 
-pdf_files = ["estrutura_sut.pdf", "dc_cc_analysis_report.pdf"]
+pdf_files = []
 pdf_index = 0
 page_index = 0
 
@@ -26,7 +26,10 @@ def select_folder():
     entry_folder.delete(0, tk.END)
     entry_folder.insert(0, folder_path)
 
-def display_pdf(index, page_num=0):
+def display_pdf(pdf_files_path,index, page_num=0):
+    if not pdf_files_path:
+        return 0
+    pdf_files = pdf_files_path
     global page_index
     if 0 <= index < len(pdf_files):
         try:
@@ -91,16 +94,14 @@ def execute():
 
     try:
         
-        executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler)
-
-        
-        adicionar_ao_log("Execution completed successfully.")
+        pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler)
         
         global pdf_index, page_index
         pdf_index = 0
         page_index = 0
-        display_pdf(pdf_index, page_index)
-        
+        display_pdf(pdf_files_path, pdf_index, page_index)
+        adicionar_ao_log("Execution completed.")
+
     except Exception as e:
         adicionar_ao_log(f"Execution error: {e}")
         messagebox.showerror("Error", f"An error occurred: {e}")

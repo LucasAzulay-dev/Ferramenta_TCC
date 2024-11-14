@@ -182,12 +182,8 @@ class TestFI_7:
         actual_tests_passed = [execution.get("pass") for execution in json_out.get("executions", [])]
         assert actual_tests_passed == oracle_tests_passed
 
-# FI#8: The execution log must indicate which components were declared.
+# FI#8: The execution log must indicate which components were executed, in an ordered manner.
 class TestFI_8:
-    pass
-
-# FI#9: The execution log must indicate which components were executed, in an ordered manner.
-class TestFI_9:
     def test_1(self, param_success, get_log_json, oracle_functions_called_ordered):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
@@ -206,18 +202,14 @@ class TestFI_9:
         
         assert actual_functions_called_ordered == oracle_functions_called_ordered * total_executions
 
-# FI#10: The execution log must report the declared variables and their respective types (DC).
+# FI#9: The execution log must report the input variables and their respective values for component execution (CC/DC).
+class TestFI_9:
+    pass
+
+# FI#10: The execution log must report variables whose values may change due to each component’s execution and their values after execution.
 class TestFI_10:
     pass
 
-# FI#11: The execution log must report the input variables and their respective values for component execution (CC/DC).
+# FI#11: The Tool must identify variables that are simultaneously input and output parameters between components.
 class TestFI_11:
-    pass
-
-# FI#12: The execution log must report variables whose values may change due to each component’s execution and their values after execution.
-class TestFI_12:
-    pass
-
-# FI#13: The Tool must identify variables that are simultaneously input and output parameters between components.
-class TestFI_13:
     pass

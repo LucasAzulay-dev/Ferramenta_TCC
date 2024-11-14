@@ -1,3 +1,6 @@
+:: run_tests.bat
+:: To run specific tests, use:
+:: run_tests.bat [file_name]::[test_class]::[test_method]
 @echo off
 
 set test_file=%1

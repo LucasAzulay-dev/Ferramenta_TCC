@@ -9,6 +9,7 @@ import json
 from .config import *
 import platform
 
+COMPILER_OPTIONS = ['gcc', 'clang']
 FUNCTIONAL_CASES = ['case1', 'case2', 'case3']
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{
@@ -215,26 +216,31 @@ def get_log_json(capfd):
 def functional_config(request):
     return FunctionalTestPaths(request.param)
 
+# Run tests considering all compiler options
+@pytest.fixture(params=COMPILER_OPTIONS)
+def compiler_config(request):
+    return request.param
+
 # Get parameters for success tests
 @pytest.fixture
-def param_success(functional_config : FunctionalTestPaths):
+def param_success(functional_config : FunctionalTestPaths, compiler_config):
     param = ToolParameters(sut_path=functional_config.sut_path,
                            proj_dir=functional_config.proj_dir,
                            sut_name=functional_config.sut_name,
                            testvec=functional_config.testvec,
-                           compiler='gcc')
+                           compiler=compiler_config)
     return param
 
 # Get parameters for tests with some faulty lines in the test driver
 @pytest.fixture
-def param_robustness_case():
+def param_robustness_case(compiler_config):
     def get_robustness_params(robustness_case):
         rubustness_config = RobustnessTestPaths(robustness_case)
         param = ToolParameters(sut_path=rubustness_config.sut_path,
                             proj_dir=rubustness_config.proj_dir,
                             sut_name=rubustness_config.sut_name,
                             testvec=rubustness_config.testvec,
-                            compiler='gcc')
+                            compiler=compiler_config)
         return param
     return get_robustness_params
 

@@ -71,7 +71,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
     fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(ast, function_name)
 
     inicioJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"' + f'{function_name}' + r'\",\"numberOfTests\": '+f'{num_linhas}'+r',  \"skipedlines\":'+f'{skipedlines}'+r',\"inputs\":'+ f'{fromparserinputs}' + r',\"outputs\": ' + f'{fromparseroutputs}'+ r',\"executions\": [");'
-    fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'
+    fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'+r'  printf("%s", log_buffer);'+'\n'
 
     #Definicao das strings
     param_tests_def = ""

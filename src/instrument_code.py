@@ -106,7 +106,6 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             args_out = {}
             args_sut_out = {}
 
-            # Coletar argumentos de entrada e saída para a função chamada
             for arg in func_call.args.exprs:
                 var = self.generator.visit(arg)
                 if isinstance(arg, c_ast.ID) and (var not in self.output_variables):
@@ -117,8 +116,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 elif (var in self.output_variables):
                     args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
 
-            # Verificar se a variável à esquerda da atribuição deve ser uma saída
-            if isinstance(node.lvalue, c_ast.ID):
+            if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID) or isinstance(node.lvalue, c_ast.UnaryOp):
                 var = self.generator.visit(node.lvalue)
                 if isinstance(node.lvalue, c_ast.ID) and (node.lvalue.name not in self.output_variables):  # Variável normal
                     args_in[var] = c_type_to_printf.get(self.variables.get(var))

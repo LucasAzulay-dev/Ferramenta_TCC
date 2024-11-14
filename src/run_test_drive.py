@@ -1,7 +1,7 @@
 import subprocess
 from utils import adicionar_ao_log, list_c_directories, list_c_files
 
-def Run_Test_Driver(folder_path, SUT_path, compiler):
+def Run_Test_Driver(folder_path, SUT_path, instrumented_code_path, test_driver_path, compiler):
     adicionar_ao_log("Running Test Driver...")
     match compiler:
         case "gcc":
@@ -9,19 +9,19 @@ def Run_Test_Driver(folder_path, SUT_path, compiler):
                 #Compila o programa C
                 compile_path = list_c_directories(folder_path, SUT_path) + list_c_files(folder_path, SUT_path)
                 args = ['gcc']
-                args = args + (list(filter(None, compile_path))) + ["output/InstrumentedSUT/instrumented_SUT.c", "output/InstrumentedSUT/Test_Driver.c", "-o", "output/TestDriver/Test_Driver"]
+                args = args + (list(filter(None, compile_path))) + [instrumented_code_path, test_driver_path, "-o", "output/TestDriver/Test_Driver"]
                 subprocess.run(args, check=True, text=True, capture_output=True) 
 
             except subprocess.CalledProcessError:
                 error = f"ERROR: TestDrive not executed properly. Compilation error" # {e.stderr}
-                return error
+                raise Exception(error)
             
             try:
                 # Executa o programa C
                 subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True)
             except subprocess.CalledProcessError:
                 error = f"ERROR: TestDrive not executed properly. Execution error" # {e.stderr}
-                return error
+                raise Exception(error)
             
         case "clang":  
             try:
@@ -36,14 +36,14 @@ def Run_Test_Driver(folder_path, SUT_path, compiler):
 
             except subprocess.CalledProcessError as e:
                 error = f"ERROR: TestDrive not executed properly. Compilation error" # {e.stderr}
-                return error
+                raise Exception(error)
             
             try:
                 # Executa o programa C
                 subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True)
             except subprocess.CalledProcessError:
                 error = f"ERROR: TestDrive not executed properly. Execution error" # {e.stderr}
-                return error
+                raise Exception(error)
 
     adicionar_ao_log("Test Driver executed successfully.")
     return 0

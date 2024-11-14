@@ -1,7 +1,8 @@
-from pycparser import c_ast, c_generator, parse_file
+from pycparser import c_ast, c_generator
 from Parser import gerar_arquivo_h_com_pycparser
-from utils import adicionar_ao_log, list_c_directories
+from utils import adicionar_ao_log
 from Parser import ParseVariablesAndSutOutputs
+import copy
 
 c_type_to_printf = {
     'int': '%d',
@@ -27,8 +28,8 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         self.variables = {}  # Armazenamento de variáveis e tipos
         self.output_variables = {}
         
-    def build_sut_variables_and_outputs(self, code_path, folder_path, target_function):
-        nameInputsOutputs = ParseVariablesAndSutOutputs(code_path, folder_path, target_function)
+    def build_sut_variables_and_outputs(self, ast, target_function):
+        nameInputsOutputs = ParseVariablesAndSutOutputs(ast, target_function)
         self.variables = nameInputsOutputs[0]
         self.output_variables = {key: '*' for key in nameInputsOutputs[1]}
         
@@ -179,38 +180,36 @@ class FuncCallVisitor(c_ast.NodeVisitor):
            
         super().generic_visit(node)
         
-def Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength):
+def Create_Instrumented_Code(ast, function_name, bufferLength):
     try:
         adicionar_ao_log("Starting code instrumentation...")
-        # Parse o arquivo C
-        compile_headers_path = list_c_directories(folder_path, SUT_path)
-        cpp_args = ['-E'] + compile_headers_path
-        ast = parse_file(SUT_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
 
         # Crie o injetor e aplique ao AST
         injector = FuncCallVisitor(function_name)
-        injector.build_sut_variables_and_outputs(SUT_path, folder_path, function_name)
+        injector.build_sut_variables_and_outputs(ast, function_name)
         injector.visit(ast)
 
         # Gere o código C com a injeção
+        ast_to_instrument = copy.deepcopy(ast)
         generator = c_generator.CGenerator()
-        instrumented_code = generator.visit(ast)
+        instrumented_code = generator.visit(ast_to_instrument)
         
         # Adiciona cabeçalho para log_buffer e sprintf
         header = f'#include <stdio.h>\n#include <string.h>\n#include "instrumented_SUT.h"\nextern char log_buffer[{bufferLength}];\n'
         instrumented_code_with_header = header + instrumented_code
 
         # Escreva o código instrumentado em um novo arquivo
-        with open(r'output\InstrumentedSUT\instrumented_SUT.c', 'w') as f:
+        instrumented_code_path = 'output\InstrumentedSUT\instrumented_SUT.c'
+        with open(instrumented_code_path, 'w') as f:
             f.write(instrumented_code_with_header)
 
-        gerar_arquivo_h_com_pycparser(SUT_path, cpp_args)
+        gerar_arquivo_h_com_pycparser(ast)
 
         adicionar_ao_log("Instrumentation completed.")
-        return 0
+        return instrumented_code_path
     except:
         error = f"ERROR: Instrumentation not executed properly." # {e.stderr}
-        return error
+        raise Exception(error)
     
     
 if __name__ == '__main__':

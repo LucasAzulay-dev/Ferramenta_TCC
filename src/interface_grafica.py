@@ -3,7 +3,6 @@ from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 import fitz  # PyMuPDF
 from Ferramenta_TCC import executar_ferramenta
-from datetime import datetime
 from utils import adicionar_ao_log, configurar_log_widget, adicionar_ao_log_error
 import os
 

@@ -2,40 +2,29 @@ from Teste_Driver_Creator import Create_Test_Driver
 from instrument_code import Create_Instrumented_Code
 from run_test_drive import Run_Test_Driver
 from dc_cc import DC_CC_Report_Generator
-from utils import adicionar_ao_log, Create_output_folder, adicionar_ao_log_error
+from utils import adicionar_ao_log, Create_output_folder
+from Parser import generate_ast
 
-def executar_ferramenta(excel_file_path, code_path, function_name, folder_path ,compiler, bufferLength = 33554432): 
+def executar_ferramenta(excel_file_path, code_path, function_name, folder_path, compiler, bufferLength = 33554432): 
 
-    error_create_output_folder = Create_output_folder()
+    Create_output_folder()
 
-    if(error_create_output_folder):  
-        adicionar_ao_log_error(error_create_output_folder)
-        return
+    ast = generate_ast(code_path, folder_path)
 
-    error_create_instrumented_code = Create_Instrumented_Code(folder_path, code_path, function_name, bufferLength)
-
-    if(error_create_instrumented_code):  
-        adicionar_ao_log_error(error_create_instrumented_code)
-        return
+    instrumented_code_path = Create_Instrumented_Code(ast, function_name, bufferLength)
+    
+    adicionar_ao_log("Instrumented Code created successfully.")
+    
 
     log_buffer_path = "output/OutputBuffer/log_buffer.txt"
-    error_create_testdriver = Create_Test_Driver(excel_file_path, function_name, code_path, folder_path, log_buffer_path, bufferLength)  #FI5 parcialmente coberto
+    test_driver_path = Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, bufferLength)  #FI5 parcialmente coberto
 
-    if(error_create_testdriver):  
-        adicionar_ao_log_error(error_create_testdriver)
-        return
-    
     adicionar_ao_log("Test Driver created successfully.")
     
-    error_run_testdriver = Run_Test_Driver(folder_path, code_path, compiler)
+    Run_Test_Driver(folder_path, code_path,instrumented_code_path, test_driver_path,compiler)
 
-    if(error_run_testdriver):  
-        adicionar_ao_log_error(error_run_testdriver)
-        return
-    
     adicionar_ao_log("Generating DC/CC report...")
     
-
     return DC_CC_Report_Generator(log_buffer_path)  # Retorna os caminhos dos PDFs
 
 if __name__ == '__main__':

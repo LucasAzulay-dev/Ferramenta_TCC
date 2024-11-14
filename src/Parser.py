@@ -1,4 +1,4 @@
-from pycparser import c_parser, c_ast, parse_file
+from pycparser import c_ast, parse_file
 from utils import adicionar_ao_log, list_c_directories
 
 class FuncDefVisitor(c_ast.NodeVisitor):
@@ -96,13 +96,7 @@ class FuncReturnVisitor(c_ast.NodeVisitor):
                     self.var_return_info.append(var_type)
 
 
-def ParseInputOutputs(code_path, folder_path, target_function):
-
-    # Parsing do código C
-    compile_headers_path = list_c_directories(folder_path, code_path)
-    cpp_args = ['-E'] + compile_headers_path
-    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
-
+def ParseInputOutputs(ast, target_function):
 
     # Visitando a árvore de sintaxe
     visitor = FuncDefVisitor(target_function)
@@ -116,7 +110,7 @@ def ParseInputOutputs(code_path, folder_path, target_function):
     error = visitor.check_errors()
 
     if (error):
-        return error
+        raise Exception(error)
 
     if(len(visitor_return.var_return_info) > 0):
         visitor.resultado[1] += 1
@@ -164,11 +158,7 @@ class FuncDefVisitor2(c_ast.NodeVisitor):
             return self._get_type(tipo.type)
         return 'void'
 
-def gerar_arquivo_h_com_pycparser(arquivo_c, cpp_args):
-    adicionar_ao_log("Generating .h file with pycparser...")
-    # Usar o pycparser para analisar o arquivo .c
-    ast = parse_file(arquivo_c, use_cpp=True,cpp_args=cpp_args)
-    
+def gerar_arquivo_h_com_pycparser(ast):
     # Visitar nós de definição de função
     visitor = FuncDefVisitor2()
     visitor.visit(ast)
@@ -244,13 +234,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
             return self.variables, self.outputs
 
 
-def ParseVariablesAndSutOutputs(code_path, folder_path, target_function):
-    # Parsing do código C
-
-    compile_headers_path = list_c_directories(folder_path, code_path)
-    cpp_args = ['-E'] + compile_headers_path
-    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
-
+def ParseVariablesAndSutOutputs(ast, target_function):
     # Visitando a árvore de sintaxe
     visitor = FuncDefVisitor3(target_function)
     visitor.visit(ast)
@@ -260,14 +244,7 @@ def ParseVariablesAndSutOutputs(code_path, folder_path, target_function):
     # Exibir a lista de resultados
     return inputs, outputs
 
-def ParseNameInputsOutputs(code_path, folder_path, target_function):
-
-    # Parsing do código C
-
-    compile_headers_path = list_c_directories(folder_path, code_path)
-    cpp_args = ['-E'] + compile_headers_path
-    ast = parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
-
+def ParseNameInputsOutputs(ast, target_function):
     # Visitando a árvore de sintaxe
     visitor = FuncDefVisitor3(target_function)
     visitor.visit(ast)
@@ -278,6 +255,12 @@ def ParseNameInputsOutputs(code_path, folder_path, target_function):
     return inputs, outputs
 
 #------------------------------------------------------------------------------------------------------
+def generate_ast(code_path, folder_path):
+
+    # Parsing do código C
+    compile_headers_path = list_c_directories(folder_path, code_path)
+    cpp_args = ['-E'] + compile_headers_path
+    return parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
 
 if __name__ == '__main__':
 

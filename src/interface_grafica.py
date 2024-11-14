@@ -84,6 +84,7 @@ def execute():
     function_name = entry_func_name.get()
     compiler = compiler_var.get()
     folder_path = entry_folder.get()
+    buffer_length = entry_buffer_name.get()
 
     if not excel_file_path or not sut_file_path or not function_name:
         messagebox.showwarning("Warning", "Please fill all fields.")
@@ -93,9 +94,14 @@ def execute():
     window.update_idletasks()
 
     try:
+        if(not buffer_length):
+            buffer_length = 33554432
         
-        pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler)
+        pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler,buffer_length)
         
+        if(not pdf_files_path):
+            return
+
         global pdf_index, page_index
         pdf_index = 0
         page_index = 0
@@ -159,6 +165,13 @@ if __name__ == "__main__":
     entry_func_name = ttk.Entry(frame_func, width=40, font=default_font)
     entry_func_name.pack(side="left", padx=5)
 
+    frame_buffer = ttk.Frame(left_frame)
+    frame_buffer.pack(pady=5, fill="x")
+    label_buffer_name = ttk.Label(frame_buffer, text="Buffer length in bytes (optional):", font=default_font)
+    label_buffer_name.pack(side="left")
+    entry_buffer_name = ttk.Entry(frame_buffer, width=40, font=default_font)
+    entry_buffer_name.pack(side="left", padx=5)
+
     frame_compiler = ttk.Frame(left_frame)
     frame_compiler.pack(pady=5, fill="x")
     label_compiler = ttk.Label(frame_compiler, text="Compiler Type:", font=default_font)
@@ -177,6 +190,7 @@ if __name__ == "__main__":
     log_label.pack(anchor="w")
     log_display = tk.Text(log_frame, wrap="word", height=10, state="normal", relief="sunken", bg="#e6e6e6", font=default_font)
     log_display.pack(fill="both", expand=True)
+    log_display.config(state="disable")
     configurar_log_widget(log_display)
 
     pdf_frame = ttk.Frame(right_frame)

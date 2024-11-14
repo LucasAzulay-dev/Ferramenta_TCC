@@ -38,7 +38,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         if node.decl.name == self.func_name:
             self.instrument_sut = True
             self.generic_visit(node)
-            print(self.variables)
+            #print(self.variables)
             self.instrument_sut = False
         else:
             pass
@@ -220,10 +220,10 @@ def Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength)
 if __name__ == '__main__':
 
     # Defina o nome do arquivo .c do SUT
-    SUT_path = "examples\C_proj_mockup\SUT\SUT.c" 
+    SUT_path = "examples/C_proj_mockup_2/SUT/SUT.c" 
 
     # Defina o nome do arquivo .c do SUT
-    folder_path = "examples\C_proj_mockup\SUT" 
+    folder_path = "examples/C_proj_mockup_2" 
 
     # Defina o nome da função testada
     function_name = "SUT"

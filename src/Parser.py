@@ -203,7 +203,6 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
             # Processa os parâmetros da função
             for param in params:
                 param_name = param.name  # Nome da variável
-                print(param.type.type)
                 param_kind = "O" if self._is_pointer(param.type) else "I"
                 
                 # Adiciona o nome da variável à lista correta

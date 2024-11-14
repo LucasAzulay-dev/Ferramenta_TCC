@@ -11,8 +11,24 @@ def adicionar_ao_log(mensagem):
     print(mensagem)
     if log_widget:
         timestamp = datetime.now().strftime("[%Y-%m-%d %H:%M:%S] ")
+        log_widget.config(state="normal")
         log_widget.insert("end", timestamp + mensagem + "\n")
+        log_widget.tag_add("black", "end-1c linestart", "end-1c")
+        log_widget.tag_configure("black", foreground="black")
         log_widget.see("end")
+        log_widget.config(state="disable")
+        log_widget.update_idletasks()
+
+def adicionar_ao_log_error(mensagem):
+    print(mensagem)
+    if log_widget:
+        timestamp = datetime.now().strftime("[%Y-%m-%d %H:%M:%S] ")
+        log_widget.config(state="normal")
+        log_widget.insert("end", timestamp + mensagem + "\n")
+        log_widget.tag_add("red", "end-1c linestart", "end-1c")
+        log_widget.tag_configure("red", foreground="red")
+        log_widget.see("end")
+        log_widget.config(state="disable")
         log_widget.update_idletasks()
 
 def Create_output_folder(base_path="output"):

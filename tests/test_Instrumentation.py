@@ -145,6 +145,18 @@ class TestFI_5:
                                 function_name = param.sut_name, 
                                 compiler = param.compiler)
             assert_output(ERROR_TESTVEC_MISSING_COL)
+            
+    # Tesvec is missing columns
+    def test_10(self, param_robustness_case, assert_output):
+        param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['log_buffer_load_error'])
+        with pytest.raises(Exception):
+            executar_ferramenta(excel_file_path = param.testvec, 
+                                folder_path=param.proj_dir,
+                                code_path = param.sut_path, 
+                                function_name = param.sut_name, 
+                                compiler = param.compiler,
+                                bufferLength=1)
+            assert_output(ERROR_LOG_BUFFER_LOAD_ERROR)
 
 # FI#6: The Test Driver must generate an execution log of the tests performed on the instrumented code.
 class TestFI_6:

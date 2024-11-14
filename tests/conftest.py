@@ -59,6 +59,12 @@ ROBUSTNESS_CASES = {
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec_wrong_type.csv'
     },
+    'log_buffer_load_error' :{
+        'case_folder' : 'log_buffer_load_error',
+        'sut_file_name': 'SUT.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec.xlsx'
+    },
 }
 
 # Custom exception to pass tests earlier

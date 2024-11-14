@@ -6,7 +6,7 @@ from Ferramenta_TCC import executar_ferramenta
 from utils import adicionar_ao_log, configurar_log_widget, adicionar_ao_log_error
 import os
 
-pdf_files = []
+pdf_files_path = []
 pdf_index = 0
 page_index = 0
 
@@ -29,11 +29,10 @@ def select_folder():
 def display_pdf(pdf_files_path,index, page_num=0):
     if not pdf_files_path:
         return 0
-    pdf_files = pdf_files_path
     global page_index
-    if 0 <= index < len(pdf_files):
+    if 0 <= index < len(pdf_files_path):
         try:
-            doc = fitz.open(pdf_files[index])
+            doc = fitz.open(pdf_files_path[index])
             total_pages = doc.page_count
             
             if 0 <= page_num < total_pages:
@@ -48,7 +47,7 @@ def display_pdf(pdf_files_path,index, page_num=0):
                 pdf_canvas.image = img_tk
                 pdf_canvas.config(scrollregion=pdf_canvas.bbox("all"))
                 
-                adicionar_ao_log(f"Displaying page {page_index + 1} of {total_pages} from PDF {index + 1}")
+                #adicionar_ao_log(f"Displaying page {page_index + 1} of {total_pages} from PDF {index + 1}")
             else:
                 adicionar_ao_log("Page number out of range.")
             
@@ -57,26 +56,26 @@ def display_pdf(pdf_files_path,index, page_num=0):
             messagebox.showerror("Error", f"Error opening PDF: {e}")
 
 def next_pdf():
-    global pdf_index, page_index
-    if pdf_index < len(pdf_files) - 1:
+    global pdf_index, page_index, pdf_files_path
+    if pdf_index < len(pdf_files_path) - 1:
         pdf_index += 1
         page_index = 0
-        display_pdf(pdf_index, page_index)
+        display_pdf(pdf_files_path, pdf_index, page_index)
 
 def previous_pdf():
-    global pdf_index, page_index
+    global pdf_index, page_index, pdf_files_path
     if pdf_index > 0:
         pdf_index -= 1
         page_index = 0
-        display_pdf(pdf_index, page_index)
+        display_pdf(pdf_files_path, pdf_index, page_index)
 
 def next_page():
-    global pdf_index, page_index
-    display_pdf(pdf_index, page_index + 1)
+    global pdf_index, page_index, pdf_files_path
+    display_pdf(pdf_files_path, pdf_index, page_index + 1)
 
 def previous_page():
-    global pdf_index, page_index
-    display_pdf(pdf_index, page_index - 1)
+    global pdf_index, page_index, pdf_files_path
+    display_pdf(pdf_files_path, pdf_index, page_index - 1)
 
 def execute():
     excel_file_path = entry_excel.get()
@@ -97,6 +96,8 @@ def execute():
         if(not buffer_length):
             buffer_length = 33554432
         
+        global pdf_files_path
+
         pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler,buffer_length)
         
         if(not pdf_files_path):

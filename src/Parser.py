@@ -1,6 +1,5 @@
 from pycparser import c_parser, c_ast, parse_file
-from utils import adicionar_ao_log
-from funcoes_extras import list_c_directories
+from utils import adicionar_ao_log, list_c_directories
 
 class FuncDefVisitor(c_ast.NodeVisitor):
     def __init__(self, func_name):

@@ -1,6 +1,5 @@
 import subprocess
-from utils import adicionar_ao_log
-from funcoes_extras import list_c_directories, list_c_files
+from utils import adicionar_ao_log, list_c_directories, list_c_files
 
 def Run_Test_Driver(folder_path, SUT_path, compiler):
     adicionar_ao_log("Running Test Driver...")
@@ -13,11 +12,15 @@ def Run_Test_Driver(folder_path, SUT_path, compiler):
                 args = args + (list(filter(None, compile_path))) + ["output/InstrumentedSUT/instrumented_SUT.c", "output/InstrumentedSUT/Test_Driver.c", "-o", "output/TestDriver/Test_Driver"]
                 subprocess.run(args, check=True, text=True, capture_output=True) 
 
+            except subprocess.CalledProcessError:
+                error = f"ERROR: TestDrive not executed properly. Compilation error" # {e.stderr}
+                return error
+            
+            try:
                 # Executa o programa C
-                subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True) 
-            except subprocess.CalledProcessError as e:
-                error = f"ERROR: TestDrive not executed properly.{e.stderr}" # {e.stderr}
-                adicionar_ao_log(error)
+                subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True)
+            except subprocess.CalledProcessError:
+                error = f"ERROR: TestDrive not executed properly. Execution error" # {e.stderr}
                 return error
             
         case "clang":  
@@ -32,8 +35,14 @@ def Run_Test_Driver(folder_path, SUT_path, compiler):
                 subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True)
 
             except subprocess.CalledProcessError as e:
-                error = f"ERROR: TestDrive not executed properly.{e.stderr}" # {e.stderr}
-                adicionar_ao_log(error)
+                error = f"ERROR: TestDrive not executed properly. Compilation error" # {e.stderr}
+                return error
+            
+            try:
+                # Executa o programa C
+                subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True)
+            except subprocess.CalledProcessError:
+                error = f"ERROR: TestDrive not executed properly. Execution error" # {e.stderr}
                 return error
 
     adicionar_ao_log("Test Driver executed successfully.")
@@ -48,4 +57,5 @@ if __name__ == '__main__':
     #Tipo de compilador
     compiler = "gcc"    #gcc ou clang
 
-    Run_Test_Driver(folder_path, SUT_path, compiler)
+    error = Run_Test_Driver(folder_path, SUT_path, compiler)
+    print(error)

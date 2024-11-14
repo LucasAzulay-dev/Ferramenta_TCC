@@ -1,7 +1,6 @@
 from pycparser import c_ast, c_generator, parse_file
 from Parser import gerar_arquivo_h_com_pycparser
-from utils import adicionar_ao_log
-from funcoes_extras import list_c_directories
+from utils import adicionar_ao_log, list_c_directories
 from Parser import ParseVariablesAndSutOutputs
 
 c_type_to_printf = {
@@ -106,7 +105,6 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             args_out = {}
             args_sut_out = {}
 
-            # Coletar argumentos de entrada e saída para a função chamada
             for arg in func_call.args.exprs:
                 var = self.generator.visit(arg)
                 if isinstance(arg, c_ast.ID) and (var not in self.output_variables):
@@ -117,8 +115,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 elif (var in self.output_variables):
                     args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
 
-            # Verificar se a variável à esquerda da atribuição deve ser uma saída
-            if isinstance(node.lvalue, c_ast.ID):
+            if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID) or isinstance(node.lvalue, c_ast.UnaryOp):
                 var = self.generator.visit(node.lvalue)
                 if isinstance(node.lvalue, c_ast.ID) and (node.lvalue.name not in self.output_variables):  # Variável normal
                     args_in[var] = c_type_to_printf.get(self.variables.get(var))
@@ -213,7 +210,6 @@ def Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength)
         return 0
     except:
         error = f"ERROR: Instrumentation not executed properly." # {e.stderr}
-        adicionar_ao_log(error)
         return error
     
     

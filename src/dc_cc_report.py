@@ -1,4 +1,5 @@
 from fpdf import FPDF
+from utils import adicionar_ao_log
 
 class PDF(FPDF):
     def __init__(self, data):
@@ -26,6 +27,7 @@ class PDF(FPDF):
         self.chapter_title("Tests Results")
         test_percentage = (self.data['test_results']['total_tests_passed'])/(self.data['test_results']['total_tests']) * 100
         color = (0, 128, 0) if test_percentage >= 100 else (255, 69, 0)
+        adicionar_ao_log(f"Tests Passed: {test_percentage:.1f}%")
         
         tab_space = 5  # Define o valor do recuo desejado
         # Exibe a porcentagem de cobertura
@@ -57,13 +59,16 @@ class PDF(FPDF):
         
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
+        test_failed_vector_lines = []
         if(len(self.data['test_results']['tests_failed'])):
             self.cell(0, 5, "Test Failed Description:", 0, 1)
             self.set_text_color(0, 0, 0)
             for test_failed in self.data['test_results']['tests_failed']:
                 self.add_resume_test_failed(test_failed)
+                test_failed_vector_lines.append(test_failed['vector_line'])
             self.ln(5)
-    
+        adicionar_ao_log(f"Tests Failed (Vector Line): {','.join(map(str, test_failed_vector_lines))}")
+        
     def add_resume_test_failed(self, test_failed):
         tab_space = 10
         color = (255, 69, 0)
@@ -75,13 +80,13 @@ class PDF(FPDF):
         self.cell(0, 10, f"  | Actual Result: {test_failed['actual_result']}", 10, 1)
         self.set_text_color(0, 0, 0)
         
-    
     def add_dc_cc_coverage_section(self):
         # Adiciona seção de cobertura com cores baseadas no valor
         self.chapter_title("DC/CC Coverage Summary")
         coverage_percentage = self.data['dc_cc_coverage'] * 100
         color = (0, 128, 0) if coverage_percentage > 85 else (255, 165, 0) if coverage_percentage > 50 else (255, 69, 0)
         self.set_text_color(*color)
+        adicionar_ao_log(f"DC/CC Coverage: {coverage_percentage:.1f}%")
         
         tab_space = 5  # Define o valor do recuo desejado
         # Exibe a porcentagem de cobertura
@@ -92,11 +97,13 @@ class PDF(FPDF):
         self.ln(5)
         
         # Exibe total de acoplamentos identificados
+        identified_coupligs = len(self.data['couplings'])
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(0, 5, f"Identified Couplings: {len(self.data['couplings'])}", 0, 1)
+        self.cell(0, 5, f"Identified Couplings: {identified_coupligs}", 0, 1)
         self.set_text_color(0, 0, 0)
         self.ln(5)
+        adicionar_ao_log(f"Identified Couplings: {identified_coupligs}")
         
         # Exibe total de acoplamento exercitados individualmente que afetaram o sut output
         self.set_x(self.get_x() + tab_space)
@@ -104,6 +111,7 @@ class PDF(FPDF):
         self.cell(0, 5, f"Couplings Exercised Independent and Affecting Outputs: {self.data['couplings_individually_exercised_affected_sut']}", 0, 1)
         self.set_text_color(0, 0, 0)
         self.ln(5)
+        adicionar_ao_log(f"Couplings Exercised Independent and Affecting Outputs: {self.data['couplings_individually_exercised_affected_sut']}")
         
         # Exibe total de acoplamento exercitados individualmente que não afetaram o sut output
         self.set_x(self.get_x() + tab_space)

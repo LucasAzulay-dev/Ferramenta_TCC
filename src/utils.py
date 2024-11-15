@@ -139,7 +139,7 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
     linhas_inconsistentes = []
     for indice, valor in enumerate(df[nome_coluna]):
         if (mapear_tipo_c(valor,tipo_c) == 1):
-            linhas_inconsistentes.append(indice + 2)  # +2 para ajustar o índice para o usuário
+            linhas_inconsistentes.append(indice + 1)  # +1 para ajustar o índice para o usuário
     
     return linhas_inconsistentes
 

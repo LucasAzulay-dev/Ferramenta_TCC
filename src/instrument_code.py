@@ -305,17 +305,15 @@ if __name__ == '__main__':
 
     # Defina o nome do arquivo .c do SUT
     SUT_path = "examples\sut_final\sut.c" 
-
-    # Defina o nome do arquivo .c do SUT
-    folder_path = "examples\sut_final" 
+    # SUT_path = "examples\C_proj_mockup_2\SUT\SUT.c" 
 
     # Defina o nome da função testada
     function_name = "sut"
+    # function_name = "SUT"
 
     bufferLength = 4096
     
     # Parsing do código C
-    cpp_args = ['-E'] 
-    ast = parse_file(SUT_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
+    ast = generate_ast(SUT_path)
 
     Create_Instrumented_Code(ast, function_name, bufferLength)

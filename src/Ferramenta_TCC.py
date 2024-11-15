@@ -5,11 +5,11 @@ from dc_cc import DC_CC_Report_Generator
 from utils import adicionar_ao_log, Create_output_folder
 from Parser import generate_ast
 
-def executar_ferramenta(excel_file_path, code_path, function_name, folder_path, compiler, bufferLength = 33554432): 
+def executar_ferramenta(excel_file_path, code_path, function_name, compiler, bufferLength = 33554432): 
 
     Create_output_folder()
 
-    ast = generate_ast(code_path, folder_path)
+    ast = generate_ast(code_path)
 
     instrumented_code_path = Create_Instrumented_Code(ast, function_name, bufferLength)
     
@@ -21,7 +21,7 @@ def executar_ferramenta(excel_file_path, code_path, function_name, folder_path, 
 
     adicionar_ao_log("Test Driver created successfully.")
     
-    Run_Test_Driver(folder_path, code_path,instrumented_code_path, test_driver_path,compiler)
+    Run_Test_Driver(instrumented_code_path, test_driver_path,compiler)
 
     adicionar_ao_log("Generating DC/CC report...")
     

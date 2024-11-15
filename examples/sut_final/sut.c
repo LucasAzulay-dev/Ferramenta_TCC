@@ -2,7 +2,7 @@
 /* Author: jdavison */
 /* Revision 0.3 (Nov 04, 2024)*/
 
-// #include <stdio.h> CONSERTAR
+#include <stdio.h>
 #include "sut.h"
 
 /* ---------------- Software components: f1, f2, f3... ------------*/

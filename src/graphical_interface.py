@@ -98,7 +98,7 @@ def execute():
         
         global pdf_files_path
 
-        pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler,buffer_length)
+        pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, compiler,buffer_length)
         
         if(not pdf_files_path):
             adicionar_ao_log_error("ERROR: DC/CC report not generated properly.")

@@ -1,5 +1,7 @@
-from pycparser import c_ast, parse_file
+from pycparser import c_ast, parse_file, c_parser,c_generator
 from utils import adicionar_ao_log, list_c_directories
+import os
+import re
 
 class FuncDefVisitor(c_ast.NodeVisitor):
     def __init__(self, func_name):
@@ -243,12 +245,57 @@ def ParseNameInputsOutputs(ast, target_function):
     return inputs, outputs
 
 #------------------------------------------------------------------------------------------------------
-def generate_ast(code_path, folder_path):
+def substitute_headers_with_sources(main_file):
+    combined_code = []
 
-    # Parsing do código C
-    compile_headers_path = list_c_directories(folder_path, code_path)
-    cpp_args = ['-E'] + compile_headers_path
-    return parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
+    # Lê o arquivo principal
+    with open(main_file, 'r') as f:
+        main_file_normalized = os.path.normpath(main_file)
+        for line in f:
+            if line.strip().startswith('#include') or line.strip().startswith('# include'):
+                # Verifica se é um include de um header relativo
+                try:
+                    header_path = line.strip().split('"')[1]
+                    header_path = os.path.normpath(os.path.join(os.path.dirname(main_file), header_path))
+
+                    # Substitui o header pelo conteúdo correspondente do .c, se disponível
+                    source_path = header_path.replace('.h', '.c')
+                    if(source_path != main_file_normalized):
+                        if os.path.exists(source_path):
+                            with open(source_path, 'r') as source_file:
+                                for line_source_file in source_file:
+                                    if not line_source_file.strip().startswith('#'):
+                                        combined_code.append(line_source_file)
+                        elif line.strip().startswith('#') :
+                            pass
+                        else:
+                            combined_code.append(line)  # Mantém o include se não encontrar o .c
+                except:
+                    pass
+            else:
+                combined_code.append(line)
+
+    return clean_c_code(''.join(combined_code)) # Retorna o código combinado como uma string
+
+def clean_c_code(code):
+    # 1. Remover comentários de linha (//)
+    code = re.sub(r'//.*$', '', code, flags=re.MULTILINE)
+
+    # 2. Remover comentários de bloco (/* ... */)
+    code = re.sub(r'/\*.*?\*/', '', code, flags=re.DOTALL)
+
+    # 3. Remover diretivas de pré-processador como #include, #define, #ifdef, etc.
+    code = re.sub(r'^\s*#.*$', '', code, flags=re.MULTILINE)
+
+    # 4. Opcional: Remover linhas em branco
+    code = re.sub(r'^\s*$', '', code, flags=re.MULTILINE)
+
+    return code
+
+def generate_ast(code_path):
+    code = (substitute_headers_with_sources(code_path))
+    parser = c_parser.CParser()
+    return parser.parse(code)
 
 if __name__ == '__main__':
 

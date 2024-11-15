@@ -13,6 +13,7 @@ def diagram_generator(log_data, diagram_directory, diagram_filename):
         # Contadores de input_vars entre componentes e para variáveis de acoplamento
         input_vars = defaultdict(int)
         output_vars = defaultdict(int)  # Armazena as variáveis de acoplamento entre componentes
+        not_used_vars = defaultdict(int)  # Armazena as variáveis de acoplamento entre componentes
 
         # Iterar por execuções para acumular as ligações e identificar variáveis de acoplamento
         for execution in log_data["executions"]:
@@ -23,6 +24,9 @@ def diagram_generator(log_data, diagram_directory, diagram_filename):
                 # Registrar ligações de entradas para componentes
                 for input_var in analysis["in"]:
                     input_vars[(input_var, component)] += 1
+                    
+                for not_used_var in analysis["not_used"]:
+                    not_used_vars[(not_used_var, component)] += 1
                     
                 for output_var in analysis["out"]:
                     output_vars[(output_var, component)] += 1
@@ -50,13 +54,27 @@ def diagram_generator(log_data, diagram_directory, diagram_filename):
         with dot.subgraph(name="cluster_SUT") as c:
             if(input_var in keys):
                 c.node(input_var, input_var, shape="diamond", style="filled", color="lightblue")
+                
+    for (input_var, component), count in not_used_vars.items():
+        keys = [key[0] for key in not_used_vars.keys()]
+        # Nó de acoplamento NÃO UTILIZADO destacado entre componentes
+        with dot.subgraph(name="cluster_SUT") as c:
+            if(input_var in keys):
+                c.node(input_var, input_var, shape="ellipse")
 
     # Criar arestas entre entradas e componentes, e entre componentes e saídas do SUT
     for (source, target), count in input_vars.items():
-        if count > 1:
-            dot.edge(source, target)
+        input_output_var = output_vars.get((source, target))
+        if input_output_var:
+            with dot.subgraph(name="cluster_SUT") as c:
+                c.node(source + '_input', source + '_input', shape="ellipse")
+                c.edge(source + '_input', target)
         else:
             dot.edge(source, target)
+            
+    # Criar arestas entre entradas e componentes, e entre componentes e saídas do SUT
+    for (source, target), count in not_used_vars.items():
+        dot.edge(source, target, color='red', arrowhead='onormal')
 
     # Renderizar o diagrama sem abrir
     dot.render(diagram_filename, diagram_directory, format="pdf")  # Use "pdf" ou "png" conforme a necessidade

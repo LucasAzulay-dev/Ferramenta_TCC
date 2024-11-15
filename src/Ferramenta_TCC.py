@@ -33,10 +33,10 @@ if __name__ == '__main__':
     excel_file_path = "examples/sut_final/TestVec2.xlsx"
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "examples\sut_final\sut.c" 
+    code_path = "examples/sut_final/sut.c" 
 
     # Defina o nome do arquivo .c do SUT
-    folder_path = "examples\sut_final" 
+    folder_path = "examples/sut_final" 
 
     # Defina o nome da função testada
     function_name = "sut"

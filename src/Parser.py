@@ -5,8 +5,7 @@ class FuncDefVisitor(c_ast.NodeVisitor):
     def __init__(self, func_name):
         self.func_name = func_name
         self.func_found = False
-        self.num_entradas = 0
-        self.num_saidas = 0
+        self.num_param = 0
         self.resultado = []  # Lista que irá armazenar os resultados
         self.error_message = ''
    
@@ -24,22 +23,10 @@ class FuncDefVisitor(c_ast.NodeVisitor):
             params = node.decl.type.args.params
             for param in params:
                 param_type = self._get_type(param.type)
-                param_kind = "O" if self._is_pointer(param.type) else "I"
-               
-                # Contagem de entradas e saídas
-                if param_kind == "I":
-                    self.num_entradas += 1
-                else:
-                    self.num_saidas += 1
-
-
-                # Adicionando à lista separadamente o tipo do parâmetro e se é Entrada (I) ou Saída (O)
-                self.resultado.append(param_kind)  # Primeiro, Entrada (I) ou Saída (O)
-                self.resultado.append(param_type)  # Depois, o tipo do parâmetro
+                self.num_param += 1
+                self.resultado.append(param_type) 
            
-            # Adiciona o número de entradas e saídas ao início da lista
-            self.resultado.insert(0, self.num_saidas)  # Segundo item: número de saídas
-            self.resultado.insert(0, self.num_entradas)  # Primeiro item: número de entradas
+            self.resultado.insert(0, self.num_param)  
    
     def _get_type(self, type_node):
         """ Função auxiliar para obter o tipo de um nó """
@@ -91,8 +78,6 @@ class FuncReturnVisitor(c_ast.NodeVisitor):
                 var_name = node.expr.name
                 var_type = self.current_declared_vars.get(var_name)
                 if var_type:
-                    # Adiciona "OR" e o tipo como itens separados na lista
-                    self.var_return_info.append("OR")
                     self.var_return_info.append(var_type)
 
 
@@ -113,7 +98,10 @@ def ParseInputOutputs(ast, target_function):
         raise Exception(error)
 
     if(len(visitor_return.var_return_info) > 0):
-        visitor.resultado[1] += 1
+        visitor.resultado[0] += 1
+        visitor.resultado.insert(1,"return")
+    else:
+        visitor.resultado.insert(1,"noreturn")
 
     lista_resultante = visitor.resultado + visitor_return.var_return_info
 

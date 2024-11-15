@@ -12,8 +12,8 @@ c_type_to_printf = {
     'unsigned short': '%hu',
     'long': '%ld',
     'unsigned long': '%lu',
-    'float': '%f',
-    'double': '%lf',
+    'float': '%.3f',
+    'double': '%.3lf',
     'char': '%c',
     'unsigned char': '%c',
     'void': '%p',   # para ponteiros

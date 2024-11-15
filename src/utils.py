@@ -126,7 +126,7 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
     columns_to_skip = ['Time', 'INPUT_COMMENTS', 'OUTPUT_COMMENTS']
     used_cols = lambda x: x not in columns_to_skip
 
-    df = pd.read_excel(arquivo_excel, header = 1, usecols=used_cols, dtype=object)
+    df = pd.read_excel(arquivo_excel, engine='calamine',header = 1, usecols=used_cols, dtype=object)
     
     # Verifica se o número da coluna é válido
     if numero_coluna < 0 or numero_coluna >= len(df.columns):
@@ -142,6 +142,23 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
             linhas_inconsistentes.append(indice + 2)  # +2 para ajustar o índice para o usuário
     
     return linhas_inconsistentes
+
+def NumberInputsOutputs(excel_file_path, colunas):
+    # Carrega o arquivo Excel
+    df = pd.read_excel(excel_file_path,header=1, engine='calamine', dtype=object)
+
+    # Verifica se todos os nomes de colunas estão presentes
+    if any(col not in df.columns for col in colunas):
+        return "Uma ou mais das colunas especificadas não estão presentes no arquivo."
+
+    # Localiza os índices das colunas
+    idx1, idx2, idx3 = df.columns.get_loc(colunas[0]), df.columns.get_loc(colunas[1]), df.columns.get_loc(colunas[2])
+    
+    # Conta o número de colunas entre cada par de colunas especificadas
+    colunas_entre_1_2 = abs(idx2 - idx1) - 1
+    colunas_entre_2_3 = abs(idx3 - idx2) - 1
+
+    return [colunas_entre_1_2, colunas_entre_2_3]
 
 def list_c_files(code_path, exclude):
     caminhos_c = []  # Lista para armazenar os caminhos dos arquivos .c

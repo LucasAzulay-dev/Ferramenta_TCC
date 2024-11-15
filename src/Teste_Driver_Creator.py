@@ -1,6 +1,6 @@
 import pandas as pd
 from Parser import ParseInputOutputs, ParseNameInputsOutputs
-from utils import skip_lines, adicionar_ao_log 
+from utils import skip_lines, adicionar_ao_log, NumberInputsOutputs
 
 c_type_to_printf = {
     'int': '%d',
@@ -9,8 +9,8 @@ c_type_to_printf = {
     'unsigned short': '%hu',
     'long': '%ld',
     'unsigned long': '%lu',
-    'float': '%f',
-    'double': '%lf',
+    'float': '%.3f',
+    'double': '%.3lf',
     'char': '%c',
     'unsigned char': '%c',
     'void': '%p',   # para ponteiros
@@ -28,20 +28,21 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
         return resultado
 
     #Definindo o numero de colunas do SUT
-    num_colunas = resultado[0]+resultado[1]
+    num_colunas = resultado[0]
 
     #Sistema para pular e printar as linhas que são incongruentes
     skipedlines = []
-    for i in range(0,((num_colunas)*2),2):
-        linhas_inconsistentes = skip_lines(excel_file_path, (i//2), resultado[i+3])
+    for i in range(0,(num_colunas),1):
+        linhas_inconsistentes = skip_lines(excel_file_path, i, resultado[i+2])
         skipedlines = list(set(skipedlines + linhas_inconsistentes))
 
     columns_to_skip = ['Time', 'INPUT_COMMENTS', 'OUTPUT_COMMENTS']
     used_cols = lambda x: x not in columns_to_skip
-    #used_cols = range(1, len(pd.read_excel(excel_file_path).columns))
+
+    inputsOutputs = NumberInputsOutputs(excel_file_path, columns_to_skip)
 
     # Leia o arquivo Excel
-    df = pd.read_excel(excel_file_path,header=1, engine='openpyxl', usecols=used_cols, dtype=object, skiprows=skipedlines)
+    df = pd.read_excel(excel_file_path,header=1, engine='calamine', usecols=used_cols, dtype=object, skiprows=skipedlines)
 
     num_linhas = len(df.index)    
 
@@ -54,12 +55,12 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
     num_colunas_test_vec = df.shape[1]
 
     #Print da mensagem de erro
-    if(resultado[0] <= 0):
+    if(inputsOutputs[0] <= 0):
         error = f"ERROR: No inputs detected"
         raise Exception(error)
     
     #Print da mensagem de erro
-    if(resultado[1] <= 0):
+    if(inputsOutputs[1] <= 0):
         error = f"ERROR: No outputs detected"
         raise Exception(error)
 
@@ -88,18 +89,18 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
     outputs = 1
 
     #Escrever todos os prints que dependem dos inputs e outputs
-    for i in range(0,(num_colunas)*2,2):
-        if(resultado[i+2] == 'I'): #Se for entrada
+    for i in range(0,num_colunas,1):
+        if(i<inputsOutputs[0]): #Se for entrada
             #Para print da função definicao testeX
-            param_tests_def = param_tests_def + ', ' + resultado[i+3] + ' ' + 'SUTI' + f'{inputs}' 
+            param_tests_def = param_tests_def + ', ' + resultado[i+2] + ' ' + 'SUTI' + f'{inputs}' 
 
             #Para print dos parametros da função testeX
             param_tests = param_tests + ' test_vecs_SUTI' + f'{inputs}[i],' 
 
             #Para print dos test_inputs
-            numero_coluna = i//2
+            numero_coluna = i
             coluna = df.iloc[:, numero_coluna]
-            test_vecs = test_vecs + '  '+resultado[i+3] + ' ' + 'test_vecs_SUTI' + f'{inputs}' + f'[{num_linhas}] =' + ' {'
+            test_vecs = test_vecs + '  '+resultado[i+2] + ' ' + 'test_vecs_SUTI' + f'{inputs}' + f'[{num_linhas}] =' + ' {'
             coluna_string = ', '.join(map(str, coluna.dropna().tolist()))
             test_vecs = test_vecs + coluna_string + '};\n'
             
@@ -108,36 +109,37 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
 
             inputs = inputs+1
 
-        elif(resultado[i+2] == 'O' or resultado[i+2] == 'OR'): #se for saida ponteiros
+        else: 
             #Para print da função testeX
-            param_tests_def = param_tests_def + ', '  + resultado[i+3] + ' ' + 'SUTO' + f'{outputs}_test' 
+            param_tests_def = param_tests_def + ', '  + resultado[i+2] + ' ' + 'SUTO' + f'{outputs}_test' 
 
             #Para print dos parametros da função testeX
             param_tests = param_tests + ' test_vecs_SUTO' + f'{outputs}[i],' 
 
             #Para print dos test_inputs
-            numero_coluna = i//2
+            numero_coluna = i
             coluna = df.iloc[:, numero_coluna]
-            test_vecs = test_vecs + '  '+resultado[i+3] + ' ' + 'test_vecs_SUTO' + f'{outputs}' + f'[{num_linhas}] =' + ' {'
-            coluna_string = ', '.join(map(str, coluna.dropna().tolist()))
+            test_vecs = test_vecs + '  '+resultado[i+2] + ' ' + 'test_vecs_SUTO' + f'{outputs}' + f'[{num_linhas}] =' + ' {'
+            #coluna_string = ', '.join(map(str, coluna.dropna().tolist()))
+            coluna_string = ', '.join(f"{valor:.3f}" if isinstance(valor, float) else str(valor) for valor in coluna.dropna().tolist())
             test_vecs = test_vecs + coluna_string + '};\n'     
 
-            if(resultado[i+2] == 'O'):
-                #Para print da função SUT
-                param_SUT = param_SUT + ' &SUTO' + f'{outputs},'
-            else:
+            if((resultado[1] == 'return') and (i == (num_colunas-1))):
                 #Para receber o return do SUT
                 return_output = 'SUTO' + f'{outputs}'+' = '
+            else:
+                #Para print da função SUT
+                param_SUT = param_SUT + ' &SUTO' + f'{outputs},'
              
 
             #Para definicoes dos outputs     
-            param_outputs = param_outputs + resultado[i+3] + ' ' + 'SUTO' + f'{outputs};\n    ' 
+            param_outputs = param_outputs + resultado[i+2] + ' ' + 'SUTO' + f'{outputs};\n    ' 
 
             #Para verificacao dos testes
-            test_outputs = test_outputs + ' SUTO' + f'{outputs} == SUTO' + f'{outputs}_test &&' 
+            test_outputs = test_outputs + ' (fabs(SUTO' + f'{outputs} - SUTO' + f'{outputs}_test) < 0.0001) &&' 
 
             #Para print dos tipos de saida
-            type_output = c_type_to_printf.get(resultado[i+3])
+            type_output = c_type_to_printf.get(resultado[i+2])
             if (len(print_outputs_types) == 0):
                 print_outputs_types = print_outputs_types + '\\"' +type_output + '\\"'
             else:
@@ -158,7 +160,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
 
     #Começar a escrever no arquivo
     with open(testdriver_path, 'a') as file:
-        file.write('#include "'+ 'instrumented_SUT.h' + '"\n#include <stdio.h>\n#include <string.h>\n\n#define BUFFER_SIZE '+f'{bufferLength}'+'\nchar log_buffer[BUFFER_SIZE];\n\nvoid testeX(int num_teste'+ param_tests_def +');\nint main(){\n')
+        file.write('#include "'+ 'instrumented_SUT.h' + '"\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n\n#define BUFFER_SIZE '+f'{bufferLength}'+'\nchar log_buffer[BUFFER_SIZE];\n\nvoid testeX(int num_teste'+ param_tests_def +');\nint main(){\n')
 
     #Escrever os vetores de teste de cada parametro
     with open(testdriver_path, 'a') as file:

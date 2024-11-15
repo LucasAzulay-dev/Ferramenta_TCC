@@ -12,8 +12,8 @@ def Run_Test_Driver(folder_path, SUT_path, instrumented_code_path, test_driver_p
                 args = args + (list(filter(None, compile_path))) + [instrumented_code_path, test_driver_path, "-o", "output/TestDriver/Test_Driver"]
                 subprocess.run(args, check=True, text=True, capture_output=True) 
 
-            except subprocess.CalledProcessError:
-                error = f"ERROR: TestDrive not executed properly. Compilation error" # {e.stderr}
+            except subprocess.CalledProcessError as e:
+                error = f"ERROR: TestDrive not executed properly. Compilation error. {e.stderr}" # {e.stderr}
                 raise Exception(error)
             
             try:

@@ -6,6 +6,7 @@ fpdf
 pillow
 pymupdf
 frontend
+python-calamine
 #tests and code coverage
 pytest
 pytest-cov

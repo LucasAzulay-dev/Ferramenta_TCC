@@ -9,8 +9,7 @@ class TestFI_1:
     # The required inputs are accepted. Using GCC compiler
     def test_1(self, param_success, assert_output):
         param : ToolParameters = param_success
-        executar_ferramenta(excel_file_path=param.testvec, 
-                            folder_path=param.proj_dir, 
+        executar_ferramenta(excel_file_path=param.testvec,  
                             code_path=param.sut_path, 
                             function_name=param.sut_name, 
                             compiler=param.compiler)
@@ -21,7 +20,6 @@ class TestFI_2:
     def test_1(self, param_success):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
-                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -32,7 +30,6 @@ class TestFI_3:
     def test_1(self, param_success):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
-                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -50,7 +47,6 @@ class TestFI_5:
     def test_1(self, param_success, get_log_json):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
-                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -61,7 +57,6 @@ class TestFI_5:
     def test_2(self, param_robustness_case, get_log_json):
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['testvec_invalid_line'])
         executar_ferramenta(excel_file_path = param.testvec, 
-                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -73,7 +68,6 @@ class TestFI_5:
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['testvec_all_invalid_lines'])
         with pytest.raises(Exception):
             executar_ferramenta(excel_file_path = param.testvec, 
-                                folder_path=param.proj_dir,
                                 code_path = param.sut_path, 
                                 function_name = param.sut_name, 
                                 compiler = param.compiler)
@@ -85,7 +79,6 @@ class TestFI_5:
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['sut_function_not_found'])
         with pytest.raises(Exception):
             executar_ferramenta(excel_file_path = param.testvec, 
-                                folder_path=param.proj_dir,
                                 code_path = param.sut_path, 
                                 function_name = param.sut_name, 
                                 compiler = param.compiler)
@@ -96,7 +89,6 @@ class TestFI_5:
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['sut_not_testable'])
         with pytest.raises(Exception):
             executar_ferramenta(excel_file_path = param.testvec, 
-                                folder_path=param.proj_dir,
                                 code_path = param.sut_path, 
                                 function_name = param.sut_name, 
                                 compiler = param.compiler)
@@ -107,7 +99,6 @@ class TestFI_5:
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['sut_runtime_error'])
         with pytest.raises(Exception):
             executar_ferramenta(excel_file_path = param.testvec, 
-                                folder_path=param.proj_dir,
                                 code_path = param.sut_path, 
                                 function_name = param.sut_name, 
                                 compiler = param.compiler)
@@ -118,7 +109,6 @@ class TestFI_5:
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['sut_wrong_type'])
         with pytest.raises(Exception):
             executar_ferramenta(excel_file_path = param.testvec, 
-                                folder_path=param.proj_dir,
                                 code_path = param.sut_path, 
                                 function_name = param.sut_name, 
                                 compiler = param.compiler)
@@ -129,7 +119,6 @@ class TestFI_5:
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['testvec_wrong_type'])
         with pytest.raises(Exception):
             executar_ferramenta(excel_file_path = param.testvec, 
-                                folder_path=param.proj_dir,
                                 code_path = param.sut_path, 
                                 function_name = param.sut_name, 
                                 compiler = param.compiler)
@@ -140,7 +129,6 @@ class TestFI_5:
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['testvec_missing_column'])
         with pytest.raises(Exception):
             executar_ferramenta(excel_file_path = param.testvec, 
-                                folder_path=param.proj_dir,
                                 code_path = param.sut_path, 
                                 function_name = param.sut_name, 
                                 compiler = param.compiler)
@@ -151,7 +139,6 @@ class TestFI_5:
         param : ToolParameters = param_robustness_case(ROBUSTNESS_CASES['log_buffer_load_error'])
         with pytest.raises(Exception):
             executar_ferramenta(excel_file_path = param.testvec, 
-                                folder_path=param.proj_dir,
                                 code_path = param.sut_path, 
                                 function_name = param.sut_name, 
                                 compiler = param.compiler,
@@ -163,7 +150,6 @@ class TestFI_6:
     def test_1(self, param_success):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
-                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -175,7 +161,6 @@ class TestFI_7:
     def test_1(self, param_success, get_log_json):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
-                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -186,7 +171,6 @@ class TestFI_7:
     def test_2(self, param_success, get_log_json, oracle_tests_passed):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
-                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)
@@ -199,7 +183,6 @@ class TestFI_8:
     def test_1(self, param_success, get_log_json, oracle_functions_called_ordered):
         param : ToolParameters = param_success
         executar_ferramenta(excel_file_path = param.testvec, 
-                            folder_path=param.proj_dir,
                             code_path = param.sut_path, 
                             function_name = param.sut_name, 
                             compiler = param.compiler)

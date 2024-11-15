@@ -1,7 +1,8 @@
-from pycparser import c_ast, c_generator
+from pycparser import c_ast, c_generator, parse_file
 from Parser import gerar_arquivo_h_com_pycparser
 from utils import adicionar_ao_log
-from Parser import ParseVariablesAndSutOutputs
+from Parser import ParseVariablesAndSutOutputs, generate_ast
+from getInputOutputs import get_component_input_outputs
 import copy
 
 c_type_to_printf = {
@@ -27,6 +28,8 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         self.execution_order = 1
         self.variables = {}  # Armazenamento de variáveis e tipos
         self.output_variables = {}
+        self.components_inputs = {}
+        self.components_outputs = {}
         
     def build_sut_variables_and_outputs(self, ast, target_function):
         nameInputsOutputs = ParseVariablesAndSutOutputs(ast, target_function)
@@ -35,64 +38,64 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         
     def visit_FuncDef(self, node):
 		# Verificar se estamos na definição da função SUT
-        if node.decl.name == self.func_name:
+        function_name = node.decl.name
+        if function_name == self.func_name:
             self.instrument_sut = True
             self.generic_visit(node)
             #print(self.variables)
             self.instrument_sut = False
         else:
-            pass
+            inputs, outputs = get_component_input_outputs(function_name, node)
+            self.components_inputs[function_name] = inputs
+            self.components_outputs[function_name] = outputs
 
     def visit_FuncCall(self, node):
         if self.instrument_sut:
             func_name = self.generator.visit(node.name)
-            new_statements = []
-            args_in = {}
-            args_out = {}
-            args_sut_out = {}
+            if(func_name != 'sprintf'):
+                new_statements = []
 
-            # Coletar argumentos de entrada
-            for arg in node.args.exprs:
-                var = self.generator.visit(arg)
-                if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
-                    args_in[var] = c_type_to_printf.get(self.variables.get(var))
-                elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (var not in self.output_variables):  # Ponteiro
-                    pointed_var = self.generator.visit(arg.expr)
-                    args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var)) # SUT Output
-                elif (var in self.output_variables):
-                    args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
+                # Adicionar sprintf para registrar dados em JSON após a função
+                execution_order_str = f'{self.execution_order}'
+                self.execution_order += 1
 
+                args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name)]
+                json_entry_before_call = r'"'+(
+                f'{{\\"function\\": \\"{func_name}\\", '
+                f'\\"executionOrder\\": \\"{execution_order_str}\\", '
+                f'\\"in\\": {{{",".join(args_in_json)}}}'
+                ) + r',"'
+                args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name)])
+                
+                new_statements.append(c_ast.FuncCall(
+                    c_ast.ID("sprintf"),
+                    c_ast.ExprList([
+                        c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
+                        c_ast.Constant(type="string", value=json_entry_before_call + ','+ args_before_call)
+                    ])
+                ))
 
-            # Chamada da função original
-            new_statements.append(node)
+                # Chamada da função original
+                new_statements.append(node)
+                
+                args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name)]
+                json_entry_after_call = r'"'+(
+                f'\\"out\\": {{{",".join(args_out_json)}}}'
+                ) + r'},", '
+                args_after_call = ','.join(
+                [f'*{key}' if key in self.output_variables else key for key in self.components_outputs.get(func_name)]
+                )
+                
+                # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
+                new_statements.append(c_ast.FuncCall(
+                    c_ast.ID("sprintf"),
+                    c_ast.ExprList([
+                        c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
+                        c_ast.Constant(type="string", value=json_entry_after_call + args_after_call)
+                    ])
+                ))
 
-            # Adicionar sprintf para registrar dados em JSON após a função
-            execution_order_str = f'{self.execution_order}'
-            self.execution_order += 1
-
-            args_in_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_in.items()]
-            args_out_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_out.items()]
-            args_sut_out_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_sut_out.items()]
-
-            json_entry = '\"' + (
-            f'{{\\"function\\": \\"{func_name}\\", '
-            f'\\"executionOrder\\": \\"{execution_order_str}\\", '
-            f'\\"in\\": {{{",".join(args_in_json)}}}, '
-            f'\\"out\\": {{{",".join(args_out_json)+",".join(args_sut_out_json)}}}}}'
-            ) + ',\\n\"'
-            
-            args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'{self.output_variables.get(key)}{key}' for key in args_sut_out.keys()])
-
-            # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
-            new_statements.append(c_ast.FuncCall(
-                c_ast.ID("sprintf"),
-                c_ast.ExprList([
-                    c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
-                    c_ast.Constant(type="string", value=json_entry + ','+ args)
-                ])
-            ))
-
-            return new_statements
+                return new_statements
         else:
             return node
     
@@ -102,60 +105,56 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             func_name = self.generator.visit(func_call.name)
 
             new_statements = []
-            args_in = {}
-            args_out = {}
-            args_sut_out = {}
-
-            for arg in func_call.args.exprs:
-                var = self.generator.visit(arg)
-                if isinstance(arg, c_ast.ID) and (var not in self.output_variables):
-                    args_in[var] = c_type_to_printf.get(self.variables.get(var))
-                elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (var not in self.output_variables):
-                    pointed_var = self.generator.visit(arg.expr)
-                    args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var))
-                elif (var in self.output_variables):
-                    args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
 
             if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID) or isinstance(node.lvalue, c_ast.UnaryOp):
                 var = self.generator.visit(node.lvalue)
                 if isinstance(node.lvalue, c_ast.ID) and (node.lvalue.name not in self.output_variables):  # Variável normal
-                    args_in[var] = c_type_to_printf.get(self.variables.get(var))
+                    self.components_outputs[func_name].append(var)
                 elif isinstance(node.lvalue, c_ast.UnaryOp) and node.lvalue.op == '&' and (node.lvalue not in self.output_variables):  # Ponteiro
                     pointed_var = self.generator.visit(node.lvalue.expr)
-                    args_out[pointed_var] = c_type_to_printf.get(self.variables.get(pointed_var))
+                    self.components_outputs[func_name].append(pointed_var)
                 elif (var in self.output_variables):
-                    args_sut_out[var] = c_type_to_printf.get(self.variables.get(var))
-                    self.output_variables[var] = ''                    
+                    self.components_outputs[func_name].append(var)                
                 elif (self.generator.visit(node.lvalue.expr) in self.output_variables):
-                    args_sut_out[self.generator.visit(node.lvalue.expr)] = c_type_to_printf.get(self.variables.get(self.generator.visit(node.lvalue.expr)))
-                    
-
-            # Chamada da função original
-            new_statements.append(node)
+                    self.components_outputs[func_name].append(self.generator.visit(node.lvalue.expr))   
 
             # Log em JSON após a chamada da função
             execution_order_str = f'{self.execution_order}'
             self.execution_order += 1
 
-            args_in_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_in.items()]
-            args_out_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_out.items()]
-            args_sut_out_json = [f'\\"{key}\\": \\"{value}\\"' for key, value in args_sut_out.items()]
-
-            json_entry = '\"' + (
-                f'{{\\"function\\": \\"{func_name}\\", '
-                f'\\"executionOrder\\": \\"{execution_order_str}\\", '
-                f'\\"in\\": {{{",".join(args_in_json)}}}, '
-                f'\\"out\\": {{{",".join(args_out_json + args_sut_out_json)}}}}}'
-            ) + ',\\n\"'
+            args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name)]
+            json_entry_before_call = r'"'+(
+            f'{{\\"function\\": \\"{func_name}\\", '
+            f'\\"executionOrder\\": \\"{execution_order_str}\\", '
+            f'\\"in\\": {{{",".join(args_in_json)}}}'
+            ) + r',"'
+            args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name)])
             
-            args = ','.join([f'{key}' for key in args_in.keys()] + [f'{key}' for key in args_out.keys()] + [f'{self.output_variables.get(key)}{key}' for key in args_sut_out.keys()])  
-
-            # Registro no log_buffer
             new_statements.append(c_ast.FuncCall(
                 c_ast.ID("sprintf"),
                 c_ast.ExprList([
                     c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
-                    c_ast.Constant(type="string", value=json_entry + ',' + args)
+                    c_ast.Constant(type="string", value=json_entry_before_call + ','+ args_before_call)
+                ])
+            ))
+
+            # Chamada da função original
+            new_statements.append(node)
+            
+            args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name)]
+            json_entry_after_call = r'"'+(
+            f'\\"out\\": {{{",".join(args_out_json)}}}'
+            ) + r'},", '
+            args_after_call = ','.join(
+                [f'*{key}' if key in self.output_variables else key for key in self.components_outputs.get(func_name)]
+                )
+            
+            # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
+            new_statements.append(c_ast.FuncCall(
+                c_ast.ID("sprintf"),
+                c_ast.ExprList([
+                    c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
+                    c_ast.Constant(type="string", value=json_entry_after_call + args_after_call)
                 ])
             ))
 
@@ -215,14 +214,18 @@ def Create_Instrumented_Code(ast, function_name, bufferLength):
 if __name__ == '__main__':
 
     # Defina o nome do arquivo .c do SUT
-    SUT_path = "examples/C_proj_mockup_2/SUT/SUT.c" 
+    SUT_path = "examples\sut_final\sut.c" 
 
     # Defina o nome do arquivo .c do SUT
-    folder_path = "examples/C_proj_mockup_2" 
+    folder_path = "examples\sut_final" 
 
     # Defina o nome da função testada
-    function_name = "SUT"
+    function_name = "sut"
 
     bufferLength = 4096
+    
+    # Parsing do código C
+    cpp_args = ['-E'] 
+    ast = parse_file(SUT_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
 
-    Create_Instrumented_Code(folder_path, SUT_path, function_name, bufferLength)
+    Create_Instrumented_Code(ast, function_name, bufferLength)

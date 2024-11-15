@@ -15,7 +15,7 @@ ERROR_EXEC_ERROR = "ERROR: Runtime execution error"
 ERROR_SUT_WRONG_TYPE = "ERROR: SUT is not a C file"
 ERROR_TESTVEC_WRONG_TYPE = "ERROR: Test Vector is not a xlsx file"
 ERROR_TESTVEC_MISSING_COL = "ERROR: Test Vector has missing columns"
-ERROR_LOG_BUFFER_LOAD_ERROR = "ERROR: Failed to load log_buffer. Consider increasing the buffer length."
+ERROR_LOG_BUFFER_LOAD_ERROR = "ERROR: Failed to load log_buffer."
 
 PATH_INSTRUMENTED_SUT_C = "output\\InstrumentedSUT\\instrumented_SUT.c"
 PATH_INSTRUMENTED_SUT_H = "output\\InstrumentedSUT\\instrumented_SUT.h"

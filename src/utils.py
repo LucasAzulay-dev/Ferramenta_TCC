@@ -102,12 +102,12 @@ def mapear_tipo_c(valor,tipo_c):
         else:
             return 1  
     elif tipo_c == "float":
-        if (isinstance(valor, float) and (1.2E-38 <= valor <= 3.4E+38)):
+        if ((isinstance(valor, float) and (-1.2E+38 <= valor <= 3.4E+38)) or isinstance(valor, int)):
             return 0 
         else:
             return 1 
     elif tipo_c == "double":
-        if (isinstance(valor, float) and (2.3E-308 <= valor <= 1.7E+308)):
+        if ((isinstance(valor, float) and (-1.2E+38 <= valor <= 3.4E+38)) or isinstance(valor, int)):
             return 0 
         else:
             return 1 

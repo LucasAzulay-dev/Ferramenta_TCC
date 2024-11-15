@@ -70,7 +70,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
 
     fromparserinputs, fromparseroutputs = ParseNameInputsOutputs(ast, function_name)
 
-    inicioJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"' + f'{function_name}' + r'\",\"numberOfTests\": '+f'{num_linhas}'+r',  \"skipedlines\":'+f'{skipedlines}'+r',\"inputs\":'+ f'{fromparserinputs}' + r',\"outputs\": ' + f'{fromparseroutputs}'+ r',\"executions\": [");'
+    inicioJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"' + f'{function_name}' + r'\",\"numberOfTests\": '+f'\\"{num_linhas}\\"'+r',  \"skipedlines\":'+f'{skipedlines}'+r',\"inputs\":'+ f'{fromparserinputs}' + r',\"outputs\": ' + f'{fromparseroutputs}'+ r',\"executions\": [");'
     fimJSON = r'  snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"],}"); '+'\n'
 
     #Definicao das strings
@@ -139,9 +139,9 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
             #Para print dos tipos de saida
             type_output = c_type_to_printf.get(resultado[i+3])
             if (len(print_outputs_types) == 0):
-                print_outputs_types = print_outputs_types + type_output
+                print_outputs_types = print_outputs_types + '\\"' +type_output + '\\"'
             else:
-                print_outputs_types = print_outputs_types + ',' + type_output
+                print_outputs_types = print_outputs_types + ',' + '\\"' +type_output + '\\"'
 
             #Para print da verificação dos testes
             print_test_outputs = print_test_outputs + ', SUTO' + f'{outputs}_test' 
@@ -165,8 +165,8 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
         file.write(test_vecs)
 
     #Escrever os prints
-    print_JSON_begin_loop = r'        snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"testNumber\":%d,\"analysis\": [",i+1);'
-    print_JSON_end_loop = r'        snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"\"executionTime\": %d},",elapsed);'
+    print_JSON_begin_loop = r'        snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"testNumber\":\"%d\",\"analysis\": [",i+1);'
+    print_JSON_end_loop = r'        snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"\"executionTime\": \"%d\"},",elapsed);'
 
     #Escrever a variaveis do testeX
     with open(testdriver_path, 'a') as file:
@@ -216,7 +216,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
             file.truncate()
 
     #Escrever os prints
-    print_string_passed = r'   snprintf(log_buffer + strlen(log_buffer), BUFFER_SIZE - strlen(log_buffer), "],\"pass\": \"true\",");'
+    print_string_passed = r'   snprintf(log_buffer + strlen(log_buffer), BUFFER_SIZE - strlen(log_buffer), "],\"pass\": \"true\",\"actualResult\": [' + print_outputs_types + r'],"' + print_outputs + r');'
     print_string_failed = r'   snprintf(log_buffer + strlen(log_buffer), BUFFER_SIZE - strlen(log_buffer), "],\"pass\": \"false\",\"expectedResult\": [' + print_outputs_types + r'],\"actualResult\": [' + print_outputs_types + r'],"' + print_test_outputs + print_outputs + r');'
 
     with open(testdriver_path, 'a') as file:

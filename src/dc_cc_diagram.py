@@ -71,15 +71,24 @@ def diagram_generator(log_data, diagram_directory, diagram_filename):
     }
 
     for execution in log_data["executions"]:
-        test_result = {
-            "testNumber": execution["testNumber"],
-            "pass": execution["pass"],
-            "expectedResult": execution["expectedResult"],
-            "actualResult": execution["actualResult"],
-            "failed_conditions": [],
-            "unexecuted_components": [],
-            "coupling_info": []
-        }
+        if (execution["pass"] == 'false'):
+            test_result = {
+                "testNumber": execution["testNumber"],
+                "pass": execution["pass"],
+                "expectedResult": execution["expectedResult"],
+                "actualResult": execution["actualResult"],
+                "failed_conditions": [],
+                "unexecuted_components": [],
+                "coupling_info": []
+            }
+        else:
+            test_result = {
+                "testNumber": execution["testNumber"],
+                "pass": execution["pass"],
+                "failed_conditions": [],
+                "unexecuted_components": [],
+                "coupling_info": []
+            }
         
         for analysis in execution["analysis"]:
             # Exemplo de análise de acoplamento e condição

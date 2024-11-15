@@ -68,8 +68,13 @@ class CouplingAnalyzer:
                 self._set_input_related_sut_output(input_key, component_output)
             else:
                 input_related_components_outputs = self.inputs_related_components_outputs.get(component_output)
-                if input_related_components_outputs:
-                    self._identify_input_related_sut_output(input_key, input_related_components_outputs)
+                filtered_outputs = (
+                list(filter(lambda i: i != component_output, input_related_components_outputs))
+                if input_related_components_outputs is not None
+                else None
+                )
+                if filtered_outputs:
+                    self._identify_input_related_sut_output(input_key, filtered_outputs)
 
     def _set_input_related_sut_output(self, input_key, component_output):
         if component_output in self.log_data['outputs']:
@@ -82,15 +87,16 @@ class CouplingAnalyzer:
             output_components = self.outputs_component.get(input_key, [])
             for input_component in input_components:
                 for output_component in output_components:
-                    self.couplings[self.coupling_id] = {
-                        "id": self.coupling_id,
-                        "var": input_key,
-                        "output_component": output_component,
-                        "input_component": input_component,
-                        # 'sut_outputs_related': list(self.inputs_related_sut_outputs.get(input_key, []))
-                        'sut_outputs_related': set()
-                    }
-                    self.coupling_id += 1
+                    if(input_component != output_component):
+                        self.couplings[self.coupling_id] = {
+                            "id": self.coupling_id,
+                            "var": input_key,
+                            "output_component": output_component,
+                            "input_component": input_component,
+                            # 'sut_outputs_related': list(self.inputs_related_sut_outputs.get(input_key, []))
+                            'sut_outputs_related': set()
+                        }
+                        self.coupling_id += 1
                     
     def _set_couplings_sut_outputs_related(self):
         couplings_yet_to_found_more_sut_outputs_related = set(self.couplings.keys())

@@ -30,16 +30,16 @@ def executar_ferramenta(excel_file_path, code_path, function_name, folder_path, 
 if __name__ == '__main__':
 
     # Defina o caminho para o arquivo Excel
-    excel_file_path = "tests\\test_cases\\functional_cases\\case1\\testInputs\\testvec.xlsx"
+    excel_file_path = "examples/sut_final/TestVec2.xlsx"
 
     # Defina o nome do arquivo .c do SUT
-    code_path = "tests\\test_cases\\functional_cases\\case1\\src\\SUT\\SUT.c" 
+    code_path = "examples\sut_final\sut.c" 
 
     # Defina o nome do arquivo .c do SUT
-    folder_path = "tests\\test_cases\\functional_cases\\case1\\src" 
+    folder_path = "examples\sut_final" 
 
     # Defina o nome da função testada
-    function_name = "SUT"
+    function_name = "sut"
 
     #Tipo de compilador
     compiler = "gcc"    #gcc ou clang

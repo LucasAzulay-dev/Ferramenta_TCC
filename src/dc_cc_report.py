@@ -25,7 +25,7 @@ class PDF(FPDF):
     def add_test_results(self):
         # Adiciona seção resultados dos testes
         self.chapter_title("Tests Results")
-        test_percentage = (self.data['test_results']['total_tests_passed'])/(self.data['test_results']['total_tests']) * 100
+        test_percentage = (self.data['test_results']['total_tests_passed'])/(int)(self.data['test_results']['total_tests']) * 100
         color = (0, 128, 0) if test_percentage >= 100 else (255, 69, 0)
         adicionar_ao_log(f"Tests Passed: {test_percentage:.1f}%")
         
@@ -75,9 +75,8 @@ class PDF(FPDF):
         self.set_text_color(*color)
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(32, 10, f"- Vector Line: {test_failed['vector_line']}", 10)
-        self.cell(52, 10, f" | Expected Result: {test_failed['expected_result']}", 10)
-        self.cell(0, 10, f"  | Actual Result: {test_failed['actual_result']}", 10, 1)
+        self.cell(32, 10, f"- Vector Line: {test_failed['vector_line']}", 10, 1)
+        self.cell(100, 10, f" Expected Result: {test_failed['expected_result']} | "+f"Actual Result: {test_failed['actual_result']}", 10, 1)
         self.set_text_color(0, 0, 0)
         
     def add_dc_cc_coverage_section(self):

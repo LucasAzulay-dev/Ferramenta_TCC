@@ -10,6 +10,11 @@ pdf_files_path = []
 pdf_index = 0
 page_index = 0
 
+def clear_log():
+    log_display.config(state="normal")
+    log_display.delete(1.0, tk.END)
+    log_display.config(state="disable")
+
 def select_excel():
     excel_file_path = filedialog.askopenfilename(title="Select Excel File", filetypes=[("Excel files", ".xlsx .xls")])
     entry_excel.delete(0, tk.END)
@@ -186,6 +191,9 @@ if __name__ == "__main__":
     log_display.tag_configure("red", foreground="red")
     log_display.config(state="disable")
     configurar_log_widget(log_display)
+
+    button_clear_log = tk.Button(left_frame, text="Clear Log", command=clear_log, **button_style)
+    button_clear_log.pack(pady=5)
 
     pdf_frame = ttk.Frame(right_frame)
     pdf_frame.pack(fill="both", expand=True)

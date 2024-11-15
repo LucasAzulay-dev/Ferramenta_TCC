@@ -37,19 +37,16 @@ def adicionar_ao_log_error(mensagem):
 def Create_output_folder(base_path="output"):
     try:
         adicionar_ao_log("Creating Output folder...")
-        # Define o caminho da pasta principal
-        pasta_principal = os.path.join(base_path)
+        # Verifica se a pasta principal já existe
+        if not os.path.exists(base_path):
+            os.makedirs(base_path)
         
         # Lista com os nomes das subpastas
         subpastas = ["InstrumentedSUT", "TestDriver", "Report", "OutputBuffer"]
         
-        # Cria a pasta principal, se não existir
-        if not os.path.exists(pasta_principal):
-            os.makedirs(pasta_principal)
-        
         # Cria as subpastas dentro da pasta principal
         for subpasta in subpastas:
-            caminho_subpasta = os.path.join(pasta_principal, subpasta)
+            caminho_subpasta = os.path.join(base_path, subpasta)
             if not os.path.exists(caminho_subpasta):
                 os.makedirs(caminho_subpasta)
 
@@ -191,3 +188,6 @@ def list_c_directories(code_path, exclude):
         return list(directories)
     except Exception as e:
         return []
+
+if __name__ == '__main__':
+    Create_output_folder()

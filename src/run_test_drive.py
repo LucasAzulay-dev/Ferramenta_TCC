@@ -49,11 +49,12 @@ def Run_Test_Driver(instrumented_code_path, test_driver_path, compiler):
 
 if __name__ == '__main__':
 
-    folder_path = "tests/test_cases/case1/src"
-    SUT_path = "tests/test_cases/case1/src/SUT/SUT.c"
+    instrumented_code_path = r'output\InstrumentedSUT\instrumented_SUT.c'
+
+    test_driver_path = r'output\InstrumentedSUT\Test_Driver.c'
 
     #Tipo de compilador
     compiler = "gcc"    #gcc ou clang
 
-    error = Run_Test_Driver(folder_path, SUT_path, compiler)
+    error = Run_Test_Driver(instrumented_code_path, test_driver_path, compiler)
     print(error)

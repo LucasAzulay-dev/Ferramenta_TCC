@@ -169,7 +169,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
     def __init__(self, func_name):
         self.func_name = func_name
         self.inputs = []  # Lista para armazenar nomes de variáveis de entrada
-        self.outputs = []  # Lista para armazenar nomes de variáveis de saída (incluindo retornos)
+        self.outputs = {}  # Lista para armazenar nomes de variáveis de saída (incluindo retornos)
         self.current_declared_vars = {}  # Dicionário para armazenar as declarações de variáveis locais
         self.variables = {}  # Dicionário para armazenar as declarações de variáveis locais
 
@@ -187,7 +187,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
                     self.inputs.append(param_name)
                     self.variables[param_name] = ''.join(param.type.type.names)
                 else:
-                    self.outputs.append(param_name)
+                    self.outputs[param_name] = '*'
                     self.variables[param_name] = ''.join(param.type.type.type.names)
                 
             
@@ -206,7 +206,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
         if isinstance(node.expr, c_ast.ID):
             var_name = node.expr.name
             if var_name not in self.outputs:  # Evita duplicações
-                self.outputs.append(var_name)
+                self.outputs[var_name] = ''
 
     def _is_pointer(self, type_node):
         """ Função auxiliar para verificar se um nó é ponteiro """
@@ -215,7 +215,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
     def get_results(self):
             """ Retorna as listas de entradas e saídas como strings formatadas """
             formatted_inputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.inputs))
-            formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs))
+            formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs.keys()))
             return formatted_inputs.replace('"', '\\"'), formatted_outputs.replace('"', '\\"')
         
     def get_variables_and_sut_outputs(self):

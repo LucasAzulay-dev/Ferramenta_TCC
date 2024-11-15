@@ -30,12 +30,13 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         self.output_variables = {}
         self.components_inputs = {}
         self.components_outputs = {}
+        self.components_all_parameters = {}
         self.components_not_used_variables = {}
         
     def build_sut_variables_and_outputs(self, ast, target_function):
         nameInputsOutputs = ParseVariablesAndSutOutputs(ast, target_function)
         self.variables = nameInputsOutputs[0]
-        self.output_variables = {key: '*' for key in nameInputsOutputs[1]}
+        self.output_variables = nameInputsOutputs[1]
         
     def visit_FuncDef(self, node):
 		# Verificar se estamos na definição da função SUT
@@ -49,6 +50,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             inputs, outputs, all_parameters = get_component_input_outputs(function_name, node)
             self.components_inputs[function_name] = inputs
             self.components_outputs[function_name] = outputs
+            self.components_all_parameters[function_name] = all_parameters
             components_not_used_variables = [
                 param for param in all_parameters if param not in inputs and param not in outputs
             ]
@@ -59,6 +61,42 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             func_name = self.generator.visit(node.name)
             if(func_name != 'sprintf'):
                 new_statements = []
+                #Ordered
+                passed_parameters = []
+                
+                for arg in node.args.exprs:
+                    var = self.generator.visit(arg)
+                    if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
+                        passed_parameters.append(var)
+                    elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (var not in self.output_variables):  # Ponteiro
+                        pointed_var = self.generator.visit(arg.expr)
+                        passed_parameters.append(pointed_var)
+                    elif (var in self.output_variables):
+                        passed_parameters.append(var)
+                
+                component_all_params = self.components_all_parameters.get(func_name)
+                
+                for index, passed_parameter in enumerate(passed_parameters): 
+                    # Obter o parâmetro da definição correspondente ao índice
+                    param_def_to_change = component_all_params[index]
+                    
+                    not_used_vars = self.components_not_used_variables.get(func_name, [])
+                    inputs = self.components_inputs.get(func_name, [])
+                    outputs = self.components_outputs.get(func_name, [])
+
+                    if param_def_to_change in not_used_vars:
+                        not_used_vars[not_used_vars.index(param_def_to_change)] = passed_parameter
+                    
+                    if param_def_to_change in inputs:
+                        inputs[inputs.index(param_def_to_change)] = passed_parameter
+                    
+                    if param_def_to_change in outputs:
+                        outputs[outputs.index(param_def_to_change)] = passed_parameter
+
+                    # Atualizar os dicionários com os novos valores
+                    self.components_not_used_variables[func_name] = not_used_vars
+                    self.components_inputs[func_name] = inputs
+                    self.components_outputs[func_name] = outputs
 
                 # Adicionar sprintf para registrar dados em JSON após a função
                 execution_order_str = f'{self.execution_order}'
@@ -94,7 +132,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 f'\\"out\\": {{{",".join(args_out_json)}}}'
                 ) + r'},", '
                 args_after_call = ','.join(
-                [f'*{key}' if key in self.output_variables else key for key in self.components_outputs.get(func_name)]
+                [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name)]
                 )
                 
                 # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
@@ -116,6 +154,41 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             func_name = self.generator.visit(func_call.name)
 
             new_statements = []
+            passed_parameters = []
+            
+            for arg in func_call.args.exprs:
+                    var = self.generator.visit(arg)
+                    if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
+                        passed_parameters.append(var)
+                    elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (var not in self.output_variables):  # Ponteiro
+                        pointed_var = self.generator.visit(arg.expr)
+                        passed_parameters.append(pointed_var)
+                    elif (var in self.output_variables):
+                        passed_parameters.append(var)
+                        
+            component_all_params = self.components_all_parameters.get(func_name)
+                
+            for index, passed_parameter in enumerate(passed_parameters): 
+                # Obter o parâmetro da definição correspondente ao índice
+                param_def_to_change = component_all_params[index]
+                
+                not_used_vars = self.components_not_used_variables.get(func_name, [])
+                inputs = self.components_inputs.get(func_name, [])
+                outputs = self.components_outputs.get(func_name, [])
+
+                if param_def_to_change in not_used_vars:
+                    not_used_vars[not_used_vars.index(param_def_to_change)] = passed_parameter
+                
+                if param_def_to_change in inputs:
+                    inputs[inputs.index(param_def_to_change)] = passed_parameter
+                
+                if param_def_to_change in outputs:
+                    outputs[outputs.index(param_def_to_change)] = passed_parameter
+
+                # Atualizar os dicionários com os novos valores
+                self.components_not_used_variables[func_name] = not_used_vars
+                self.components_inputs[func_name] = inputs
+                self.components_outputs[func_name] = outputs
 
             if isinstance(node.lvalue, c_ast.PtrDecl) or isinstance(node.lvalue, c_ast.ID) or isinstance(node.lvalue, c_ast.UnaryOp):
                 var = self.generator.visit(node.lvalue)
@@ -163,8 +236,8 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             f'\\"out\\": {{{",".join(args_out_json)}}}'
             ) + r'},", '
             args_after_call = ','.join(
-                [f'*{key}' if key in self.output_variables else key for key in self.components_outputs.get(func_name)]
-                )
+            [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name)]
+            )
             
             # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
             new_statements.append(c_ast.FuncCall(

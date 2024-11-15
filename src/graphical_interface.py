@@ -11,7 +11,7 @@ pdf_index = 0
 page_index = 0
 
 def select_excel():
-    excel_file_path = filedialog.askopenfilename(title="Select Excel File", filetypes=[("Excel files", "*.xlsx")])
+    excel_file_path = filedialog.askopenfilename(title="Select Excel File", filetypes=[("Excel files", ".xlsx .xls")])
     entry_excel.delete(0, tk.END)
     entry_excel.insert(0, excel_file_path)
 

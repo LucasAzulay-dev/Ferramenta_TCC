@@ -126,7 +126,7 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
     columns_to_skip = ['Time', 'INPUT_COMMENTS', 'OUTPUT_COMMENTS']
     used_cols = lambda x: x not in columns_to_skip
 
-    df = pd.read_excel(arquivo_excel, header = 1, usecols=used_cols, dtype=object)
+    df = pd.read_excel(arquivo_excel, engine='calamine',header = 1, usecols=used_cols, dtype=object)
     
     # Verifica se o número da coluna é válido
     if numero_coluna < 0 or numero_coluna >= len(df.columns):

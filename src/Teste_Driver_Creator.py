@@ -41,7 +41,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
     #used_cols = range(1, len(pd.read_excel(excel_file_path).columns))
 
     # Leia o arquivo Excel
-    df = pd.read_excel(excel_file_path,header=1, engine='openpyxl', usecols=used_cols, dtype=object, skiprows=skipedlines)
+    df = pd.read_excel(excel_file_path,header=1, engine='calamine', usecols=used_cols, dtype=object, skiprows=skipedlines)
 
     num_linhas = len(df.index)    
 

@@ -39,9 +39,9 @@ def diagram_generator(log_data, diagram_directory, diagram_filename):
         # Nó de acoplamento destacado entre componentes
         with dot.subgraph(name="cluster_SUT") as c:
             if(output_var in log_data["outputs"]):
-                dot.edge(component, output_var, label=f"Calls: {count}")
+                dot.edge(component, output_var)
             else:
-                c.edge(component, output_var, label=f"Calls: {count}")
+                c.edge(component, output_var)
 
     # Criar arestas únicas com variáveis de acoplamento destacadas e dentro do SUT
     for (input_var, component), count in input_vars.items():
@@ -54,7 +54,7 @@ def diagram_generator(log_data, diagram_directory, diagram_filename):
     # Criar arestas entre entradas e componentes, e entre componentes e saídas do SUT
     for (source, target), count in input_vars.items():
         if count > 1:
-            dot.edge(source, target, label=f"Calls: {count}")
+            dot.edge(source, target)
         else:
             dot.edge(source, target)
 

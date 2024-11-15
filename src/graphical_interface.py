@@ -20,12 +20,6 @@ def select_sut():
     entry_sut.delete(0, tk.END)
     entry_sut.insert(0, sut_file_path)
 
-#é pra selecionar uma pasta com todos os arquivos para compilação
-def select_folder():
-    folder_path = filedialog.askdirectory(title="Select Folder with Files to Compile")
-    entry_folder.delete(0, tk.END)
-    entry_folder.insert(0, folder_path)
-
 def display_pdf(pdf_files_path,index, page_num=0):
     if not pdf_files_path:
         return 0
@@ -82,7 +76,6 @@ def execute():
     sut_file_path = entry_sut.get()
     function_name = entry_func_name.get()
     compiler = compiler_var.get()
-    folder_path = entry_folder.get()
     buffer_length = entry_buffer_name.get()
 
     if not excel_file_path or not sut_file_path or not function_name:
@@ -156,15 +149,6 @@ if __name__ == "__main__":
     entry_sut.pack(side="left", padx=5)
     button_sut = tk.Button(frame_sut, text="Select", command=select_sut, **button_style)
     button_sut.pack(side="left")
-
-    frame_folder = ttk.Frame(left_frame)
-    frame_folder.pack(pady=5, fill="x")
-    label_folder = ttk.Label(frame_folder, text="Folder with Files to Compile:", font=default_font)
-    label_folder.pack(side="left")
-    entry_folder = ttk.Entry(frame_folder, width=40, font=default_font)
-    entry_folder.pack(side="left", padx=5)
-    button_folder = tk.Button(frame_folder, text="Select", command=select_folder, **button_style)
-    button_folder.pack(side="left")
 
     frame_func = ttk.Frame(left_frame)
     frame_func.pack(pady=5, fill="x")

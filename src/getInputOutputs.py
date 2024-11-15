@@ -5,7 +5,7 @@ class FunctionIOAnalyzer(c_ast.NodeVisitor):
         self.function_name = function_name
         self.inputs = []
         self.outputs = []
-        self.params_order = []
+        self.all_parameters = []  # Nova lista para todos os parâmetros
         self.param_types = {}
 
     def visit_FuncDef(self, node):
@@ -13,7 +13,7 @@ class FunctionIOAnalyzer(c_ast.NodeVisitor):
             # Captura os parâmetros da função na ordem de declaração
             for param in node.decl.type.args.params:
                 param_name = param.name
-                self.params_order.append(param_name)
+                self.all_parameters.append(param_name)  # Adiciona à lista AllParameters
                 # Verifica se o parâmetro é ponteiro
                 if isinstance(param.type, c_ast.PtrDecl):
                     self.param_types[param_name] = 'pointer'
@@ -90,14 +90,10 @@ class FunctionIOAnalyzer(c_ast.NodeVisitor):
         self.visit(ast)
 
         # Ordena inputs e outputs de acordo com a ordem dos parâmetros
-        ordered_inputs = [p for p in self.params_order if p in self.inputs]
-        ordered_outputs = [p for p in self.params_order if p in self.outputs]
+        ordered_inputs = [p for p in self.all_parameters if p in self.inputs]
+        ordered_outputs = [p for p in self.all_parameters if p in self.outputs]
 
-        # Adiciona "returnValue" no final dos outputs se necessário
-        if "returnValue" in self.outputs:
-            ordered_outputs.append("returnValue")
-
-        return ordered_inputs, ordered_outputs
+        return ordered_inputs, ordered_outputs, self.all_parameters
 
 def get_component_input_outputs(function_name, ast):
     analyzer = FunctionIOAnalyzer(function_name)

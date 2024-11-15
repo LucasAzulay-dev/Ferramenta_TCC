@@ -30,6 +30,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         self.output_variables = {}
         self.components_inputs = {}
         self.components_outputs = {}
+        self.components_not_used_variables = {}
         
     def build_sut_variables_and_outputs(self, ast, target_function):
         nameInputsOutputs = ParseVariablesAndSutOutputs(ast, target_function)
@@ -45,9 +46,13 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             #print(self.variables)
             self.instrument_sut = False
         else:
-            inputs, outputs = get_component_input_outputs(function_name, node)
+            inputs, outputs, all_parameters = get_component_input_outputs(function_name, node)
             self.components_inputs[function_name] = inputs
             self.components_outputs[function_name] = outputs
+            components_not_used_variables = [
+                param for param in all_parameters if param not in inputs and param not in outputs
+            ]
+            self.components_not_used_variables[function_name] = components_not_used_variables
 
     def visit_FuncCall(self, node):
         if self.instrument_sut:
@@ -59,19 +64,25 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 execution_order_str = f'{self.execution_order}'
                 self.execution_order += 1
 
+                args_not_used = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_not_used_variables.get(func_name)]
                 args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name)]
                 json_entry_before_call = r'"'+(
                 f'{{\\"function\\": \\"{func_name}\\", '
                 f'\\"executionOrder\\": \\"{execution_order_str}\\", '
+                f'\\"not_used\\": {{{",".join(args_not_used)}}},'
                 f'\\"in\\": {{{",".join(args_in_json)}}}'
                 ) + r',"'
+                args_not_used = ','.join([f'{key}' for key in self.components_not_used_variables.get(func_name)])
                 args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name)])
+                args_combined = ','.join(
+                filter(None, [args_not_used, args_before_call])
+                )
                 
                 new_statements.append(c_ast.FuncCall(
                     c_ast.ID("sprintf"),
                     c_ast.ExprList([
                         c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
-                        c_ast.Constant(type="string", value=json_entry_before_call + ','+ args_before_call)
+                        c_ast.Constant(type="string", value=json_entry_before_call + ', '+ args_combined)
                     ])
                 ))
 
@@ -122,19 +133,25 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             execution_order_str = f'{self.execution_order}'
             self.execution_order += 1
 
+            args_not_used = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_not_used_variables.get(func_name)]
             args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name)]
             json_entry_before_call = r'"'+(
             f'{{\\"function\\": \\"{func_name}\\", '
             f'\\"executionOrder\\": \\"{execution_order_str}\\", '
+            f'\\"not_used\\": {{{",".join(args_not_used)}}},'
             f'\\"in\\": {{{",".join(args_in_json)}}}'
             ) + r',"'
+            args_not_used = ','.join([f'{key}' for key in self.components_not_used_variables.get(func_name)])
             args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name)])
+            args_combined = ','.join(
+                filter(None, [args_not_used, args_before_call])
+            )
             
             new_statements.append(c_ast.FuncCall(
                 c_ast.ID("sprintf"),
                 c_ast.ExprList([
                     c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
-                    c_ast.Constant(type="string", value=json_entry_before_call + ','+ args_before_call)
+                    c_ast.Constant(type="string", value=json_entry_before_call + ', '+ args_combined)
                 ])
             ))
 

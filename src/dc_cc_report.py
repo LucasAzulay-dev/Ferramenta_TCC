@@ -83,7 +83,7 @@ class PDF(FPDF):
         # Adiciona seção de cobertura com cores baseadas no valor
         self.chapter_title("DC/CC Coverage Summary")
         coverage_percentage = self.data['dc_cc_coverage'] * 100
-        color = (0, 128, 0) if coverage_percentage > 85 else (255, 165, 0) if coverage_percentage > 50 else (255, 69, 0)
+        color = (0, 128, 0) if coverage_percentage > 85 else (255, 150, 0) if coverage_percentage > 50 else (255, 0, 0)
         self.set_text_color(*color)
         adicionar_ao_log(f"DC/CC Coverage: {coverage_percentage:.1f}%")
         
@@ -139,6 +139,7 @@ class PDF(FPDF):
         self.set_x(self.get_x() + tab_space)
         independent_exercised = False
         independent_exercised_and_sut_output_affected = False
+        text_to_append = ''
         
         for exercise in self.data['individual_coupling_exercises']:
             
@@ -151,6 +152,11 @@ class PDF(FPDF):
                 
         self.couplings_color[coupling['id']] =  (0, 100, 0) if independent_exercised_and_sut_output_affected else (255, 0, 0) if independent_exercised else (240, 150, 60)
         
+        if('unused_var' in coupling and (coupling['unused_var'] == True)):
+            text_to_append = ' | Unused Variable'
+            self.couplings_color[coupling['id']] = (74, 37, 17)
+            
+        
         self.set_font("Arial", "B", 12)
         color = self.couplings_color.get(coupling['id'])
         self.set_text_color(*color)
@@ -158,7 +164,7 @@ class PDF(FPDF):
         independent_exercised_string = "Yes" if independent_exercised else "No"
         self.cell(58, 10, f" | Independent Exercised: {independent_exercised_string}", 10)
         independent_exercised_and_sut_output_affected_string = "Yes" if independent_exercised_and_sut_output_affected else "No"
-        self.cell(0, 10, f"  | Sut Outputs Affected: {independent_exercised_and_sut_output_affected_string}", 10, 1)
+        self.cell(0, 10, f"  | Sut Outputs Affected: {independent_exercised_and_sut_output_affected_string+text_to_append}", 10, 1)
         self.set_text_color(0,0,0)
                 
     def add_coupling_section(self, coupling):

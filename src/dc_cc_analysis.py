@@ -3,6 +3,7 @@ class CouplingAnalyzer:
         self.log_data = log_data
         self.inputs_components = {}
         self.outputs_component = {}
+        self.components_not_used_vars = {}
         self.inputs_related_components_outputs = {}
         self.inputs_related_sut_outputs = {}
         self.couplings = {}
@@ -55,6 +56,20 @@ class CouplingAnalyzer:
                 self.inputs_related_components_outputs[input_key] = set()
             for output_component in analyse['out'].keys():
                 self.inputs_related_components_outputs[input_key].add(output_component)
+                
+        for not_used in analyse['not_used']:
+            if not_used not in self.inputs_components:
+                self.inputs_components[not_used] = set()
+            self.inputs_components[not_used].add(analyse['function'])
+            
+            if not_used not in self.components_not_used_vars:
+                self.components_not_used_vars[not_used] = set()                
+            self.components_not_used_vars[not_used].add(analyse['function'])
+            
+            if not_used not in self.inputs_related_components_outputs:
+                self.inputs_related_components_outputs[not_used] = set()
+            for output_component in analyse['out'].keys():
+                self.inputs_related_components_outputs[not_used].add(output_component)
 
     def _process_outputs(self, analyse):
         for output_key in analyse['out']:
@@ -150,13 +165,16 @@ class CouplingAnalyzer:
                     
     def _analyze_couplings_execution(self):
         for id, coupling in self.couplings.items():
-            for id_log_data_executions, execution in enumerate(self.log_data['executions']):
-                component_analyse = next(
-                    (analyse_item for analyse_item in execution['analysis']
-                     if analyse_item['function'] == coupling['input_component']), None)
-                
-                if component_analyse:
-                    self._update_coupling_execution(id, coupling, component_analyse, execution, id_log_data_executions)
+            if(coupling['input_component'] not in (self.components_not_used_vars.get(coupling['var']) or [])):
+                for id_log_data_executions, execution in enumerate(self.log_data['executions']):
+                    component_analyse = next(
+                        (analyse_item for analyse_item in execution['analysis']
+                        if analyse_item['function'] == coupling['input_component']), None)
+                    
+                    if component_analyse:
+                        self._update_coupling_execution(id, coupling, component_analyse, execution, id_log_data_executions)
+            else:
+                coupling['unused_var'] = True
 
     def _update_coupling_execution(self, id, coupling, component_analyse, execution, id_log_data_executions):
         component_inputs_values = list(component_analyse['in'].values())
@@ -240,19 +258,20 @@ class CouplingAnalyzer:
                 for i, value_execution in enumerate(values_executions):
                     for j in range(i + 1, len(values_executions)):
                         pair_values_execution = [value_execution, values_executions[j]]
-                        sut_outputs_affected = self._check_sut_affected(pair_values_execution)
-                        self.individual_coupling_exercises.append({
-                                'id': id, 
-                                'var': self.couplings[id]['var'], 
-                                'test_vector_pair_lines': tuple(self._determine_test_vector_pair_lines(pair_values_execution)),
-                                'output_component': self.couplings[id]['output_component'],
-                                'input_component': self.couplings[id]['input_component'],
-                                'non_varying_params': list(non_varying_params.keys()),
-                                'non_varying_params_values': list(non_varying_params_values),
-                                'sut_outputs_related': self.couplings_executions[id]['sut_outputs_related'],
-                                'values_executions': pair_values_execution,
-                                'sut_outputs_affected': sut_outputs_affected
-                                })
+                        if(value_execution['var_value'] != values_executions[j]['var_value']):
+                            sut_outputs_affected = self._check_sut_affected(pair_values_execution)
+                            self.individual_coupling_exercises.append({
+                                    'id': id, 
+                                    'var': self.couplings[id]['var'], 
+                                    'test_vector_pair_lines': tuple(self._determine_test_vector_pair_lines(pair_values_execution)),
+                                    'output_component': self.couplings[id]['output_component'],
+                                    'input_component': self.couplings[id]['input_component'],
+                                    'non_varying_params': list(non_varying_params.keys()),
+                                    'non_varying_params_values': list(non_varying_params_values),
+                                    'sut_outputs_related': self.couplings_executions[id]['sut_outputs_related'],
+                                    'values_executions': pair_values_execution,
+                                    'sut_outputs_affected': sut_outputs_affected
+                                    })
 
                         
     def _determine_dc_cc_coverage(self):

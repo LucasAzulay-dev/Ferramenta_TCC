@@ -234,6 +234,8 @@ class CouplingAnalyzer:
                     non_varying_params[param] = index
                 else:
                     coupling_values_executions_index = index
+                    
+            self.couplings[id]['non_varying_params'] = list(non_varying_params.keys())
 
             for execution in coupling_executions['executions']:
                 self._analyze_non_varying_params(execution, non_varying_params, coupling_values_executions_index, non_varying_params_values_executions)

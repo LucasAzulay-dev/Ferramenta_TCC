@@ -153,7 +153,7 @@ class PDF(FPDF):
         self.couplings_color[coupling['id']] =  (0, 100, 0) if independent_exercised_and_sut_output_affected else (255, 0, 0) if independent_exercised else (240, 150, 60)
         
         if('unused_var' in coupling and (coupling['unused_var'] == True)):
-            text_to_append = ' | Unused Variable'
+            text_to_append = ' | Unused'
             self.couplings_color[coupling['id']] = (74, 37, 17)
             
         
@@ -181,31 +181,39 @@ class PDF(FPDF):
         # Tabela para exibir os detalhes do acoplamento
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(45, 6, "Variable:", 0)
+        self.cell(52, 6, "Variable:", 0)
         self.set_font("Arial", "", 12)
         self.cell(0, 6, coupling['var'], 0, 1)
 
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(46, 6, "Output Component:", 0)
+        self.cell(52, 6, "Output Component:", 0)
         self.set_font("Arial", "", 12)
         self.cell(0, 6, coupling['output_component'], 0, 1)
 
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(46, 6, "Input Component:", 0)
+        self.cell(52, 6, "Input Component:", 0)
         self.set_font("Arial", "", 12)
         self.cell(0, 6, coupling['input_component'], 0, 1)
+        
+        # Tabela para exibir os exercícios de acoplamento individuais
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        self.cell(52, 5, "Non-Varying Parameters:", 0)
+        self.set_font("Arial", "", 12)
+        non_varying_params = ', '.join(coupling['non_varying_params']) if coupling.get('non_varying_params', False) else 'None'
+        self.cell(0, 5, non_varying_params, 0,1)
 
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(46, 6, "SUT Outputs Related:", 0)
+        self.cell(52, 6, "SUT Outputs Related:", 0)
         self.set_font("Arial", "", 12)
         self.cell(0, 6, ', '.join(coupling['sut_outputs_related']), 0, 1)
         
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(46, 6, "SUT Outputs Affected:", 0)
+        self.cell(52, 6, "SUT Outputs Affected:", 0)
         self.set_font("Arial", "", 12)
         self.cell(0, 6, ', '.join(coupling['suts_outputs_affected']), 0, 1)
         
@@ -232,50 +240,77 @@ class PDF(FPDF):
                 # Mostrando se os SUT outputs foram afetados
                 self.set_x(self.get_x() + tab_space)
                 self.set_font("Arial", "B", 12)
-                self.cell(100, 5, "SUT Output Affected:", 0)
+                self.cell(70, 5, "SUT Output Affected:", 0)
                 self.set_font("Arial", "", 12)
                 affected_status = "Yes" if exercise['sut_output_affected'] else "No"
                 self.cell(0, 5, affected_status, 0, 1)
                 
-                # Tabela para exibir os exercícios de acoplamento individuais
-                self.set_x(self.get_x() + tab_space)
-                self.set_font("Arial", "B", 12)
-                self.cell(100, 5, "Non-Varying Parameters:", 0)
-                self.set_font("Arial", "", 12)
-                non_varying_params = ', '.join(exercise['non_varying_params']) if exercise['non_varying_params'] else 'None'
-                self.cell(0, 5, non_varying_params, 0, 1)
-
-                self.set_x(self.get_x() + tab_space)
-                self.set_font("Arial", "B", 12)
-                self.cell(100, 5, "Non-Varying Parameters Values:", 0)
-                self.set_font("Arial", "", 12)
-                non_varying_values = ', '.join(exercise['non_varying_params_values']) if exercise['non_varying_params_values'] else 'None'
-                self.cell(0, 5, non_varying_values, 0, 1)
-
                 sut_outputs_has_no_impact = [key for (key, value) in exercise['suts_outputs_could_be_affected'].items() if not value]
                 if(sut_outputs_has_no_impact):
                     self.set_x(self.get_x() + tab_space)
                     self.set_font("Arial", "B", 12)
-                    self.cell(100, 5, "Sut Outputs Detected No Impact:", 0)
+                    self.cell(71, 5, "Sut Outputs Detected No Impact:", 0)
                     self.set_font("Arial", "", 12)
                     non_varying_values = ', '.join(sut_outputs_has_no_impact)
                     self.cell(0, 5, non_varying_values, 0, 1)
+                    
+                test_size = 20
+                variable_size = 30
+                sut_outputs_could_affected_index = {key: idx for idx, (key, value) in enumerate(exercise['suts_outputs_could_be_affected'].items()) if value}
+                output_size = len(sut_outputs_could_affected_index)*50
+                heigth = 10
+                # Tabela para exibir os exercícios de acoplamento individuais
+                if(non_varying_params != 'None'):
+                    heigth = 15
+                    self.set_x(self.get_x() + tab_space)
+                    self.set_font("Arial", "B", 12)
+                    self.cell(test_size, heigth, 'Test', 1)
+                    self.set_font("Arial", "B", 12)
+                    self.cell(variable_size, 5, non_varying_params, 1)
+                    self.set_font("Arial", "B", 12)
+                    self.cell(output_size, 5, ','.join(exercise['non_varying_params_values']), 1)
+                    self.ln(5)
+                    self.set_x(self.get_x() + test_size + tab_space)
+                else:
+                    self.set_x(self.get_x() + tab_space)
+                    self.set_font("Arial", "B", 12)
+                    self.cell(test_size, heigth, 'Test', 1)
                 
+                # Tabela para exibir os exercícios de acoplamento individuais
                 # Adicionando a tabela de execuções
+                self.set_font("Arial", "B", 12)
+                self.set_font("Arial", "B", 12)
+                self.cell(variable_size, 5, "Variable", 1)
+                self.cell(output_size, 5, 'Outputs', 1)
+                self.ln()
+                
+                # Tabela para exibir os exercícios de acoplamento individuais
+                # Adicionando a tabela de execuções
+                self.set_x(self.get_x() + test_size)
                 self.set_x(self.get_x() + tab_space)
                 self.set_font("Arial", "B", 12)
-                self.cell(40, 5, coupling['var'], 1)
-                sut_outputs_could_affected_index = {key: idx for idx, (key, value) in enumerate(exercise['suts_outputs_could_be_affected'].items()) if value}
-                self.cell(0, 5, ', '.join(sut_outputs_could_affected_index.keys()), 1)
+                self.set_font("Arial", "B", 12)
+                self.cell(variable_size, 5, coupling['var'], 1)
+                for sut_output_could_affected in sut_outputs_could_affected_index.keys():
+                    self.cell(output_size/len(sut_outputs_could_affected_index.keys()), 5, sut_output_could_affected, 1)
                 self.ln()
-
+                
+                vector_line_index = 0
                 for execution in exercise['values_executions']:
-                    self.set_x(self.get_x() + tab_space)
+                    self.set_x(self.get_x() + test_size)
                     self.set_font("Arial", "", 12)
-                    self.cell(40, 5, str(execution['var_value']), 1)
-                    sut_values = ', '.join([execution['sut_values'][idx] for idx in sut_outputs_could_affected_index.values()])
-                    self.cell(0, 5, sut_values, 1)
+                    self.cell(test_size, 5, str(exercise['test_vector_pair_lines'][vector_line_index]), 1)
+                    self.cell(variable_size, 5, str(execution['var_value']), 1)
+                    for idx in sut_outputs_could_affected_index.values():
+                        is_the_same = True
+                        self.set_text_color(0, 0, 0)
+                        if exercise['values_executions'][0]['sut_values'][idx] != exercise['values_executions'][1]['sut_values'][idx]: 
+                            is_the_same = False
+                            if(not is_the_same): self.set_text_color(0, 128, 0)
+                        self.cell(output_size/len(sut_outputs_could_affected_index.keys()), 5, execution['sut_values'][idx], 1)
+                        self.set_text_color(0, 0, 0)
                     self.ln()
+                    vector_line_index += 1
 
                 self.ln(5)  # Espaço entre seções
 

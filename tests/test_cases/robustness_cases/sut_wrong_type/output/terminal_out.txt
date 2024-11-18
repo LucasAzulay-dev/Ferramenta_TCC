@@ -1,0 +1,19 @@
+Creating Output folder...
+Output folder created successfully.
+Starting code instrumentation...
+.h file generated successfully.
+Instrumentation completed.
+Instrumented Code created successfully.
+Creating Test Driver...
+Test Driver created successfully.
+Running Test Driver...
+Test Driver executed successfully.
+Generating DC/CC report...
+Generating SUT Diagram
+SUT Diagram sucessfully generated
+Tests Passed: 0.0%
+Tests Failed (Vector Line): 1,2,3,4
+DC/CC Coverage: 20.0%
+Identified Couplings: 5
+Couplings Exercised Independent and Affecting Outputs: 1
+PDF report created: output\Report\dc_cc_analysis_report.pdf

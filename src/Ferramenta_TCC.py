@@ -30,7 +30,7 @@ def executar_ferramenta(excel_file_path, code_path, function_name, compiler, buf
 if __name__ == '__main__':
 
     # Defina o caminho para o arquivo Excel
-    excel_file_path = "examples/sut_final/TestVec2.xlsx"
+    excel_file_path = "examples/sut_final/TestVec.xls"
 
     # Defina o nome do arquivo .c do SUT
     code_path = "examples/sut_final/sut.c" 

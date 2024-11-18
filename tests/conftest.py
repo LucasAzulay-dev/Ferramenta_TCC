@@ -1,6 +1,6 @@
+from .config import *
 import pytest
 import os
-import builtins
 from pathlib import Path
 import shutil
 import tempfile
@@ -8,131 +8,120 @@ import re
 import json
 from .config import *
 import platform
+from src.Ferramenta_TCC import executar_ferramenta
+from contextlib import redirect_stdout, redirect_stderr
+import io
 
-COMPILER_OPTIONS = ['gcc', 'clang']
-FUNCTIONAL_CASES = ['case1', 'case2', 'case3']
+
+# COMPILER_OPTIONS = ['gcc']
+# FUNCTIONAL_CASES = ['case1', 'case2', 'case3']
+FUNCTIONAL_CASES = ['case_embraer', 'case1']
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{
         'case_folder' : 'sut_function_not_found',
         'sut_file_name': 'SUT.c',
-        'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec.xlsx'
+        'sut_fcn_name' : 'wrong_name',
+        'testvec_name' : 'testvec.xlsx',
+        'buffer_length' : None
     },
     'sut_not_testable' :{
         'case_folder' : 'sut_not_testable',
         'sut_file_name': 'SUT_not_testable.c',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec.xlsx'
+        'testvec_name' : 'testvec.xlsx',
+        'buffer_length' : None
     },
     'sut_runtime_error' :{
         'case_folder' : 'sut_runtime_error',
         'sut_file_name': 'SUT_exec_error.c',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec.xlsx'
+        'testvec_name' : 'testvec.xlsx',
+        'buffer_length' : None
     },
     'sut_wrong_type' :{
         'case_folder' : 'sut_wrong_type',
         'sut_file_name': 'SUT_wrong_type.cpp',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec.xlsx'
+        'testvec_name' : 'testvec.xlsx',
+        'buffer_length' : None
     },
     'testvec_all_invalid_lines' :{
         'case_folder' : 'testvec_all_invalid_lines',
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec_all_invalid_lines.xlsx'
+        'testvec_name' : 'testvec_all_invalid_lines.xlsx',
+        'buffer_length' : None
     },
     'testvec_invalid_line' :{
         'case_folder' : 'testvec_invalid_line',
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec_invalid_line.xlsx'
+        'testvec_name' : 'testvec_invalid_line.xlsx',
+        'buffer_length' : None
     },
     'testvec_missing_column' :{
         'case_folder' : 'testvec_missing_column',
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec_missing_column.xlsx'
+        'testvec_name' : 'testvec_missing_column.xlsx',
+        'buffer_length' : None
     },
     'testvec_wrong_type' :{
         'case_folder' : 'testvec_wrong_type',
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec_wrong_type.csv'
+        'testvec_name' : 'testvec_wrong_type.csv',
+        'buffer_length' : None
     },
     'log_buffer_load_error' :{
         'case_folder' : 'log_buffer_load_error',
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec.xlsx'
+        'testvec_name' : 'testvec.xlsx',
+        'buffer_length' : 1
     },
 }
 
-# Custom exception to pass tests earlier
-class TestPassedException(Exception):
-    pass
+# # Custom exception to pass tests earlier
+# class TestPassedException(Exception):
+#     pass
 
 # Get path to all functional test cases
-class FunctionalTestPaths:
+class FunctionalTestConfig:
     def __init__(self, case):
-        self.sut_path = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\src\\SUT\\SUT.c').absolute())
-        self.proj_dir = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\src').absolute())
-        self.sut_name = 'SUT'
-        self.testvec = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\testInputs\\testvec.xlsx').absolute())
+        self.case_dir = str(Path(PATH_FUNC_TEST_CASES+'\\'+case).absolute())
+        self.sut_path = str(Path(PATH_FUNC_TEST_CASES+'\\'+case+'\\src\\sut.c').absolute())
+        self.sut_name = 'sut'
+        self.buffer_length = None
+        self.testvec = str(Path(PATH_FUNC_TEST_CASES+'\\'+case+'\\testInputs\\testvec.xls').absolute())
+        if not os.path.isfile(self.testvec):
+            self.testvec = str(Path(PATH_FUNC_TEST_CASES+'\\'+case+'\\testInputs\\testvec.xlsx').absolute())
         # oracles
-        self.oracle_tests_passed = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\oracle\\testsPassed.txt').absolute())
-        self.oracle_functions_called_ordered = str(Path('tests\\test_cases\\functional_cases\\'+case+'\\oracle\\functionsCalledOrdered.txt').absolute())
+        self.oracle_tests_passed = str(Path(PATH_FUNC_TEST_CASES+'\\'+case+'\\oracle\\testsPassed.txt').absolute())
+        self.oracle_functions_called_ordered = str(Path(PATH_FUNC_TEST_CASES+'\\'+case+'\\oracle\\functionsCalledOrdered.txt').absolute())
+        # output
+        self.case_out = str(Path(PATH_FUNC_TEST_CASES+'\\'+case+'\\'+PATH_PROJ_OUTPUT).absolute())
 
 # Get path to all robustness test cases
-class RobustnessTestPaths:
+class RobustnessTestConfig:
     def __init__(self, robustness_case):
-        self.sut_path = str(Path('tests\\test_cases\\robustness_cases\\'+robustness_case['case_folder']+'\\'+robustness_case['sut_file_name']).absolute())
-        self.proj_dir = str(Path('tests\\test_cases\\robustness_cases\\'+robustness_case['case_folder']).absolute())
-        self.sut_name = robustness_case['sut_fcn_name']
-        self.testvec = str(Path('tests\\test_cases\\robustness_cases\\'+robustness_case['case_folder']+'\\'+robustness_case['testvec_name']).absolute())
+        case = ROBUSTNESS_CASES[robustness_case]
+        self.case_dir = str(Path(PATH_ROBS_TEST_CASES +'\\'+ case['case_folder']).absolute())
+        self.sut_path = str(Path(PATH_ROBS_TEST_CASES +'\\'+ case['case_folder']+'\\'+case['sut_file_name']).absolute())
+        self.sut_name = case['sut_fcn_name']
+        self.buffer_length = case['buffer_length']
+        self.testvec = str(Path(PATH_ROBS_TEST_CASES +'\\'+ case['case_folder']+'\\'+case['testvec_name']).absolute())
+        # output
+        self.case_out = str(Path(PATH_ROBS_TEST_CASES+'\\'+case['case_folder']+'\\'+PATH_PROJ_OUTPUT).absolute())
     
 class ToolParameters():
-    def __init__(self, sut_path, sut_name, proj_dir, testvec, compiler):
+    def __init__(self, sut_path, sut_name, testvec, compiler, buffer_length=None):
         self.sut_path = sut_path
         self.sut_name = sut_name
-        self.proj_dir = proj_dir
+        # self.proj_dir = proj_dir
         self.testvec = testvec
         self.compiler = compiler
-
-# Patch 'open' function to track all new files
-def patch_open(open_func, new_files):
-    def open_patched(file, mode='r', buffering=-1, encoding=None, 
-                     errors=None, newline=None, closefd=True, opener=None):
-        if not os.path.isfile(file):
-            new_files.append(file)
-        return open_func(file, mode=mode, buffering=buffering, encoding=encoding, 
-                     errors=errors, newline=newline, closefd=closefd, opener=opener)
-    return open_patched
-
-# Setup: Monkeypatch build-in 'open' function
-# Teardown: delete files created by tests
-@pytest.fixture(autouse=True)
-def cleanup_new_files(monkeypatch):
-    new_files = []
-    monkeypatch.setattr(builtins, 'open', patch_open(builtins.open, new_files))
-    yield
-    for file in new_files:
-        if os.path.isfile(file):
-            os.remove(file)
-
-# Monkeypatch os.startfile or os.system to prevent the opening of the report after every execution
-@pytest.fixture(autouse=True)
-def dont_open_report(monkeypatch):
-    def mock_startfile(path):
-        pass
-
-    def mock_system(command):
-        pass
-
-    if platform.system() == "Windows":
-        monkeypatch.setattr(os, "startfile", mock_startfile)
-    else:
-        monkeypatch.setattr(os, "system", mock_system)
+        self.buffer_length = buffer_length
 
 # Setup: backup the 'output' directory
 # Teardown: restore the original 'output' directory
@@ -141,7 +130,7 @@ def prepare_output_directory():
     output_dir = str(Path("output").absolute())
     backup_dir = 'output_backup'
 
-    print("Backing up output dir")    
+    print("[pytest] Backing up output dir")    
     temp_dir = tempfile.mkdtemp()
     shutil.copytree(output_dir, os.path.join(temp_dir, backup_dir))
     for root, _, files in os.walk(output_dir):
@@ -150,57 +139,96 @@ def prepare_output_directory():
     
     yield
 
-    print('Restoring output dir')
+    print('[pytest] Restoring output dir')
     shutil.rmtree(output_dir)
     shutil.copytree(os.path.join(temp_dir, backup_dir), output_dir)
     shutil.rmtree(temp_dir)
 
-# Pause the test, for manual checks
-@pytest.fixture
-def pause_test(pytestconfig):
-    capmanager = pytestconfig.pluginmanager.getplugin('capturemanager')
+@pytest.fixture(scope="session")
+def monkeysession():
+    with pytest.MonkeyPatch.context() as mp:
+        yield mp
 
-    capmanager.suspend_global_capture(in_=True)
-    input('Test paused. Press enter to resume.')
-    yield
-    # tear-down
+@pytest.fixture(scope='session', params=FUNCTIONAL_CASES, autouse=False)
+def execute_functional_case(request, monkeysession):
+    """
+    Execute and save the output of the test case
+    """
+    # Monkeypatch to avoid opening the pdf report
+    if platform.system() == "Windows":
+        monkeysession.setattr(os, "startfile", lambda path, operation=None: None)
+    else:
+        monkeysession.setattr(os, "system", lambda path, operation=None: None)
 
-# Assert console output is equal to expected message
-@pytest.fixture
-def assert_output(capfd):
-    def check_output(expected_message):
-        out,_ = capfd.readouterr()
-        if expected_message in out:
-            raise TestPassedException()
-    return check_output
+    case = request.param
+    request.session.current_case = case #save context for other fixtures
+    print("[pytest] Executing case - "+ case)
+    param, paths = _get_case_config(case)
+    _clean_test_output_dir(paths)
+    f_out, f_err = io.StringIO(), io.StringIO()
+    with redirect_stdout(f_out), redirect_stderr(f_err):
+        executar_ferramenta(excel_file_path=param.testvec,  
+                            code_path=param.sut_path, 
+                            function_name=param.sut_name, 
+                            compiler=param.compiler)
+    _copy_test_output(paths)
+    _saveTerminalOutput(paths, f_out.getvalue(), f_err.getvalue())
 
-# Hook to pass test when TestPassedException is raised
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    outcome = yield
-    rep = outcome.get_result()
-    if call.excinfo is not None and call.excinfo.errisinstance(TestPassedException):
-        rep.outcome = "passed"
+@pytest.fixture()
+def execute_robust_case(monkeypatch):
+    """
+    Execute and save the output of robust test cases
+    """
+    # Monkeypatch to avoid opening the pdf report
+    if platform.system() == "Windows":
+        monkeypatch.setattr(os, "startfile", lambda path, operation=None: None)
+    else:
+        monkeypatch.setattr(os, "system", lambda path, operation=None: None)
+
+    def run_robust_case(case):
+        print("[pytest] Executing robustness case - "+ case)
+        param, paths = _get_case_config(case, isRobust=True)
+        _clean_test_output_dir(paths)
+        f_out, f_err = io.StringIO(), io.StringIO()
+        exception = None
+        try:
+            with redirect_stdout(f_out), redirect_stderr(f_err):
+                if param.buffer_length == None:
+                    executar_ferramenta(excel_file_path=param.testvec,  
+                                        code_path=param.sut_path, 
+                                        function_name=param.sut_name, 
+                                        compiler=param.compiler)
+                else:
+                    executar_ferramenta(excel_file_path=param.testvec,  
+                                        code_path=param.sut_path, 
+                                        function_name=param.sut_name, 
+                                        compiler=param.compiler,
+                                        bufferLength=param.buffer_length)
+        except Exception as e:
+            exception = e
+        finally:
+            _copy_test_output(paths)
+            _saveTerminalOutput(paths, f_out.getvalue(), f_err.getvalue())
+        if exception:
+            raise exception
+    return run_robust_case
 
 # Get JSON outputted to terminal
-@pytest.fixture
-def get_log_json(capfd):
-    def get_json_output():
-        out, _ = capfd.readouterr()
-
-        driver_executing_msg_position = out.find(MSG_DRIVER_EXECUTING)
-        if driver_executing_msg_position == -1:
-            pytest.fail(f"Message of driver execution not found.")
-
-        text_post_driver_execution = out[driver_executing_msg_position + len(MSG_DRIVER_EXECUTING):]
-        
-        json_match = re.search(r'{.*}', text_post_driver_execution, re.DOTALL)
+@pytest.fixture()
+def get_log_json(request):
+    def get_log_buffer(robustness_case=''):
+        if robustness_case == '':
+            case = request.session.current_case
+            _, paths = _get_case_config(case)
+        else:
+            case = robustness_case
+            _, paths = _get_case_config(case, isRobust=True)
+        log_buffer_txt = _getCaseLogBuffer(paths)
+        json_match = re.search(r'{.*}', log_buffer_txt, re.DOTALL)
         if json_match:
             json_text = json_match.group(0)
-
             # Remove commas before '}' or ']'
             json_text = re.sub(r',\s*([\}\]])', r'\1', json_text)
-
             try:
                 json_data = json.loads(json_text)
                 return json_data
@@ -208,44 +236,84 @@ def get_log_json(capfd):
                 pytest.fail("Failed to decode JSON: "+json_text)
         else:
             pytest.fail("No JSON found.")
-    
-    return get_json_output
+    return get_log_buffer
 
-# Run tests considering all functional test cases
-@pytest.fixture(params=FUNCTIONAL_CASES)
-def functional_config(request):
-    return FunctionalTestPaths(request.param)
-
-# Run tests considering all compiler options
-@pytest.fixture(params=COMPILER_OPTIONS)
-def compiler_config(request):
-    return request.param
-
-# Get parameters for success tests
+# Get oracle of tests passed
 @pytest.fixture
-def param_success(functional_config : FunctionalTestPaths, compiler_config):
-    param = ToolParameters(sut_path=functional_config.sut_path,
-                           proj_dir=functional_config.proj_dir,
-                           sut_name=functional_config.sut_name,
-                           testvec=functional_config.testvec,
-                           compiler=compiler_config)
-    return param
+def oracle_tests_passed(request):
+    case = request.session.current_case
+    _, paths = _get_case_config(case)
+    return _textFileToList(paths.oracle_tests_passed)
 
-# Get parameters for tests with some faulty lines in the test driver
+# Get oracle of tests passed
 @pytest.fixture
-def param_robustness_case(compiler_config):
-    def get_robustness_params(robustness_case):
-        rubustness_config = RobustnessTestPaths(robustness_case)
-        param = ToolParameters(sut_path=rubustness_config.sut_path,
-                            proj_dir=rubustness_config.proj_dir,
-                            sut_name=rubustness_config.sut_name,
-                            testvec=rubustness_config.testvec,
-                            compiler=compiler_config)
-        return param
-    return get_robustness_params
+def oracle_functions_called_ordered(request):
+    case = request.session.current_case
+    _, paths = _get_case_config(case)
+    return _textFileToList(paths.oracle_functions_called_ordered)
+
+@pytest.fixture
+def case_path(request):
+    case = request.session.current_case
+    _, paths = _get_case_config(case)
+    return paths.case_dir
+
+def _get_case_config(case, isRobust=False):
+    """
+    Get data related to the test case.
+    Returns the parameters and the case paths.
+    """
+    if isRobust:
+        case_paths = RobustnessTestConfig(case)
+    else:
+        case_paths = FunctionalTestConfig(case)
+
+    case_params = ToolParameters(sut_path=case_paths.sut_path,
+                        # proj_dir=case_paths.proj_dir,
+                        sut_name=case_paths.sut_name,
+                        testvec=case_paths.testvec,
+                        compiler='gcc')
+    return case_params, case_paths
+
+def _clean_test_output_dir(case_path : FunctionalTestConfig | RobustnessTestConfig):
+    """
+    Clean the test case output folder.
+    """
+    print("[pytest] Cleaning test output folder...")
+    case_output_dir = Path(case_path.case_out)
+    if case_output_dir.exists():
+        shutil.rmtree(case_output_dir)
+    case_output_dir.mkdir(parents=True)
+
+def _copy_test_output(case_path : FunctionalTestConfig | RobustnessTestConfig):
+    """
+    Copy the project output folder to the test case output folder.
+    """
+    print("[pytest] Coping project output to case output...")
+    proj_output_dir = Path(PATH_PROJ_OUTPUT)
+    case_output_dir = Path(case_path.case_out)
+    if proj_output_dir.exists():
+        shutil.copytree(proj_output_dir, case_output_dir, dirs_exist_ok=True)
+
+def _saveTerminalOutput(case_path : FunctionalTestConfig | RobustnessTestConfig, out, err):
+    """
+    Save the terminal output to files in the case output folder
+    """
+    out_path = os.path.join(case_path.case_out, 'terminal_out.txt')
+    err_path = os.path.join(case_path.case_out, 'terminal_errors.txt')
+    with open(out_path, 'w', encoding='utf-8') as file:
+        file.write(out)
+    with open(err_path, 'w', encoding='utf-8') as file:
+        file.write(err)
+
+def _getCaseLogBuffer(casePath: FunctionalTestConfig | RobustnessTestConfig):
+    buffer_path = os.path.join(casePath.case_dir, PATH_LOG_BUFFER)
+    with open(buffer_path, 'r', encoding='utf-8') as file:
+        log_buffer_txt = file.read()
+    return log_buffer_txt
 
 # return the lines of a text file as a list
-def textFileToList(filePath):
+def _textFileToList(filePath):
     with open(filePath, 'r', encoding='utf-8') as file:
         lines = file.readlines()
     lines = [
@@ -253,13 +321,3 @@ def textFileToList(filePath):
         if not line.startswith('#')
         ]
     return lines
-
-# Get oracle of tests passed
-@pytest.fixture
-def oracle_tests_passed(functional_config : FunctionalTestPaths):
-    return textFileToList(functional_config.oracle_tests_passed)
-
-# Get oracle of tests passed
-@pytest.fixture
-def oracle_functions_called_ordered(functional_config : FunctionalTestPaths):
-    return textFileToList(functional_config.oracle_functions_called_ordered)

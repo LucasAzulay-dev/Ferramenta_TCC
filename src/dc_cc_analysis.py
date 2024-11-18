@@ -11,6 +11,7 @@ class CouplingAnalyzer:
         self.coupling_id = 1
         self.individual_coupling_exercises = []
         self.dc_cc_coverarge = 0
+        self.dc_cc_coverage_2 = 0
         self.couplings_individually_exercised = 0
         self.couplings_individually_exercised_affected_sut = 0
         self.test_results = {
@@ -26,7 +27,8 @@ class CouplingAnalyzer:
         self._determine_dc_cc_coverage()
         self._analyse_test_result()
         return {
-                'couplings': self.couplings, 'individual_coupling_exercises': self.individual_coupling_exercises, 'dc_cc_coverage': self.dc_cc_coverage, 
+                'couplings': self.couplings, 'individual_coupling_exercises': self.individual_coupling_exercises, 
+                'dc_cc_coverage': self.dc_cc_coverage, 'dc_cc_coverage_2': self.dc_cc_coverage_2,
                 'couplings_individually_exercised':self.couplings_individually_exercised, 
                 'couplings_individually_exercised_affected_sut': self.couplings_individually_exercised_affected_sut,
                 'test_results': self.test_results
@@ -337,9 +339,12 @@ class CouplingAnalyzer:
         self.dc_cc_coverage = 0
         self.couplings_individually_exercised = 0
         self.couplings_individually_exercised_affected_sut = 0
+        self.count_sut_outputs_couplings_can_affect = 0
+        self.count_sut_outputs_couplings_affected = 0
         
         # Itera sobre cada acoplamento na estrutura `couplings`
         for id, coupling in self.couplings.items():
+            
             # Filtra exercícios individuais que correspondem ao ID do acoplamento atual
             individual_exercises = [
                 exercise for exercise in self.individual_coupling_exercises
@@ -358,8 +363,12 @@ class CouplingAnalyzer:
                 if exercise['sut_output_affected']:
                     self.couplings_individually_exercised_affected_sut += 1
                     break
-        
+                
+            self.count_sut_outputs_couplings_can_affect += len(coupling['sut_outputs_related'])
+            self.count_sut_outputs_couplings_affected += len(coupling['suts_outputs_affected'])
+                    
         self.dc_cc_coverage = self.couplings_individually_exercised_affected_sut / (len(self.couplings))
+        self.dc_cc_coverage_2 = self.count_sut_outputs_couplings_affected / self.count_sut_outputs_couplings_can_affect
         
     def _analyse_test_result(self):
         self.test_results['total_tests'] = self.log_data['numberOfTests']

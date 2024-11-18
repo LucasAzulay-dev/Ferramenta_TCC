@@ -44,7 +44,8 @@ class CouplingAnalyzer:
 
         # Identify SUT-related outputs for each input
         for input_key, components_outputs in self.inputs_related_components_outputs.items():
-            self._identify_input_related_sut_output(input_key, components_outputs)
+            if(input_key not in self.components_not_used_vars):
+                self._identify_input_related_sut_output(input_key, components_outputs)
 
     def _process_inputs(self, analyse):
         for input_key in analyse['in']:
@@ -109,7 +110,10 @@ class CouplingAnalyzer:
                             "output_component": output_component,
                             "input_component": input_component,
                             # 'sut_outputs_related': list(self.inputs_related_sut_outputs.get(input_key, []))
-                            'sut_outputs_related': set()
+                            'sut_outputs_related': set(),
+                            'component_outputs_related': set(),
+                            'found_all_suto_related': False,
+                            'suts_outputs_affected': set()
                         }
                         self.coupling_id += 1
                     
@@ -121,6 +125,12 @@ class CouplingAnalyzer:
             coupling = self.couplings[coupling_id]
             component_to_check_outputs = coupling['input_component']
             
+            if(coupling['var'] in self.components_not_used_vars.keys()):
+                if(component_to_check_outputs in self.components_not_used_vars.get(coupling['var'])):
+                    self.couplings[coupling_id]['found_all_suto_related'] = True
+                    continue
+                
+            
             # Obtém os outputs do componente em `outputs_component`
             outputs_from_component = [
             output for output, components in self.outputs_component.items() if component_to_check_outputs in components
@@ -128,13 +138,18 @@ class CouplingAnalyzer:
 
             # Itera sobre cada output do componente para verificar e definir os SUT outputs relacionados
             for output_from_component in outputs_from_component:
-                found_all = True
-
                 # Verifica se o output atual faz parte dos outputs do SUT
                 if output_from_component in self.log_data['outputs']:
                     # Adiciona o output ao conjunto de `sut_outputs_related` do coupling
                     coupling['sut_outputs_related'].add(output_from_component)
                 else:
+                    if output_from_component in self.inputs_related_components_outputs.get(coupling['var']):
+                        coupling['component_outputs_related'].add(output_from_component)
+                        
+            if not(coupling['component_outputs_related']):
+                    self.couplings[coupling_id]['found_all_suto_related'] = True
+                        
+            for output_from_component in outputs_from_component:
                     # Procura couplings onde `var` é igual a `output_from_component`
                     matching_couplings = [
                         (matching_coupling_id, matching_coupling)
@@ -142,27 +157,24 @@ class CouplingAnalyzer:
                         if matching_coupling['var'] == output_from_component
                     ]
 
-                    # Assume que todos foram encontrados, mas isso pode mudar ao iterar
-                    found_all = False
-                    
-                    # Verifica cada coupling correspondente para encontrar os SUT outputs relacionados
                     for matching_coupling_id, matching_coupling in matching_couplings:
+                        self.couplings[coupling_id]['found_all_suto_related'] = matching_coupling['found_all_suto_related']
                         # Se já existem SUT outputs relacionados neste matching_coupling, adiciona-os ao atual
                         if matching_coupling['sut_outputs_related']:
                             for sut_output_related in matching_coupling['sut_outputs_related']:
                                 coupling['sut_outputs_related'].add(sut_output_related)
-                            found_all = True
+                        elif matching_coupling['found_all_suto_related']:
+                            break
                         else:
                             # Caso algum matching_coupling ainda não tenha SUT outputs relacionados, atualiza a flag
-                            found_all = False
+                            self.couplings[coupling_id]['found_all_suto_related'] = False
                             couplings_yet_to_found_more_sut_outputs_related.add(coupling_id)
                             break  # Sai do loop, pois ainda falta algum SUT output relacionado
 
                 # Remove o coupling atual do conjunto se todos os outputs relacionados foram encontrados
-                if not found_all:
-                    couplings_yet_to_found_more_sut_outputs_related.add(coupling_id)
+            if not self.couplings[coupling_id]['found_all_suto_related']:
+                couplings_yet_to_found_more_sut_outputs_related.add(coupling_id)
 
-                    
     def _analyze_couplings_execution(self):
         for id, coupling in self.couplings.items():
             if(coupling['input_component'] not in (self.components_not_used_vars.get(coupling['var']) or [])):
@@ -184,14 +196,28 @@ class CouplingAnalyzer:
                 'var': coupling['var'],
                 'params': component_inputs,
                 'sut_outputs_related': coupling['sut_outputs_related'],
+                'component_outputs_related': coupling['component_outputs_related'],
+                'input_component': coupling['input_component'],
+                'output_component': coupling['output_component'],
                 'executions': []
             }
 
-        component_execution = {'component_inputs_values': component_inputs_values, 'sut_values': [], 'id_log_data_executions': id_log_data_executions}
+        component_execution = {'component_inputs_values': component_inputs_values, 'sut_values': [], 'component_outputs_related_values':[],'id_log_data_executions': id_log_data_executions}
         for sut_output_related in coupling['sut_outputs_related']:
             if sut_output_related in self.log_data['outputs']:
                 suto_index = self.log_data['outputs'].index(sut_output_related)
                 component_execution['sut_values'].append(execution['actualResult'][suto_index])
+        
+        [analyse_outputs_related_values] = [
+            analyse for analyse in execution['analysis'] 
+            if analyse['function'] == coupling['input_component']
+        ]
+        
+        for component_output_related in coupling['component_outputs_related']:
+            if component_output_related in analyse_outputs_related_values['out'].keys():
+                component_execution['component_outputs_related_values'].append(analyse_outputs_related_values['out'].get(component_output_related))
+
+        # component_execution.append()
 
         self.couplings_executions[id]['executions'].append(component_execution)
 
@@ -225,18 +251,40 @@ class CouplingAnalyzer:
         non_varying_params_values_executions[key].append({
             'var_value': execution['component_inputs_values'][coupling_values_executions_index],
             'sut_values': execution['sut_values'],
+            'component_outputs_related_values': execution['component_outputs_related_values'],
             'id_log_data_executions': execution['id_log_data_executions']
         })
         
-    def _check_sut_affected(self, values_executions):
+    def _check_outputs_suts_could_be_affected(self, values_executions, coupling_executions):
+        suts_outputs_could_be_affected = {key: True for key in coupling_executions['sut_outputs_related']}
+        for component_output_related in coupling_executions['component_outputs_related']:
+            for sut_output_component_output_related in self.inputs_related_sut_outputs.get(component_output_related,[]):
+                if sut_output_component_output_related not in self.inputs_related_components_outputs.get(coupling_executions['var']):
+                    suts_outputs_could_be_affected[sut_output_component_output_related] = False
+        
+        for i in range(len(values_executions) - 1):
+            current_component_outputs_related_values = values_executions[i]['component_outputs_related_values']
+            next_component_outputs_related_values = values_executions[i + 1]['component_outputs_related_values']
+            
+            for index in range(len(current_component_outputs_related_values)):
+                if current_component_outputs_related_values[index] != next_component_outputs_related_values[index]:
+                    component_output_related = list(coupling_executions['component_outputs_related'])[index]
+                    for sut_output_related in self.inputs_related_sut_outputs.get(component_output_related,[]):
+                        suts_outputs_could_be_affected[sut_output_related] = True
+        return suts_outputs_could_be_affected
+    
+    def _check_outputs_suts_affected(self, values_executions, suts_outputs_could_be_affected, coupling_executions):
+        suts_outputs_affected = {key: False for key in suts_outputs_could_be_affected.keys()}
         for i in range(len(values_executions) - 1):
             current_sut_values = values_executions[i]['sut_values']
             next_sut_values = values_executions[i + 1]['sut_values']
             
             for index in range(len(current_sut_values)):
                 if current_sut_values[index] != next_sut_values[index]:
-                    return True 
-        return False
+                    sut_output = list(coupling_executions['sut_outputs_related'])[index]
+                    if (suts_outputs_could_be_affected.get(sut_output)):
+                        suts_outputs_affected[sut_output] = True
+        return suts_outputs_affected
     
     def _adjusted_index(self,index):
         adjusted = 0
@@ -259,7 +307,8 @@ class CouplingAnalyzer:
                     for j in range(i + 1, len(values_executions)):
                         pair_values_execution = [value_execution, values_executions[j]]
                         if(value_execution['var_value'] != values_executions[j]['var_value']):
-                            sut_outputs_affected = self._check_sut_affected(pair_values_execution)
+                            suts_outputs_could_be_affected = self._check_outputs_suts_could_be_affected(pair_values_execution, self.couplings_executions[id])
+                            suts_outputs_affected = self._check_outputs_suts_affected(pair_values_execution, suts_outputs_could_be_affected, self.couplings_executions[id])
                             self.individual_coupling_exercises.append({
                                     'id': id, 
                                     'var': self.couplings[id]['var'], 
@@ -270,10 +319,20 @@ class CouplingAnalyzer:
                                     'non_varying_params_values': list(non_varying_params_values),
                                     'sut_outputs_related': self.couplings_executions[id]['sut_outputs_related'],
                                     'values_executions': pair_values_execution,
-                                    'sut_outputs_affected': sut_outputs_affected
+                                    'suts_outputs_could_be_affected': suts_outputs_could_be_affected,
+                                    'suts_outputs_affected': suts_outputs_affected,
+                                    'sut_output_affected': False
                                     })
 
                         
+    def _check_sut_affected(self, exercise, coupling):
+        sut_affected = False
+        for sut_output_affected_key, sut_output_affected_value in exercise['suts_outputs_affected'].items():
+            if sut_output_affected_value: 
+                sut_affected = True
+                coupling['suts_outputs_affected'].add(sut_output_affected_key)
+        return sut_affected
+    
     def _determine_dc_cc_coverage(self):
         self.dc_cc_coverage = 0
         self.couplings_individually_exercised = 0
@@ -292,7 +351,11 @@ class CouplingAnalyzer:
             
             # Conta quantos desses exercícios afetam a saída
             for exercise in individual_exercises:
-                if exercise['sut_outputs_affected']:
+                sut_output_affected = self._check_sut_affected(exercise, coupling)
+                exercise['sut_output_affected'] = sut_output_affected
+
+            for exercise in individual_exercises:
+                if exercise['sut_output_affected']:
                     self.couplings_individually_exercised_affected_sut += 1
                     break
         

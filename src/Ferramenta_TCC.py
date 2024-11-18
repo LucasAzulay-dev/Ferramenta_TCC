@@ -44,4 +44,4 @@ if __name__ == '__main__':
     #Tipo de compilador
     compiler = "gcc"    #gcc ou clang
 
-    executar_ferramenta(excel_file_path, code_path, function_name, folder_path, compiler)
+    executar_ferramenta(excel_file_path, code_path, function_name, compiler)

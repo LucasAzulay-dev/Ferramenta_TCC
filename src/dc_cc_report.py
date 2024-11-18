@@ -146,7 +146,7 @@ class PDF(FPDF):
             if exercise['id'] == coupling['id']:
                 independent_exercised = True
                 
-                if exercise['sut_outputs_affected']: 
+                if exercise['sut_output_affected']: 
                     independent_exercised_and_sut_output_affected = True
                     break
                 
@@ -164,7 +164,7 @@ class PDF(FPDF):
         independent_exercised_string = "Yes" if independent_exercised else "No"
         self.cell(58, 10, f" | Independent Exercised: {independent_exercised_string}", 10)
         independent_exercised_and_sut_output_affected_string = "Yes" if independent_exercised_and_sut_output_affected else "No"
-        self.cell(0, 10, f"  | Sut Outputs Affected: {independent_exercised_and_sut_output_affected_string+text_to_append}", 10, 1)
+        self.cell(0, 10, f"  | Sut Output Affected: {independent_exercised_and_sut_output_affected_string+text_to_append}", 10, 1)
         self.set_text_color(0,0,0)
                 
     def add_coupling_section(self, coupling):
@@ -181,27 +181,33 @@ class PDF(FPDF):
         # Tabela para exibir os detalhes do acoplamento
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(45, 5, "Variable:", 0)
+        self.cell(45, 6, "Variable:", 0)
         self.set_font("Arial", "", 12)
-        self.cell(0, 5, coupling['var'], 0, 1)
+        self.cell(0, 6, coupling['var'], 0, 1)
 
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(45, 5, "Output Component:", 0)
+        self.cell(46, 6, "Output Component:", 0)
         self.set_font("Arial", "", 12)
-        self.cell(0, 5, coupling['output_component'], 0, 1)
+        self.cell(0, 6, coupling['output_component'], 0, 1)
 
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(45, 5, "Input Component:", 0)
+        self.cell(46, 6, "Input Component:", 0)
         self.set_font("Arial", "", 12)
-        self.cell(0, 5, coupling['input_component'], 0, 1)
+        self.cell(0, 6, coupling['input_component'], 0, 1)
 
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(45, 5, "SUT Output Related:", 0)
+        self.cell(46, 6, "SUT Outputs Related:", 0)
         self.set_font("Arial", "", 12)
-        self.cell(0, 5, ', '.join(coupling['sut_outputs_related']), 0, 1)
+        self.cell(0, 6, ', '.join(coupling['sut_outputs_related']), 0, 1)
+        
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        self.cell(46, 6, "SUT Outputs Affected:", 0)
+        self.set_font("Arial", "", 12)
+        self.cell(0, 6, ', '.join(coupling['suts_outputs_affected']), 0, 1)
         
         independent_title = True
         pairs = 0
@@ -226,9 +232,9 @@ class PDF(FPDF):
                 # Mostrando se os SUT outputs foram afetados
                 self.set_x(self.get_x() + tab_space)
                 self.set_font("Arial", "B", 12)
-                self.cell(100, 5, "SUT Outputs Affected:", 0)
+                self.cell(100, 5, "SUT Output Affected:", 0)
                 self.set_font("Arial", "", 12)
-                affected_status = "Yes" if exercise['sut_outputs_affected'] else "No"
+                affected_status = "Yes" if exercise['sut_output_affected'] else "No"
                 self.cell(0, 5, affected_status, 0, 1)
                 
                 # Tabela para exibir os exercícios de acoplamento individuais
@@ -246,18 +252,28 @@ class PDF(FPDF):
                 non_varying_values = ', '.join(exercise['non_varying_params_values']) if exercise['non_varying_params_values'] else 'None'
                 self.cell(0, 5, non_varying_values, 0, 1)
 
+                sut_outputs_has_no_impact = [key for (key, value) in exercise['suts_outputs_could_be_affected'].items() if not value]
+                if(sut_outputs_has_no_impact):
+                    self.set_x(self.get_x() + tab_space)
+                    self.set_font("Arial", "B", 12)
+                    self.cell(100, 5, "Sut Outputs Detected No Impact:", 0)
+                    self.set_font("Arial", "", 12)
+                    non_varying_values = ', '.join(sut_outputs_has_no_impact)
+                    self.cell(0, 5, non_varying_values, 0, 1)
+                
                 # Adicionando a tabela de execuções
                 self.set_x(self.get_x() + tab_space)
                 self.set_font("Arial", "B", 12)
                 self.cell(40, 5, coupling['var'], 1)
-                self.cell(0, 5, ', '.join(exercise['sut_outputs_related']), 1)
+                sut_outputs_could_affected_index = {key: idx for idx, (key, value) in enumerate(exercise['suts_outputs_could_be_affected'].items()) if value}
+                self.cell(0, 5, ', '.join(sut_outputs_could_affected_index.keys()), 1)
                 self.ln()
 
                 for execution in exercise['values_executions']:
                     self.set_x(self.get_x() + tab_space)
                     self.set_font("Arial", "", 12)
                     self.cell(40, 5, str(execution['var_value']), 1)
-                    sut_values = ', '.join(map(str, execution['sut_values']))
+                    sut_values = ', '.join([execution['sut_values'][idx] for idx in sut_outputs_could_affected_index.values()])
                     self.cell(0, 5, sut_values, 1)
                     self.ln()
 

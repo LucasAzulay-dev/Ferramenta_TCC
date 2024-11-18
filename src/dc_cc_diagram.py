@@ -67,7 +67,7 @@ def diagram_generator(log_data, diagram_directory, diagram_filename):
         input_output_var = output_vars.get((source, target))
         if input_output_var:
             with dot.subgraph(name="cluster_SUT") as c:
-                c.node(source + '_input', source + '_input', shape="ellipse")
+                c.node(source + '_input', source, shape="ellipse")
                 c.edge(source + '_input', target)
         else:
             dot.edge(source, target)

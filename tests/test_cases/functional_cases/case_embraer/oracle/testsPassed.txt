@@ -1,0 +1,8 @@
+# put 'true' or 'false' if the each test will pass or not
+true
+true
+true
+true
+true
+true
+true

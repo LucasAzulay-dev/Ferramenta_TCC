@@ -17,9 +17,13 @@ ERROR_TESTVEC_WRONG_TYPE = "ERROR: Test Vector is not a xlsx file"
 ERROR_TESTVEC_MISSING_COL = "ERROR: Test Vector has missing columns"
 ERROR_LOG_BUFFER_LOAD_ERROR = "ERROR: Failed to load log_buffer."
 
+PATH_PROJ_OUTPUT = "output"
 PATH_INSTRUMENTED_SUT_C = "output\\InstrumentedSUT\\instrumented_SUT.c"
 PATH_INSTRUMENTED_SUT_H = "output\\InstrumentedSUT\\instrumented_SUT.h"
 PATH_TEST_DRIVER_C = "output\\InstrumentedSUT\\Test_Driver.c"
 PATH_TEST_DRIVER_EXE = "output\\TestDriver\\Test_Driver.exe"
 PATH_LOG_BUFFER = "output\\OutputBuffer\\log_buffer.txt"
 PATH_REPORT_PDF = "output\\Report\\dc_cc_analysis_report.pdf"
+
+PATH_FUNC_TEST_CASES = "tests\\test_cases\\functional_cases"
+PATH_ROBS_TEST_CASES = "tests\\test_cases\\robustness_cases"

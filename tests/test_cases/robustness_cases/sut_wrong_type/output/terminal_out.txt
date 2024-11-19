@@ -17,3 +17,4 @@ DC/CC Coverage: 20.0%
 Identified Couplings: 5
 Couplings Exercised Independent and Affecting Outputs: 1
 PDF report created: output\Report\dc_cc_analysis_report.pdf
+[pytest] Coping project output to case output...

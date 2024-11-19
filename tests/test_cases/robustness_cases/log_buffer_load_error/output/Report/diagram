@@ -4,93 +4,158 @@ digraph {
 	subgraph cluster_SUT {
 		label=SUT
 		style=dashed
-		CompA [label=CompA shape=box]
-		CompB [label=CompB shape=box]
-		CompC [label=CompC shape=box]
-		CompE [label=CompE shape=box]
-		CompD [label=CompD shape=box]
-		CompA [label=CompA shape=box]
-		CompB [label=CompB shape=box]
-		CompC [label=CompC shape=box]
-		CompE [label=CompE shape=box]
-		CompD [label=CompD shape=box]
-		CompA [label=CompA shape=box]
-		CompB [label=CompB shape=box]
-		CompC [label=CompC shape=box]
-		CompE [label=CompE shape=box]
-		CompD [label=CompD shape=box]
-		CompA [label=CompA shape=box]
-		CompB [label=CompB shape=box]
-		CompC [label=CompC shape=box]
-		CompE [label=CompE shape=box]
-		CompD [label=CompD shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f4 [label=f4 shape=box]
+		f6 [label=f6 shape=box]
+		f5 [label=f5 shape=box]
+		f7 [label=f7 shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f4 [label=f4 shape=box]
+		f6 [label=f6 shape=box]
+		f5 [label=f5 shape=box]
+		f7 [label=f7 shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f4 [label=f4 shape=box]
+		f6 [label=f6 shape=box]
+		f5 [label=f5 shape=box]
+		f7 [label=f7 shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f4 [label=f4 shape=box]
+		f6 [label=f6 shape=box]
+		f5 [label=f5 shape=box]
+		f7 [label=f7 shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f4 [label=f4 shape=box]
+		f6 [label=f6 shape=box]
+		f5 [label=f5 shape=box]
+		f7 [label=f7 shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f4 [label=f4 shape=box]
+		f6 [label=f6 shape=box]
+		f5 [label=f5 shape=box]
+		f7 [label=f7 shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f4 [label=f4 shape=box]
+		f6 [label=f6 shape=box]
+		f5 [label=f5 shape=box]
+		f7 [label=f7 shape=box]
 	}
-	SUTI1 [label=SUTI1 shape=ellipse]
-	SUTI2 [label=SUTI2 shape=ellipse]
-	SUTI3 [label=SUTI3 shape=ellipse]
-	SUTI4 [label=SUTI4 shape=ellipse]
-	SUTI5 [label=SUTI5 shape=ellipse]
-	SUTI6 [label=SUTI6 shape=ellipse]
-	SUTI7 [label=SUTI7 shape=ellipse]
-	SUTO1 [label=SUTO1 shape=ellipse]
-	SUTO2 [label=SUTO2 shape=ellipse]
+	i1 [label=i1 shape=ellipse]
+	i2 [label=i2 shape=ellipse]
+	i3 [label=i3 shape=ellipse]
+	o1 [label=o1 shape=ellipse]
+	o2 [label=o2 shape=ellipse]
+	o3 [label=o3 shape=ellipse]
 	subgraph cluster_SUT {
-		CompA -> AO1
-	}
-	subgraph cluster_SUT {
-		CompA -> AO2
-	}
-	subgraph cluster_SUT {
-		CompB -> BO1
-	}
-	subgraph cluster_SUT {
-		CompC -> CO1
-	}
-	CompE -> SUTO2
-	subgraph cluster_SUT {
-	}
-	CompD -> SUTO1
-	subgraph cluster_SUT {
-	}
-	subgraph cluster_SUT {
-	}
-	subgraph cluster_SUT {
-	}
-	subgraph cluster_SUT {
-	}
-	subgraph cluster_SUT {
-	}
-	subgraph cluster_SUT {
-	}
-	subgraph cluster_SUT {
-	}
-	subgraph cluster_SUT {
-		AO1 [label=AO1 color=lightblue shape=diamond style=filled]
+		f1 -> a
 	}
 	subgraph cluster_SUT {
-		BO1 [label=BO1 color=lightblue shape=diamond style=filled]
+		f2 -> b
+	}
+	subgraph cluster_SUT {
+		f2 -> h
+	}
+	subgraph cluster_SUT {
+		f3 -> e
+	}
+	subgraph cluster_SUT {
+		f3 -> g
+	}
+	subgraph cluster_SUT {
+		f4 -> c
+	}
+	subgraph cluster_SUT {
+		f6 -> d
+	}
+	f6 -> o1
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+		f5 -> f
+	}
+	f5 -> o2
+	subgraph cluster_SUT {
+	}
+	f7 -> o3
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
 	}
 	subgraph cluster_SUT {
 	}
 	subgraph cluster_SUT {
-		CO1 [label=CO1 color=lightblue shape=diamond style=filled]
 	}
 	subgraph cluster_SUT {
-		CO1 [label=CO1 color=lightblue shape=diamond style=filled]
+		h [label=h color=lightblue shape=diamond style=filled]
 	}
 	subgraph cluster_SUT {
-		AO2 [label=AO2 color=lightblue shape=diamond style=filled]
 	}
-	SUTI1 -> CompA
-	SUTI2 -> CompA
-	SUTI3 -> CompA
-	SUTI4 -> CompB
-	SUTI5 -> CompB
-	SUTI6 -> CompB
-	AO1 -> CompC
-	BO1 -> CompC
-	SUTI7 -> CompC
-	CO1 -> CompE
-	CO1 -> CompD
-	AO2 -> CompD
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+		h [label=h color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		b [label=b color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		c [label=c color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		d [label=d color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		b [label=b color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		e [label=e color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		d [label=d color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		f [label=f color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		g [label=g color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		a [label=a shape=ellipse]
+	}
+	i1 -> f1
+	i2 -> f1
+	i2 -> f2
+	subgraph cluster_SUT {
+		h_input [label=h shape=ellipse]
+		h_input -> f2
+	}
+	i2 -> f3
+	i3 -> f3
+	h -> f3
+	b -> f4
+	c -> f6
+	subgraph cluster_SUT {
+		d_input [label=d shape=ellipse]
+		d_input -> f6
+	}
+	b -> f5
+	e -> f5
+	d -> f5
+	f -> f7
+	g -> f7
+	a -> f4 [arrowhead=onormal color=red]
 }

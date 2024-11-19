@@ -18,7 +18,13 @@ void f3(int a, float b, int *o1)
   *o1 = a - ((int) b);
 }
 
-void sut(int i1, float i2, int i3, int *o1)
+int f4(int a, float b)
+{
+  int o2 = ((int) b) * 2;
+  return o2;
+}
+
+void sut(int i1, float i2, int i3, int *o1, int *o2)
 {
   int a;
   float b;
@@ -31,5 +37,8 @@ void sut(int i1, float i2, int i3, int *o1)
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"f3\", \"executionOrder\": \"3\", \"not_used\": {},\"in\": {\"a\": \"%d\",\"b\": \"%.3f\"},", a,b);
   f3(a, b, o1);
   sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"o1\": \"%d\"}},", *o1);
+  sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"f4\", \"executionOrder\": \"4\", \"not_used\": {\"a\": \"%d\"},\"in\": {\"b\": \"%.3f\"},", a,b);
+  *o2 = f4(a, b);
+  sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"o2\": \"%d\"}},", *o2);
 }
 

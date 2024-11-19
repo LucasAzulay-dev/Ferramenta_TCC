@@ -16,8 +16,9 @@ FUNCTIONAL_CASES = [
     # 'case_embraer_base',
     # 'case_embraer_changed_names',
     # 'case_embraer_tests_failed',
-    # 'case_100_coverage',
     # 'case1',
+    # 'case_100_coverage',
+    'case_unused_var',
 ]
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{
@@ -215,6 +216,14 @@ def execute_robust_case(monkeypatch):
         if exception:
             raise exception
     return run_robust_case
+
+@pytest.fixture()
+def dont_open_report(monkeypatch):
+    # Monkeypatch to avoid opening the pdf report
+    if platform.system() == "Windows":
+        monkeypatch.setattr(os, "startfile", lambda path, operation=None: None)
+    else:
+        monkeypatch.setattr(os, "system", lambda path, operation=None: None)
 
 # Get JSON outputted to terminal
 @pytest.fixture()

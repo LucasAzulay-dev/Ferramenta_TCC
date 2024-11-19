@@ -1,1 +1,1 @@
-Caso idêntico ao que foi fornecido pela Embraer.
+Case given by Embraer, but with variable names changed so the variables in the SUT no longer matches the names of the component's variables.

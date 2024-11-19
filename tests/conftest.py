@@ -13,11 +13,11 @@ from contextlib import redirect_stdout, redirect_stderr
 import io
 
 FUNCTIONAL_CASES = [
-    # 'case_embraer_base',
-    # 'case_embraer_changed_names',
-    # 'case_embraer_tests_failed',
-    # 'case1',
-    # 'case_100_coverage',
+    'case_embraer_base',
+    'case_embraer_changed_names',
+    'case_embraer_tests_failed',
+    'case1',
+    'case_100_coverage',
     'case_unused_var',
 ]
 ROBUSTNESS_CASES = {
@@ -79,9 +79,9 @@ ROBUSTNESS_CASES = {
     },
     'log_buffer_load_error' :{
         'case_folder' : 'log_buffer_load_error',
-        'sut_file_name': 'SUT.c',
-        'sut_fcn_name' : 'SUT',
-        'testvec_name' : 'testvec.xlsx',
+        'sut_file_name': 'sut.c',
+        'sut_fcn_name' : 'sut',
+        'testvec_name' : 'TestVec.xls',
         'buffer_length' : 1
     },
 }
@@ -195,8 +195,8 @@ def execute_robust_case(monkeypatch):
         _clean_test_output_dir(paths)
         f_out, f_err = io.StringIO(), io.StringIO()
         exception = None
-        try:
-            with redirect_stdout(f_out), redirect_stderr(f_err):
+        with redirect_stdout(f_out), redirect_stderr(f_err):
+            try:
                 if param.buffer_length == None:
                     executar_ferramenta(excel_file_path=param.testvec,  
                                         code_path=param.sut_path, 
@@ -208,11 +208,12 @@ def execute_robust_case(monkeypatch):
                                         function_name=param.sut_name, 
                                         compiler=param.compiler,
                                         bufferLength=param.buffer_length)
-        except Exception as e:
-            exception = e
-        finally:
-            _copy_test_output(paths)
-            _saveTerminalOutput(paths, f_out.getvalue(), f_err.getvalue())
+            except Exception as e:
+                exception = e
+                f_err.write(str(e))
+            finally:
+                _copy_test_output(paths)
+                _saveTerminalOutput(paths, f_out.getvalue(), f_err.getvalue())
         if exception:
             raise exception
     return run_robust_case

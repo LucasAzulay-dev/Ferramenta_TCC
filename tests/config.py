@@ -9,12 +9,12 @@ MSG_DRIVER_CREATED = "Test Driver created successfully."
 MSG_DRIVER_EXECUTING = "Running Test Driver..."
 
 ERROR_NO_VALID_LINES = "ERROR: No valid lines in the Test Vector"
-ERROR_SUT_FCN_NOT_FOUND = "ERROR: function 'SUT' not found."
-ERROR_SUT_NOT_TESTABLE = "ERROR: SUT not testable"
-ERROR_EXEC_ERROR = "ERROR: Runtime execution error"
+ERROR_SUT_FCN_NOT_FOUND = "ERROR: function 'wrong_name' not found."
+ERROR_SUT_NOT_TESTABLE = "ERROR: Instrumentation not executed properly." #isso tá certo?
+ERROR_EXEC_ERROR = "ERROR: TestDrive not executed properly. Execution error"
 ERROR_SUT_WRONG_TYPE = "ERROR: SUT is not a C file"
-ERROR_TESTVEC_WRONG_TYPE = "ERROR: Test Vector is not a xlsx file"
-ERROR_TESTVEC_MISSING_COL = "ERROR: Test Vector has missing columns"
+ERROR_TESTVEC_WRONG_TYPE = "Cannot detect file format"
+ERROR_TESTVEC_MISSING_COL = "ERROR: Test vector does not have a size equivalent to the desired function. SUT columns: 9 Test_vec columns: 8"
 ERROR_LOG_BUFFER_LOAD_ERROR = "ERROR: Failed to load log_buffer."
 
 PATH_PROJ_OUTPUT = "output"

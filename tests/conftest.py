@@ -12,10 +12,13 @@ from src.Ferramenta_TCC import executar_ferramenta
 from contextlib import redirect_stdout, redirect_stderr
 import io
 
-
-# COMPILER_OPTIONS = ['gcc']
-# FUNCTIONAL_CASES = ['case1', 'case2', 'case3']
-FUNCTIONAL_CASES = ['case_embraer', 'case1']
+FUNCTIONAL_CASES = [
+    # 'case_embraer_base',
+    # 'case_embraer_changed_names',
+    # 'case_embraer_tests_failed',
+    # 'case_100_coverage',
+    # 'case1',
+]
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{
         'case_folder' : 'sut_function_not_found',

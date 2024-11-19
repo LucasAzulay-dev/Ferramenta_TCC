@@ -1,2 +1,1 @@
-Caso modificado a partir do exemplo fornecido pela Embraer.
-Os valores esperados de alguns testes não irão corresponder aos valores obtidos. Dessa forma, menos de 100% dos testes irão passar. Todo o restante deve permanecer idêntico ao caso base da Embraer.
+Case given by embraer, but with modifications in the test vector so that not all tests pass.

@@ -8,8 +8,26 @@ import os.path
 # FI#1: The Tool must accept a SUT, the name of the function to be tested, a test suite and a compiler name as input.
 class TestFI_1:
     # The required inputs are accepted. Using GCC compiler
-    def test_1(self, execute_functional_case):
-        pass
+    def test_1(self, dont_open_report):
+        case_path = 'tests\\test_cases\\functional_cases\\case_embraer_base'
+        executar_ferramenta(
+            excel_file_path=case_path + '\\testInputs\\TestVec.xls',
+            code_path=case_path+"\\src\\sut.c",
+            function_name='sut',
+            compiler='gcc',
+            bufferLength=33554432
+    )
+
+    # The required inputs are accepted. Using CLANG compiler
+    def test_2(self, dont_open_report):
+        case_path = 'tests\\test_cases\\functional_cases\\case_embraer_base'
+        executar_ferramenta(
+            excel_file_path=case_path + '\\testInputs\\TestVec.xls',
+            code_path=case_path+"\\src\\sut.c",
+            function_name='sut',
+            compiler='clang',
+            bufferLength=33554432
+    )
         
 # FI#2: The Tool must generate a Test Driver based on its inputs
 class TestFI_2:

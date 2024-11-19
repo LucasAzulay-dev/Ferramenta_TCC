@@ -13,7 +13,7 @@ Generating SUT Diagram
 SUT Diagram sucessfully generated
 Tests Passed: 100.0%
 Tests Failed (Vector Line): 
-DC/CC Coverage: 100.0%
-Identified Couplings: 2
-Couplings Exercised Independent and Affecting Outputs: 2
+DC/CC Coverage: 75.0%
+Identified Couplings: 4
+Couplings Exercised Independent and Affecting Outputs: 3
 PDF report created: output\Report\dc_cc_analysis_report.pdf

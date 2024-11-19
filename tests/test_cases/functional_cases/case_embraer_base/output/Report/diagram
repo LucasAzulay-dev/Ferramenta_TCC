@@ -140,7 +140,7 @@ digraph {
 	i2 -> f1
 	i2 -> f2
 	subgraph cluster_SUT {
-		h_input [label=h_input shape=ellipse]
+		h_input [label=h shape=ellipse]
 		h_input -> f2
 	}
 	i2 -> f3
@@ -149,7 +149,7 @@ digraph {
 	b -> f4
 	c -> f6
 	subgraph cluster_SUT {
-		d_input [label=d_input shape=ellipse]
+		d_input [label=d shape=ellipse]
 		d_input -> f6
 	}
 	b -> f5

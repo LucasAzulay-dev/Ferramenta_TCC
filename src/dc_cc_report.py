@@ -257,7 +257,7 @@ class PDF(FPDF):
                 test_size = 20
                 variable_size = 30
                 sut_outputs_could_affected_index = {key: idx for idx, (key, value) in enumerate(exercise['suts_outputs_could_be_affected'].items()) if value}
-                output_size = len(sut_outputs_could_affected_index)*50
+                output_size = len(sut_outputs_could_affected_index)*35
                 heigth = 10
                 # Tabela para exibir os exercícios de acoplamento individuais
                 if(non_varying_params != 'None'):

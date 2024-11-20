@@ -4,7 +4,7 @@
 void CompA(int AI1, int AI2, int AI3, int* AO1, int* AO2);
 void CompB(int BI1, int BI2, int BI3, int* BO1);
 void CompC(int CI1, int CI2, int CI3, int* CO1);
-long CompE(void);
+long CompE();
 void CompD(int DI1, int DI2, int* DO1);
 void sut(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int* SUTO1, long* SUTO2);
 

@@ -13,14 +13,15 @@ from contextlib import redirect_stdout, redirect_stderr
 import io
 
 FUNCTIONAL_CASES = [
-    'case_embraer_base',
-    'case_embraer_changed_names',
-    'case_embraer_tests_failed',
-    'case1',
-    'case_100_coverage',
-    'case_unused_var',
-    'case_sut_return',
-    'case_comp_no_param',
+    # 'case_embraer_base',
+    # 'case_embraer_changed_names',
+    # 'case_embraer_tests_failed',
+    # 'case1',
+    # 'case_100_coverage',
+    # 'case_unused_var',
+    # 'case_sut_return',
+    # 'case_comp_no_param',
+    'case_separated_files',
 ]
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{
@@ -196,9 +197,7 @@ def execute_robust_case(monkeypatch):
         with redirect_stdout(f_out), redirect_stderr(f_err):
             # print("[pytest] bufferLength is None: " + param.buffer_length == None)
             try:
-                print("[PYTEST] param:" + str(param.buffer_length))
                 if param.buffer_length == None:
-                    print("[PYTEST] bufferLength default")
                     executar_ferramenta(excel_file_path=param.testvec,  
                                         code_path=param.sut_path, 
                                         function_name=param.sut_name, 

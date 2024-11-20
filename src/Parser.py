@@ -260,8 +260,6 @@ def substitute_headers_with_sources(main_file):
                                         combined_code.append(line_source_file)
                         elif line.strip().startswith('#') :
                             pass
-                        else:
-                            combined_code.append(line)  # Mantém o include se não encontrar o .c
                 except:
                     pass
             else:

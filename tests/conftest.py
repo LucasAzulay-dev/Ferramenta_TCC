@@ -25,6 +25,7 @@ FUNCTIONAL_CASES = [
     'case_unused_related_output',
     'case_pointer_assigned',
     'case_multiple_returns',
+    'case_no_coupling',
 ]
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{

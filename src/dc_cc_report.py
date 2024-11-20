@@ -38,7 +38,7 @@ class PDF(FPDF):
         # Exibe a LINHAS SKIPED
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(30, 5, "Lines skiped: ", 0)
+        self.cell(30, 5, "Tests skiped: ", 0)
         self.cell(0, 5, f"{self.data['skiped_lines']}", 0, 1)
         self.ln(5)
         

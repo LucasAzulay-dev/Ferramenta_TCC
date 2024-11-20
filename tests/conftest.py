@@ -94,7 +94,14 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT_no_outputs.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'TestVec_no_outputs.xlsx',
-        'buffer_length' : 1
+        'buffer_length' : None
+    },
+    'sut_no_inputs' :{
+        'case_folder' : 'sut_no_inputs',
+        'sut_file_name': 'SUT_no_inputs.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'TestVec_no_inputs.xlsx',
+        'buffer_length' : None
     },
 }
 

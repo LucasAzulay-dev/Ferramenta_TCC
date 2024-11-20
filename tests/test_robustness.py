@@ -81,3 +81,10 @@ class TestFI_5:
         with pytest.raises(Exception) as exception:
             execute_robust_case(robustness_case)
         assert str(exception.value) == ERROR_SUT_NO_OUTPUTS
+            
+    # SUT has no inputs
+    def test_12(self, execute_robust_case):
+        robustness_case = 'sut_no_inputs'
+        with pytest.raises(Exception) as exception:
+            execute_robust_case(robustness_case)
+        assert str(exception.value) == ERROR_SUT_NO_INPUTS

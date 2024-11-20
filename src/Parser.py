@@ -1,5 +1,5 @@
-from pycparser import c_ast, parse_file, c_parser,c_generator
-from utils import adicionar_ao_log, list_c_directories
+from pycparser import c_ast, c_parser
+from utils import adicionar_ao_log
 import os
 import re
 
@@ -36,19 +36,12 @@ class FuncDefVisitor(c_ast.NodeVisitor):
             return self._get_type(type_node.type)   # Ponteiro  + '*'
         elif isinstance(type_node, c_ast.TypeDecl):
             return ' '.join(type_node.type.names)  # Tipos como "unsigned int"
-        return "desconhecido"
 
 
-    def _is_pointer(self, type_node):
-        """ Função auxiliar para verificar se um nó é ponteiro """
-        return isinstance(type_node, c_ast.PtrDecl)
-    
     def check_errors(self):
         """ Função que checa se houve erros e retorna as mensagens correspondentes """
         if not self.func_found:
             return f"ERROR: function '{self.func_name}' not found."
-        if self.error_message:
-            return self.error_message
         return None
 
 class FuncReturnVisitor(c_ast.NodeVisitor):
@@ -128,8 +121,8 @@ class FuncDefVisitor2(c_ast.NodeVisitor):
                 param_tipo = self._get_type(param.type)
                 param_nome = param.name if param.name else ''
                 parametros.append(f'{param_tipo} {param_nome}'.strip())
-        else:
-            parametros.append('void')
+        # else:
+        #     parametros.append('void')
 
         # Montar a declaração da função
         declaracao = f'{tipo_retorno} {nome_funcao}({", ".join(parametros)});'
@@ -142,8 +135,8 @@ class FuncDefVisitor2(c_ast.NodeVisitor):
                 return ' '.join(tipo.type.names)
         elif isinstance(tipo, c_ast.PtrDecl):  # Para tipos com ponteiros
             return self._get_type(tipo.type) + '*'
-        elif isinstance(tipo, c_ast.ArrayDecl):  # Para arrays
-            return self._get_type(tipo.type) + '[]'
+        # elif isinstance(tipo, c_ast.ArrayDecl):  # Para arrays
+        #     return self._get_type(tipo.type) + '[]'
         elif isinstance(tipo, c_ast.FuncDecl):  # Para funções como ponteiros
             return self._get_type(tipo.type)
         return 'void'
@@ -296,22 +289,3 @@ def generate_ast(code_path):
     code = (substitute_headers_with_sources(code_path))
     parser = c_parser.CParser()
     return parser.parse(code)
-
-if __name__ == '__main__':
-
-    # Defina o nome do arquivo .c do SUT
-    code_path = "tests/test_cases/case2/src/SUT/SUT2.c"
-    # Função alvo
-    target_function = "SUT"
-
-    folder_path= "tests/test_cases/case2/src/SUT"
-
-    #resultado = ParseInputOutputs(code_path, target_function)
-    #print(resultado)
-
-    #gerar_arquivo_h_com_pycparser(code_path)
-
-    inputs, outputs = ParseNameInputsOutputs(code_path, folder_path ,target_function)
-
-    print("Inputs:", inputs)
-    print("Outputs:", outputs)

@@ -373,8 +373,17 @@ class CouplingAnalyzer:
             self.count_sut_outputs_couplings_can_affect += len(coupling['sut_outputs_related'])
             self.count_sut_outputs_couplings_affected += len(coupling['suts_outputs_affected'])
                     
-        self.dc_cc_coverage = self.couplings_individually_exercised_affected_sut / (len(self.couplings))
-        self.dc_cc_coverage_2 = self.count_sut_outputs_couplings_affected / self.count_sut_outputs_couplings_can_affect
+        if len(self.couplings) > 0:
+            self.dc_cc_coverage = self.couplings_individually_exercised_affected_sut / len(self.couplings)
+        else:
+            self.dc_cc_coverage = 1
+        # Verifica se o denominador não é zero antes de realizar a divisão
+        if self.count_sut_outputs_couplings_can_affect > 0:
+            self.dc_cc_coverage_2 = self.count_sut_outputs_couplings_affected / self.count_sut_outputs_couplings_can_affect
+        else:
+            # Ação alternativa caso o denominador seja zero, como definir a cobertura como 0 ou outro valor adequado
+            self.dc_cc_coverage_2 = 1
+
         
     def _analyse_test_result(self):
         self.test_results['total_tests'] = self.log_data['numberOfTests']

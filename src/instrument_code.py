@@ -194,9 +194,6 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 var = self.generator.visit(node.lvalue)
                 if isinstance(node.lvalue, c_ast.ID) and (node.lvalue.name not in self.output_variables):  # Variável normal
                     self.components_outputs[func_name].append(var)
-                elif isinstance(node.lvalue, c_ast.UnaryOp) and node.lvalue.op == '&' and (node.lvalue not in self.output_variables):  # Ponteiro
-                    pointed_var = self.generator.visit(node.lvalue.expr)
-                    self.components_outputs[func_name].append(pointed_var)
                 elif (var in self.output_variables):
                     self.components_outputs[func_name].append(var)                
                 elif (self.generator.visit(node.lvalue.expr) in self.output_variables):

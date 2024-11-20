@@ -64,7 +64,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 #Ordered
                 passed_parameters = []
                 
-                for arg in node.args.exprs:
+                for arg in (node.args.exprs if node.args.exprs else []):
                     var = self.generator.visit(arg)
                     if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
                         passed_parameters.append(var)
@@ -115,12 +115,13 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 args_combined = ','.join(
                 filter(None, [args_not_used, args_before_call])
                 )
+                if args_combined: args_combined = ", " + args_combined
                 
                 new_statements.append(c_ast.FuncCall(
                     c_ast.ID("sprintf"),
                     c_ast.ExprList([
                         c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
-                        c_ast.Constant(type="string", value=json_entry_before_call + ', '+ args_combined)
+                        c_ast.Constant(type="string", value=json_entry_before_call + args_combined)
                     ])
                 ))
 
@@ -130,10 +131,11 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name)]
                 json_entry_after_call = r'"'+(
                 f'\\"out\\": {{{",".join(args_out_json)}}}'
-                ) + r'},", '
+                ) + r'},"'
                 args_after_call = ','.join(
                 [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name)]
                 )
+                if args_after_call: args_after_call = ", " + args_after_call
                 
                 # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
                 new_statements.append(c_ast.FuncCall(
@@ -156,7 +158,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             new_statements = []
             passed_parameters = []
             
-            for arg in func_call.args.exprs:
+            for arg in func_call.args.exprs if func_call.args else []:
                     var = self.generator.visit(arg)
                     if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
                         passed_parameters.append(var)
@@ -219,12 +221,13 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             args_combined = ','.join(
                 filter(None, [args_not_used, args_before_call])
             )
+            if args_combined: args_combined = ", " + args_combined
             
             new_statements.append(c_ast.FuncCall(
                 c_ast.ID("sprintf"),
                 c_ast.ExprList([
                     c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
-                    c_ast.Constant(type="string", value=json_entry_before_call + ', '+ args_combined)
+                    c_ast.Constant(type="string", value=json_entry_before_call + args_combined)
                 ])
             ))
 
@@ -234,10 +237,11 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name)]
             json_entry_after_call = r'"'+(
             f'\\"out\\": {{{",".join(args_out_json)}}}'
-            ) + r'},", '
+            ) + r'},"'
             args_after_call = ','.join(
             [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name)]
             )
+            if args_after_call: args_after_call = ", " + args_after_call
             
             # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
             new_statements.append(c_ast.FuncCall(

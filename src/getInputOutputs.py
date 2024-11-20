@@ -11,7 +11,7 @@ class FunctionIOAnalyzer(c_ast.NodeVisitor):
     def visit_FuncDef(self, node):
         if node.decl.name == self.function_name:
             # Captura os parâmetros da função na ordem de declaração
-            for param in node.decl.type.args.params:
+            for param in (node.decl.type.args.params if node.decl.type.args else []):
                 param_name = param.name
                 self.all_parameters.append(param_name)  # Adiciona à lista AllParameters
                 # Verifica se o parâmetro é ponteiro

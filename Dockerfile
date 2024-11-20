@@ -6,9 +6,10 @@ FROM python:3.10.5
 RUN apt-get update && apt-get install -y \
     build-essential \ 
     gcc \
+    nano \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
+    
 # Diretório de trabalho no container
 WORKDIR /app
 
@@ -18,4 +19,4 @@ COPY compile_test_vector_original_sut.py /app
 COPY TestDriversSource /app/TestDriversSource
 
 # Comando para rodar o script Python
-# CMD ["python", "runtime_execute.py"]
+# CMD ["mkdir", "TestDriverFiles"]

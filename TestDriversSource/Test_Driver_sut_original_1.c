@@ -10,7 +10,7 @@ void testeX(int SUTI1, float SUTI2, int SUTI3, int SUTO1_test, int SUTO2_test, f
 int main(){
   int test_vecs_SUTI1[1] = {5};
   float test_vecs_SUTI2[1] = {-1};
-  int test_vecs_SUTI3[1] = {100};
+  int test_vecs_SUTI3[1] = {1000};
   int test_vecs_SUTO1[1] = {0};
   int test_vecs_SUTO2[1] = {999};
   float test_vecs_SUTO3[1] = {20912.699};

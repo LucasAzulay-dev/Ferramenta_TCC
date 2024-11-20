@@ -21,10 +21,11 @@ class PDF(FPDF):
         # Adiciona seção resultados dos testes
         self.chapter_title("Tests Results")
         test_percentage = (self.data['test_results']['total_tests_passed'])/(int)(self.data['test_results']['total_tests']) * 100
+        
+        tab_space = 5  # Define o valor do recuo desejado        
         color = (0, 128, 0) if test_percentage >= 100 else (255, 69, 0)
         adicionar_ao_log(f"Tests Passed: {test_percentage:.1f}%")
         
-        tab_space = 5  # Define o valor do recuo desejado
         # Exibe a porcentagem de cobertura
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
@@ -32,6 +33,13 @@ class PDF(FPDF):
         self.set_text_color(*color)
         self.cell(0, 5, f"{test_percentage:.1f}%", 0, 1)
         self.set_text_color(0, 0, 0)
+        self.ln(5)
+        
+        # Exibe a LINHAS SKIPED
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        self.cell(30, 5, "Lines skiped: ", 0)
+        self.cell(0, 5, f"{self.data['skiped_lines']}", 0, 1)
         self.ln(5)
         
         # Exibe total de testes

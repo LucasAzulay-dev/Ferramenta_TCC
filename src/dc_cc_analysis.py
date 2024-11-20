@@ -31,7 +31,8 @@ class CouplingAnalyzer:
                 'dc_cc_coverage': self.dc_cc_coverage, 'dc_cc_coverage_2': self.dc_cc_coverage_2,
                 'couplings_individually_exercised':self.couplings_individually_exercised, 
                 'couplings_individually_exercised_affected_sut': self.couplings_individually_exercised_affected_sut,
-                'test_results': self.test_results
+                'test_results': self.test_results,
+                'skiped_lines': self.log_data['skipedlines']
                 }
 
     def _process_log_data(self):
@@ -291,11 +292,10 @@ class CouplingAnalyzer:
         return suts_outputs_affected
     
     def _adjusted_index(self,index):
-        adjusted = 0
+        adjusted = index + 1
         for i in range(index + 1):
                 while adjusted in self.log_data['skipedlines']:
                     adjusted += 1
-                adjusted += 1
         return adjusted
     
     def _determine_test_vector_pair_lines(self, pair_values_execution):

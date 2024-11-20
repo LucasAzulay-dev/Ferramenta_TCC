@@ -13,13 +13,13 @@ from contextlib import redirect_stdout, redirect_stderr
 import io
 
 FUNCTIONAL_CASES = [
-    # 'case_embraer_base',
-    # 'case_embraer_changed_names',
-    # 'case_embraer_tests_failed',
-    # 'case1',
-    # 'case_100_coverage',
-    # 'case_unused_var',
-    # 'case_sut_return',
+    'case_embraer_base',
+    'case_embraer_changed_names',
+    'case_embraer_tests_failed',
+    'case1',
+    'case_100_coverage',
+    'case_unused_var',
+    'case_sut_return',
     'case_comp_no_param',
 ]
 ROBUSTNESS_CASES = {
@@ -79,18 +79,14 @@ ROBUSTNESS_CASES = {
         'testvec_name' : 'testvec_wrong_type.csv',
         'buffer_length' : None
     },
-    'log_buffer_load_error' :{
-        'case_folder' : 'log_buffer_load_error',
+    'log_buffer_too_short' :{
+        'case_folder' : 'log_buffer_too_short',
         'sut_file_name': 'sut.c',
         'sut_fcn_name' : 'sut',
         'testvec_name' : 'TestVec.xls',
         'buffer_length' : 1
     },
 }
-
-# # Custom exception to pass tests earlier
-# class TestPassedException(Exception):
-#     pass
 
 # Get path to all functional test cases
 class FunctionalTestConfig:
@@ -198,14 +194,16 @@ def execute_robust_case(monkeypatch):
         f_out, f_err = io.StringIO(), io.StringIO()
         exception = None
         with redirect_stdout(f_out), redirect_stderr(f_err):
+            # print("[pytest] bufferLength is None: " + param.buffer_length == None)
             try:
+                print("[PYTEST] param:" + str(param.buffer_length))
                 if param.buffer_length == None:
+                    print("[PYTEST] bufferLength default")
                     executar_ferramenta(excel_file_path=param.testvec,  
                                         code_path=param.sut_path, 
                                         function_name=param.sut_name, 
                                         compiler=param.compiler)
                 else:
-                    print("fazendo bufferLength="+param.buffer_length)
                     executar_ferramenta(excel_file_path=param.testvec,  
                                         code_path=param.sut_path, 
                                         function_name=param.sut_name, 
@@ -280,16 +278,24 @@ def _get_case_config(case, isRobust=False):
     Returns the parameters and the case paths.
     """
     if isRobust:
-        case_paths = RobustnessTestConfig(case)
+        case_config = RobustnessTestConfig(case)
     else:
-        case_paths = FunctionalTestConfig(case)
+        case_config = FunctionalTestConfig(case)
 
-    case_params = ToolParameters(sut_path=case_paths.sut_path,
-                        # proj_dir=case_paths.proj_dir,
-                        sut_name=case_paths.sut_name,
-                        testvec=case_paths.testvec,
-                        compiler='gcc')
-    return case_params, case_paths
+    if case_config.buffer_length == None:
+        case_params = ToolParameters(sut_path=case_config.sut_path,
+                            # proj_dir=case_config.proj_dir,
+                            sut_name=case_config.sut_name,
+                            testvec=case_config.testvec,
+                            compiler='gcc')
+    else:
+        case_params = ToolParameters(sut_path=case_config.sut_path,
+                            # proj_dir=case_config.proj_dir,
+                            sut_name=case_config.sut_name,
+                            testvec=case_config.testvec,
+                            buffer_length=case_config.buffer_length,
+                            compiler='gcc')
+    return case_params, case_config
 
 def _clean_test_output_dir(case_path : FunctionalTestConfig | RobustnessTestConfig):
     """

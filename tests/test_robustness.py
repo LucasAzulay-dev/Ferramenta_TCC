@@ -70,7 +70,7 @@ class TestFI_5:
             
     # log buffer is just 1 byte long
     def test_10(self, execute_robust_case):
-        robustness_case = 'log_buffer_load_error'
+        robustness_case = 'log_buffer_too_short'
         with pytest.raises(Exception) as exception:
             execute_robust_case(robustness_case)
-        assert str(exception.value) == ERROR_LOG_BUFFER_LOAD_ERROR
+        assert str(exception.value) == ERROR_LOG_BUFFER_TOO_SHORT

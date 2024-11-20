@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#define BUFFER_SIZE 33554432
+#define BUFFER_SIZE 1
 char log_buffer[BUFFER_SIZE];
 
 void testeX(int num_teste, int SUTI1, float SUTI2, int SUTI3, int SUTO1_test, int SUTO2_test, float SUTO3_test);

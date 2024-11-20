@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "instrumented_SUT.h"
-extern char log_buffer[33554432];
+extern char log_buffer[1];
 int f1(int i1, float i2)
 {
   int a;

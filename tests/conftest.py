@@ -112,6 +112,13 @@ ROBUSTNESS_CASES = {
         'testvec_name' : 'testvec.xlsx',
         'buffer_length' : None
     },
+    'sut_instrumentation_error' :{
+        'case_folder' : 'sut_instrumentation_error',
+        'sut_file_name': 'SUT_instrumentation_error.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'testvec.xlsx',
+        'buffer_length' : None
+    },
 }
 
 # Get path to all functional test cases

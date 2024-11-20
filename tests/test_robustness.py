@@ -95,3 +95,10 @@ class TestFI_5:
         with pytest.raises(Exception) as exception:
             execute_robust_case(robustness_case)
         assert str(exception.value).startswith(ERROR_SUT_COMPILATION_ERROR)
+    
+    # SUT has instrumentation error
+    def test_14(self, execute_robust_case):
+        robustness_case = 'sut_instrumentation_error'
+        with pytest.raises(Exception) as exception:
+            execute_robust_case(robustness_case)
+        assert str(exception.value) == ERROR_SUT_INSTRUMENTATION_ERROR

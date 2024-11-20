@@ -1,5 +1,6 @@
 #include "CompA\CompA.c"
 #include "CompB\CompB.h"
+#include "CompB\CompX.c"
 #include "CompC\CompC.h"
 #include "CompD\CompD.h"
 #include "CompE\CompE.h"

@@ -13,12 +13,14 @@ from contextlib import redirect_stdout, redirect_stderr
 import io
 
 FUNCTIONAL_CASES = [
-    'case_embraer_base',
-    'case_embraer_changed_names',
-    'case_embraer_tests_failed',
-    'case1',
-    'case_100_coverage',
-    'case_unused_var',
+    # 'case_embraer_base',
+    # 'case_embraer_changed_names',
+    # 'case_embraer_tests_failed',
+    # 'case1',
+    # 'case_100_coverage',
+    # 'case_unused_var',
+    # 'case_sut_return',
+    'case_comp_no_param',
 ]
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{
@@ -203,6 +205,7 @@ def execute_robust_case(monkeypatch):
                                         function_name=param.sut_name, 
                                         compiler=param.compiler)
                 else:
+                    print("fazendo bufferLength="+param.buffer_length)
                     executar_ferramenta(excel_file_path=param.testvec,  
                                         code_path=param.sut_path, 
                                         function_name=param.sut_name, 

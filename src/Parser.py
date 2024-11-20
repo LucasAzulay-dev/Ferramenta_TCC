@@ -139,7 +139,6 @@ class FuncDefVisitor2(c_ast.NodeVisitor):
         #     return self._get_type(tipo.type) + '[]'
         elif isinstance(tipo, c_ast.FuncDecl):  # Para funções como ponteiros
             return self._get_type(tipo.type)
-        return 'void'
 
 def gerar_arquivo_h_com_pycparser(ast):
     # Visitar nós de definição de função
@@ -261,8 +260,6 @@ def substitute_headers_with_sources(main_file):
                                         combined_code.append(line_source_file)
                         elif line.strip().startswith('#') :
                             pass
-                        else:
-                            combined_code.append(line)  # Mantém o include se não encontrar o .c
                 except:
                     pass
             else:

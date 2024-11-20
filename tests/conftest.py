@@ -21,7 +21,9 @@ FUNCTIONAL_CASES = [
     # 'case_unused_var',
     # 'case_sut_return',
     # 'case_comp_no_param',
-    'case_separated_files',
+    # 'case_separated_files',
+    # 'case_unused_related_output',
+    'case_pointer_assigned',
 ]
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{

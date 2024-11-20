@@ -1,0 +1,1 @@
+Case where a related output is also an usused variable.

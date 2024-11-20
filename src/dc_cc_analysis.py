@@ -160,19 +160,23 @@ class CouplingAnalyzer:
                         if matching_coupling['var'] == output_from_component
                     ]
 
-                    for matching_coupling_id, matching_coupling in matching_couplings:
-                        self.couplings[coupling_id]['found_all_suto_related'] = matching_coupling['found_all_suto_related']
-                        # Se já existem SUT outputs relacionados neste matching_coupling, adiciona-os ao atual
-                        if matching_coupling['sut_outputs_related']:
-                            for sut_output_related in matching_coupling['sut_outputs_related']:
-                                coupling['sut_outputs_related'].add(sut_output_related)
-                        elif matching_coupling['found_all_suto_related']:
-                            break
-                        else:
-                            # Caso algum matching_coupling ainda não tenha SUT outputs relacionados, atualiza a flag
-                            self.couplings[coupling_id]['found_all_suto_related'] = False
-                            couplings_yet_to_found_more_sut_outputs_related.add(coupling_id)
-                            break  # Sai do loop, pois ainda falta algum SUT output relacionado
+                    if matching_couplings:
+                        self.couplings[coupling_id]['found_all_suto_related'] = False
+                        for matching_coupling_id, matching_coupling in matching_couplings:
+                            self.couplings[coupling_id]['found_all_suto_related'] = matching_coupling['found_all_suto_related']
+                            # Se já existem SUT outputs relacionados neste matching_coupling, adiciona-os ao atual
+                            if matching_coupling['sut_outputs_related']:
+                                for sut_output_related in matching_coupling['sut_outputs_related']:
+                                    coupling['sut_outputs_related'].add(sut_output_related)
+                            elif matching_coupling['found_all_suto_related']:
+                                break
+                            else:
+                                # Caso algum matching_coupling ainda não tenha SUT outputs relacionados, atualiza a flag
+                                self.couplings[coupling_id]['found_all_suto_related'] = False
+                                couplings_yet_to_found_more_sut_outputs_related.add(coupling_id)
+                                break  # Sai do loop, pois ainda falta algum SUT output relacionado
+                    elif output_from_component not in self.log_data['outputs']:
+                        self.couplings[coupling_id]['found_all_suto_related'] = True
 
                 # Remove o coupling atual do conjunto se todos os outputs relacionados foram encontrados
             if not self.couplings[coupling_id]['found_all_suto_related']:

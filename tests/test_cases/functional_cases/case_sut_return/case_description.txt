@@ -1,0 +1,1 @@
+SUT with non void type and return.

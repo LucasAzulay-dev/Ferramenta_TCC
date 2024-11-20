@@ -1,0 +1,6 @@
+# put all functions called in order
+CompA
+CompB
+CompC
+CompE
+CompD

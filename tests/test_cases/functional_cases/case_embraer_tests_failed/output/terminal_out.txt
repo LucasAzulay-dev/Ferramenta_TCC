@@ -15,5 +15,5 @@ Tests Passed: 42.9%
 Tests Failed (Vector Line): 4,5,6,7
 DC/CC Coverage: 44.4%
 Identified Couplings: 9
-Couplings Exercised Independent and Affecting Outputs: 4
+Couplings Exercised Independently and Affecting Outputs: 4
 PDF report created: output\Report\dc_cc_analysis_report.pdf

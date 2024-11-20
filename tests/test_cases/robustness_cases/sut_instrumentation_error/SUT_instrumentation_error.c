@@ -28,6 +28,7 @@ int AO1, AO2, BO1, CO1;
 
 void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1, long *SUTO2)
 {
+    CompX();
     CompA(SUTI1, SUTI1, SUTI3, &AO1, &AO2);
 
     CompB(SUTI4, SUTI5, SUTI6, &BO1);

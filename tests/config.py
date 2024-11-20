@@ -19,7 +19,7 @@ ERROR_LOG_BUFFER_TOO_SHORT = "ERROR: TestDrive not executed properly. Execution 
 ERROR_SUT_NO_OUTPUTS = "ERROR: No outputs detected" 
 ERROR_SUT_NO_INPUTS = "ERROR: No inputs detected" 
 ERROR_SUT_COMPILATION_ERROR = "ERROR: TestDrive not executed properly. Compilation error." 
-ERROR_SUT_INSTRUMENTATION_ERROR = "ERROR: TestDrive not executed properly. Execution error" 
+ERROR_SUT_INSTRUMENTATION_ERROR = "ERROR: Instrumentation not executed properly." 
 
 PATH_PROJ_OUTPUT = "output"
 PATH_INSTRUMENTED_SUT_C = "output\\InstrumentedSUT\\instrumented_SUT.c"

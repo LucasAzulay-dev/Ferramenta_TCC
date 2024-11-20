@@ -249,7 +249,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
 
             return new_statements
 
-        return node
+        return [node]
 
     def generic_visit(self, node):
         new_block_items = []

@@ -98,8 +98,6 @@ digraph {
 	subgraph cluster_SUT {
 	}
 	subgraph cluster_SUT {
-	}
-	subgraph cluster_SUT {
 		h [label=h color=lightblue shape=diamond style=filled]
 	}
 	subgraph cluster_SUT {
@@ -134,11 +132,13 @@ digraph {
 		g [label=g color=lightblue shape=diamond style=filled]
 	}
 	subgraph cluster_SUT {
+		i2 [label=i2 shape=ellipse]
+	}
+	subgraph cluster_SUT {
 		a [label=a shape=ellipse]
 	}
 	i1 -> f1
 	i2 -> f1
-	i2 -> f2
 	subgraph cluster_SUT {
 		h_input [label=h shape=ellipse]
 		h_input -> f2
@@ -157,5 +157,6 @@ digraph {
 	d -> f5
 	f -> f7
 	g -> f7
+	i2 -> f2 [arrowhead=onormal color=red]
 	a -> f4 [arrowhead=onormal color=red]
 }

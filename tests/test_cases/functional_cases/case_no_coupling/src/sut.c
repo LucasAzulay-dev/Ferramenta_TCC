@@ -38,10 +38,10 @@ void f3(float i2, int i3, float *h,   int *e, float *g){
 }
 
 float f4(int a, float *b){
-    return *b + 2;
+    return *b + 0.1;
 }
 
-float f5(float *b, int e, float d,   float *f, int *o2){
+void f5(float *b, int e, float d,   float *f, int *o2){
 
     if(*b < 0){
         *o2 = e;
@@ -51,8 +51,6 @@ float f5(float *b, int e, float d,   float *f, int *o2){
         *o2 = 1;
         *f = (float)e;
     }
-    return *f - d;
-
 }
 
 int f6(float *c, float *d){
@@ -64,26 +62,16 @@ int f6(float *c, float *d){
     return o1;
 }
 
-// float f7(float f, float *g){
-//     float o3, aux;
-//     aux = f * (*g);
+float f7(float f, float *g){
+    float o3, aux;
+    aux = f * (*g);
 
-//     o3 = aux - 50; 
-//     return o3;
-// }
+    o3 = aux - 50; 
+    return o3;
+}
 
 /* ---------------------------- The SUT! ----------------------------*/
 void sut(int i1, float i2, int i3,   int *o1, int *o2, float *o3){
-    int a, e; 
-    float b, c, d, f, g, h;
-
-    a = f1(i1, i2);
-    f2(i2, &b, &h);
-    f3(i2, i3, &h, &e, &g);
-    c = f4(a, &b);
-    *o1 =f6(&c, &d);
-    *o3 = f5(&b, e, d, &f, o2);
-    // *o3 = f7(f, &g);
 }
 /* ---------------------------- end SUT ----------------------------*/
 

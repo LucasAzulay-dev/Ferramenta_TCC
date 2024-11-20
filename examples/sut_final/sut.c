@@ -12,7 +12,7 @@ int f1(int i1, float i2){
     return a;
 }
 
-void f2(float i2,   float *b, float *h){
+void f2(float i2,  float *b, float *h){
     *h = 2 * i2;
     if(*h > 3){
         *b = *h;
@@ -46,6 +46,7 @@ void f5(float *b, int e, float d,   float *f, int *o2){
     if(*b < 0){
         *o2 = e;
         *f = d;
+        o2 = &e;
     }
     else{
         *o2 = 1;

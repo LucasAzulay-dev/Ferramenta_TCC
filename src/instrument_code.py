@@ -57,96 +57,94 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             self.components_not_used_variables[function_name] = components_not_used_variables
 
     def visit_FuncCall(self, node):
-        if self.instrument_sut:
-            func_name = self.generator.visit(node.name)
-            if(func_name != 'sprintf'):
-                new_statements = []
-                #Ordered
-                passed_parameters = []
+        func_name = self.generator.visit(node.name)
+        if(func_name != 'sprintf'):
+            new_statements = []
+            #Ordered
+            passed_parameters = []
+            
+            for arg in node.args.exprs:
+                var = self.generator.visit(arg)
+                if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
+                    passed_parameters.append(var)
+                elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (var not in self.output_variables):  # Ponteiro
+                    pointed_var = self.generator.visit(arg.expr)
+                    passed_parameters.append(pointed_var)
+                elif (var in self.output_variables):
+                    passed_parameters.append(var)
+            
+            component_all_params = self.components_all_parameters.get(func_name)
+            
+            for index, passed_parameter in enumerate(passed_parameters): 
+                # Obter o parâmetro da definição correspondente ao índice
+                param_def_to_change = component_all_params[index]
                 
-                for arg in node.args.exprs:
-                    var = self.generator.visit(arg)
-                    if isinstance(arg, c_ast.ID) and (var not in self.output_variables):  # Variável normal
-                        passed_parameters.append(var)
-                    elif isinstance(arg, c_ast.UnaryOp) and arg.op == '&' and (var not in self.output_variables):  # Ponteiro
-                        pointed_var = self.generator.visit(arg.expr)
-                        passed_parameters.append(pointed_var)
-                    elif (var in self.output_variables):
-                        passed_parameters.append(var)
+                not_used_vars = self.components_not_used_variables.get(func_name, [])
+                inputs = self.components_inputs.get(func_name, [])
+                outputs = self.components_outputs.get(func_name, [])
+
+                if param_def_to_change in not_used_vars:
+                    not_used_vars[not_used_vars.index(param_def_to_change)] = passed_parameter
                 
-                component_all_params = self.components_all_parameters.get(func_name)
+                if param_def_to_change in inputs:
+                    inputs[inputs.index(param_def_to_change)] = passed_parameter
                 
-                for index, passed_parameter in enumerate(passed_parameters): 
-                    # Obter o parâmetro da definição correspondente ao índice
-                    param_def_to_change = component_all_params[index]
-                    
-                    not_used_vars = self.components_not_used_variables.get(func_name, [])
-                    inputs = self.components_inputs.get(func_name, [])
-                    outputs = self.components_outputs.get(func_name, [])
+                if param_def_to_change in outputs:
+                    outputs[outputs.index(param_def_to_change)] = passed_parameter
 
-                    if param_def_to_change in not_used_vars:
-                        not_used_vars[not_used_vars.index(param_def_to_change)] = passed_parameter
-                    
-                    if param_def_to_change in inputs:
-                        inputs[inputs.index(param_def_to_change)] = passed_parameter
-                    
-                    if param_def_to_change in outputs:
-                        outputs[outputs.index(param_def_to_change)] = passed_parameter
+                # Atualizar os dicionários com os novos valores
+                self.components_not_used_variables[func_name] = not_used_vars
+                self.components_inputs[func_name] = inputs
+                self.components_outputs[func_name] = outputs
 
-                    # Atualizar os dicionários com os novos valores
-                    self.components_not_used_variables[func_name] = not_used_vars
-                    self.components_inputs[func_name] = inputs
-                    self.components_outputs[func_name] = outputs
+            # Adicionar sprintf para registrar dados em JSON após a função
+            execution_order_str = f'{self.execution_order}'
+            self.execution_order += 1
 
-                # Adicionar sprintf para registrar dados em JSON após a função
-                execution_order_str = f'{self.execution_order}'
-                self.execution_order += 1
+            args_not_used = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_not_used_variables.get(func_name)]
+            args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name)]
+            json_entry_before_call = r'"'+(
+            f'{{\\"function\\": \\"{func_name}\\", '
+            f'\\"executionOrder\\": \\"{execution_order_str}\\", '
+            f'\\"not_used\\": {{{",".join(args_not_used)}}},'
+            f'\\"in\\": {{{",".join(args_in_json)}}}'
+            ) + r',"'
+            args_not_used = ','.join([f'{key}' for key in self.components_not_used_variables.get(func_name)])
+            args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name)])
+            args_combined = ','.join(
+            filter(None, [args_not_used, args_before_call])
+            )
+            
+            new_statements.append(c_ast.FuncCall(
+                c_ast.ID("sprintf"),
+                c_ast.ExprList([
+                    c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
+                    c_ast.Constant(type="string", value=json_entry_before_call + ', '+ args_combined)
+                ])
+            ))
 
-                args_not_used = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_not_used_variables.get(func_name)]
-                args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name)]
-                json_entry_before_call = r'"'+(
-                f'{{\\"function\\": \\"{func_name}\\", '
-                f'\\"executionOrder\\": \\"{execution_order_str}\\", '
-                f'\\"not_used\\": {{{",".join(args_not_used)}}},'
-                f'\\"in\\": {{{",".join(args_in_json)}}}'
-                ) + r',"'
-                args_not_used = ','.join([f'{key}' for key in self.components_not_used_variables.get(func_name)])
-                args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name)])
-                args_combined = ','.join(
-                filter(None, [args_not_used, args_before_call])
-                )
-                
-                new_statements.append(c_ast.FuncCall(
-                    c_ast.ID("sprintf"),
-                    c_ast.ExprList([
-                        c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
-                        c_ast.Constant(type="string", value=json_entry_before_call + ', '+ args_combined)
-                    ])
-                ))
+            # Chamada da função original
+            new_statements.append(node)
+            
+            args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name)]
+            json_entry_after_call = r'"'+(
+            f'\\"out\\": {{{",".join(args_out_json)}}}'
+            ) + r'},", '
+            args_after_call = ','.join(
+            [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name)]
+            )
+            
+            # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
+            new_statements.append(c_ast.FuncCall(
+                c_ast.ID("sprintf"),
+                c_ast.ExprList([
+                    c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
+                    c_ast.Constant(type="string", value=json_entry_after_call + args_after_call)
+                ])
+            ))
 
-                # Chamada da função original
-                new_statements.append(node)
-                
-                args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name)]
-                json_entry_after_call = r'"'+(
-                f'\\"out\\": {{{",".join(args_out_json)}}}'
-                ) + r'},", '
-                args_after_call = ','.join(
-                [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name)]
-                )
-                
-                # Adicionar o sprintf direto para registrar no log_buffer acumulativamente
-                new_statements.append(c_ast.FuncCall(
-                    c_ast.ID("sprintf"),
-                    c_ast.ExprList([
-                        c_ast.BinaryOp('+', c_ast.ID("log_buffer"), c_ast.FuncCall(c_ast.ID("strlen"), c_ast.ExprList([c_ast.ID("log_buffer")]))),
-                        c_ast.Constant(type="string", value=json_entry_after_call + args_after_call)
-                    ])
-                ))
-
-                return new_statements
-        else:
-            return node
+            return new_statements
+        
     
     def visit_Assignment(self, node):
         if self.instrument_sut and isinstance(node.rvalue, c_ast.FuncCall):
@@ -249,7 +247,6 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             ))
 
             return new_statements
-
         return node
 
     def generic_visit(self, node):
@@ -299,21 +296,3 @@ def Create_Instrumented_Code(ast, function_name, bufferLength):
     except:
         error = f"ERROR: Instrumentation not executed properly." # {e.stderr}
         raise Exception(error)
-    
-    
-if __name__ == '__main__':
-
-    # Defina o nome do arquivo .c do SUT
-    SUT_path = "examples\sut_final\sut.c" 
-    # SUT_path = "examples\C_proj_mockup_2\SUT\SUT.c" 
-
-    # Defina o nome da função testada
-    function_name = "sut"
-    # function_name = "SUT"
-
-    bufferLength = 4096
-    
-    # Parsing do código C
-    ast = generate_ast(SUT_path)
-
-    Create_Instrumented_Code(ast, function_name, bufferLength)

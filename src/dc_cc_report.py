@@ -107,16 +107,16 @@ class PDF(FPDF):
         # Exibe total de acoplamento exercitados individualmente que afetaram o sut output
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
-        self.cell(0, 5, f"Couplings Exercised Independent and Affecting Outputs: {self.data['couplings_individually_exercised_affected_sut']}", 0, 1)
+        self.cell(0, 5, f"Couplings Exercised Independently and Affecting Outputs: {self.data['couplings_individually_exercised_affected_sut']}", 0, 1)
         self.set_text_color(0, 0, 0)
         self.ln(5)
-        adicionar_ao_log(f"Couplings Exercised Independent and Affecting Outputs: {self.data['couplings_individually_exercised_affected_sut']}")
+        adicionar_ao_log(f"Couplings Exercised Independently and Affecting Outputs: {self.data['couplings_individually_exercised_affected_sut']}")
         
         # Exibe total de acoplamento exercitados individualmente que não afetaram o sut output
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
         color = (0, 128, 0) if self.data['couplings_individually_exercised'] > 0 else (0,0,0)
-        self.cell(0, 5, f"Couplings Exercised Independent and Not Affecting Outputs: {self.data['couplings_individually_exercised']-self.data['couplings_individually_exercised_affected_sut']}", 0, 1)
+        self.cell(0, 5, f"Couplings Exercised Independently and Not Affecting Outputs: {self.data['couplings_individually_exercised']-self.data['couplings_individually_exercised_affected_sut']}", 0, 1)
         self.set_text_color(0, 0, 0)
         self.ln(5)
         
@@ -162,7 +162,7 @@ class PDF(FPDF):
         self.set_text_color(*color)
         self.cell(32, 10, f"- Coupling ID: {coupling['id']}", 10)
         independent_exercised_string = "Yes" if independent_exercised else "No"
-        self.cell(58, 10, f" | Independent Exercised: {independent_exercised_string}", 10)
+        self.cell(58, 10, f" | Independently Exercised: {independent_exercised_string}", 10)
         independent_exercised_and_sut_output_affected_string = "Yes" if independent_exercised_and_sut_output_affected else "No"
         self.cell(0, 10, f"  | Sut Output Affected: {independent_exercised_and_sut_output_affected_string+text_to_append}", 10, 1)
         self.set_text_color(0,0,0)

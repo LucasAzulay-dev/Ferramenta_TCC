@@ -57,7 +57,6 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             self.components_not_used_variables[function_name] = components_not_used_variables
 
     def visit_FuncCall(self, node):
-        if self.instrument_sut:
             func_name = self.generator.visit(node.name)
             if(func_name != 'sprintf'):
                 new_statements = []
@@ -147,8 +146,6 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 ))
 
                 return new_statements
-        else:
-            return node
     
     def visit_Assignment(self, node):
         if self.instrument_sut and isinstance(node.rvalue, c_ast.FuncCall):
@@ -303,21 +300,3 @@ def Create_Instrumented_Code(ast, function_name, bufferLength):
     except:
         error = f"ERROR: Instrumentation not executed properly." # {e.stderr}
         raise Exception(error)
-    
-    
-if __name__ == '__main__':
-
-    # Defina o nome do arquivo .c do SUT
-    SUT_path = "examples\sut_final\sut.c" 
-    # SUT_path = "examples\C_proj_mockup_2\SUT\SUT.c" 
-
-    # Defina o nome da função testada
-    function_name = "sut"
-    # function_name = "SUT"
-
-    bufferLength = 4096
-    
-    # Parsing do código C
-    ast = generate_ast(SUT_path)
-
-    Create_Instrumented_Code(ast, function_name, bufferLength)

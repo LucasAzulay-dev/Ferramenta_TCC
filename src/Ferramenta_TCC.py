@@ -26,22 +26,3 @@ def executar_ferramenta(excel_file_path, code_path, function_name, compiler, buf
     adicionar_ao_log("Generating DC/CC report...")
     
     return DC_CC_Report_Generator(log_buffer_path)  # Retorna os caminhos dos PDFs
-
-if __name__ == '__main__':
-
-    # Defina o caminho para o arquivo Excel
-    excel_file_path = "examples/sut_final/TestVec.xls"
-
-    # Defina o nome do arquivo .c do SUT
-    code_path = "examples/sut_final/sut.c" 
-
-    # Defina o nome do arquivo .c do SUT
-    folder_path = "examples/sut_final" 
-
-    # Defina o nome da função testada
-    function_name = "sut"
-
-    #Tipo de compilador
-    compiler = "gcc"    #gcc ou clang
-
-    executar_ferramenta(excel_file_path, code_path, function_name, compiler)

@@ -17,11 +17,6 @@ class PDF(FPDF):
         self.cell(0, 10, title, 0, 1, "L")
         self.ln(2)
 
-    def chapter_body(self, body):
-        self.set_font("Arial", "", 12)
-        self.multi_cell(0, 10, body)
-        self.ln()
-        
     def add_test_results(self):
         # Adiciona seção resultados dos testes
         self.chapter_title("Tests Results")

@@ -12,12 +12,8 @@ def corrigir_virgulas(conteudo):
 
 def DC_CC_Report_Generator(log_buffer_path):
     with open(log_buffer_path, 'r') as file:
-        try:
-            conteudo = corrigir_virgulas(file.read())
-            log_data = json.loads(conteudo)
-        except:
-            error = "ERROR: Failed to load log_buffer."
-            raise Exception(error)
+        conteudo = corrigir_virgulas(file.read())
+        log_data = json.loads(conteudo)
 
         adicionar_ao_log("Generating SUT Diagram")
         diagram_directory = 'output/Report/'

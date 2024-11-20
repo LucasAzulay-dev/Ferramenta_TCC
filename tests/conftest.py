@@ -13,17 +13,18 @@ from contextlib import redirect_stdout, redirect_stderr
 import io
 
 FUNCTIONAL_CASES = [
-    # 'case_embraer_base',
-    # 'case_embraer_changed_names',
-    # 'case_embraer_tests_failed',
-    # 'case1',
-    # 'case_100_coverage',
-    # 'case_unused_var',
-    # 'case_sut_return',
-    # 'case_comp_no_param',
-    # 'case_separated_files',
-    # 'case_unused_related_output',
+    'case_embraer_base',
+    'case_embraer_changed_names',
+    'case_embraer_tests_failed',
+    'case1',
+    'case_100_coverage',
+    'case_unused_var',
+    'case_sut_return',
+    'case_comp_no_param',
+    'case_separated_files',
+    'case_unused_related_output',
     'case_pointer_assigned',
+    'case_multiple_returns',
 ]
 ROBUSTNESS_CASES = {
     'sut_function_not_found' :{

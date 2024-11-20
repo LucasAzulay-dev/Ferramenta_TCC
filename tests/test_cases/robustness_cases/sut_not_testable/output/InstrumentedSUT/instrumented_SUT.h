@@ -1,21 +1,11 @@
 #ifndef _GENERATED_H_
 #define _GENERATED_H_
 
-int f1(int i1, float i2);
-void f2(float i2, float* b, float* h);
-void f3(float i2, int i3, float* h, int* e, float* g);
-float f4(int a, float* b);
-void f5(float* b, int e, float d, float* f, int* o2);
-int f6(float* c, float* d);
-float f7(float f, float* g);
-void sut(int i1, float i2, int i3, int* o1, int* o2, float* o3);
-int f1(int i1, float i2);
-void f2(float i2, float* b, float* h);
-void f3(float i2, int i3, float* h, int* e, float* g);
-float f4(int a, float* b);
-void f5(float* b, int e, float d, float* f, int* o2);
-int f6(float* c, float* d);
-float f7(float f, float* g);
-void sut(int i1, float i2, int i3, int* o1, int* o2, float* o3);
+void CompA(int AI1, int AI2, int AI3, int* AO1, int* AO2);
+void CompB(int BI1, int BI2, int BI3, int* BO1);
+void CompC(int CI1, int CI2, int CI3, int* CO1);
+long CompE(int value);
+void CompD(int DI1, int DI2, int* DO1);
+void SUT();
 
 #endif // _GENERATED_H_

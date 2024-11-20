@@ -106,7 +106,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             args_out = {}
             args_sut_out = {}
 
-            for arg in func_call.args.exprs:
+            for arg in (func_call.args or []) if func_call.args else []:
                 var = self.generator.visit(arg)
                 if isinstance(arg, c_ast.ID) and (var not in self.output_variables):
                     args_in[var] = c_type_to_printf.get(self.variables.get(var))

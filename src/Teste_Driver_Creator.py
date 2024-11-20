@@ -24,6 +24,9 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(ast, function_name)
 
+    if(isinstance(resultado, str)):
+        return resultado
+
     #Definindo o numero de colunas do SUT
     num_colunas = resultado[0]
 
@@ -76,6 +79,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
     param_tests = ""
     param_SUT = ""
     param_outputs = ""
+    return_output = ""
     test_vecs = ""
     test_outputs = ""
     print_test_outputs = ""
@@ -120,7 +124,13 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
             coluna_string = ', '.join(f"{valor:.3f}" if isinstance(valor, float) else str(valor) for valor in coluna.dropna().tolist())
             test_vecs = test_vecs + coluna_string + '};\n'     
 
-            param_SUT = param_SUT + ' &SUTO' + f'{outputs},'
+            if((resultado[1] == 'return') and (i == (num_colunas-1))):
+                #Para receber o return do SUT
+                return_output = 'SUTO' + f'{outputs}'+' = '
+            else:
+                #Para print da função SUT
+                param_SUT = param_SUT + ' &SUTO' + f'{outputs},'
+             
 
             #Para definicoes dos outputs     
             param_outputs = param_outputs + resultado[i+2] + ' ' + 'SUTO' + f'{outputs};\n    ' 
@@ -186,7 +196,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
 
     #Escrever a funcao SUT
     with open(testdriver_path, 'a') as file:
-        file.write(function_name+'('+param_SUT)
+        file.write(return_output+function_name+'('+param_SUT)
 
     #Apagar "," do ultimo dado 
     with open(testdriver_path, 'rb+') as file:

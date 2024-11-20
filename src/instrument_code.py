@@ -73,44 +73,45 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                     elif (var in self.output_variables):
                         passed_parameters.append(var)
                 
-                component_all_params = self.components_all_parameters.get(func_name)
+                component_all_params = self.components_all_parameters.get(func_name, [])
                 
-                for index, passed_parameter in enumerate(passed_parameters): 
-                    # Obter o parâmetro da definição correspondente ao índice
-                    param_def_to_change = component_all_params[index]
-                    
-                    not_used_vars = self.components_not_used_variables.get(func_name, [])
-                    inputs = self.components_inputs.get(func_name, [])
-                    outputs = self.components_outputs.get(func_name, [])
+                if component_all_params:
+                    for index, passed_parameter in enumerate(passed_parameters): 
+                        # Obter o parâmetro da definição correspondente ao índice
+                        param_def_to_change = component_all_params[index]
+                        
+                        not_used_vars = self.components_not_used_variables.get(func_name, [])
+                        inputs = self.components_inputs.get(func_name, [])
+                        outputs = self.components_outputs.get(func_name, [])
 
-                    if param_def_to_change in not_used_vars:
-                        not_used_vars[not_used_vars.index(param_def_to_change)] = passed_parameter
-                    
-                    if param_def_to_change in inputs:
-                        inputs[inputs.index(param_def_to_change)] = passed_parameter
-                    
-                    if param_def_to_change in outputs:
-                        outputs[outputs.index(param_def_to_change)] = passed_parameter
+                        if param_def_to_change in not_used_vars:
+                            not_used_vars[not_used_vars.index(param_def_to_change)] = passed_parameter
+                        
+                        if param_def_to_change in inputs:
+                            inputs[inputs.index(param_def_to_change)] = passed_parameter
+                        
+                        if param_def_to_change in outputs:
+                            outputs[outputs.index(param_def_to_change)] = passed_parameter
 
-                    # Atualizar os dicionários com os novos valores
-                    self.components_not_used_variables[func_name] = not_used_vars
-                    self.components_inputs[func_name] = inputs
-                    self.components_outputs[func_name] = outputs
+                        # Atualizar os dicionários com os novos valores
+                        self.components_not_used_variables[func_name] = not_used_vars
+                        self.components_inputs[func_name] = inputs
+                        self.components_outputs[func_name] = outputs
 
                 # Adicionar sprintf para registrar dados em JSON após a função
                 execution_order_str = f'{self.execution_order}'
                 self.execution_order += 1
 
-                args_not_used = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_not_used_variables.get(func_name)]
-                args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name)]
+                args_not_used = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_not_used_variables.get(func_name, [])]
+                args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name, [])]
                 json_entry_before_call = r'"'+(
                 f'{{\\"function\\": \\"{func_name}\\", '
                 f'\\"executionOrder\\": \\"{execution_order_str}\\", '
                 f'\\"not_used\\": {{{",".join(args_not_used)}}},'
                 f'\\"in\\": {{{",".join(args_in_json)}}}'
                 ) + r',"'
-                args_not_used = ','.join([f'{key}' for key in self.components_not_used_variables.get(func_name)])
-                args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name)])
+                args_not_used = ','.join([f'{key}' for key in self.components_not_used_variables.get(func_name, [])])
+                args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name, [])])
                 args_combined = ','.join(
                 filter(None, [args_not_used, args_before_call])
                 )
@@ -127,12 +128,12 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                 # Chamada da função original
                 new_statements.append(node)
                 
-                args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name)]
+                args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name, [])]
                 json_entry_after_call = r'"'+(
                 f'\\"out\\": {{{",".join(args_out_json)}}}'
                 ) + r'},"'
                 args_after_call = ','.join(
-                [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name)]
+                [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name, [])]
                 )
                 if args_after_call: args_after_call = ", " + args_after_call
                 
@@ -165,7 +166,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
                     elif (var in self.output_variables):
                         passed_parameters.append(var)
                         
-            component_all_params = self.components_all_parameters.get(func_name)
+            component_all_params = self.components_all_parameters.get(func_name, [])
                 
             for index, passed_parameter in enumerate(passed_parameters): 
                 # Obter o parâmetro da definição correspondente ao índice
@@ -205,16 +206,16 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             execution_order_str = f'{self.execution_order}'
             self.execution_order += 1
 
-            args_not_used = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_not_used_variables.get(func_name)]
-            args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name)]
+            args_not_used = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_not_used_variables.get(func_name, [])]
+            args_in_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_inputs.get(func_name, [])]
             json_entry_before_call = r'"'+(
             f'{{\\"function\\": \\"{func_name}\\", '
             f'\\"executionOrder\\": \\"{execution_order_str}\\", '
             f'\\"not_used\\": {{{",".join(args_not_used)}}},'
             f'\\"in\\": {{{",".join(args_in_json)}}}'
             ) + r',"'
-            args_not_used = ','.join([f'{key}' for key in self.components_not_used_variables.get(func_name)])
-            args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name)])
+            args_not_used = ','.join([f'{key}' for key in self.components_not_used_variables.get(func_name, [])])
+            args_before_call = ','.join([f'{key}' for key in self.components_inputs.get(func_name, [])])
             args_combined = ','.join(
                 filter(None, [args_not_used, args_before_call])
             )
@@ -231,12 +232,12 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             # Chamada da função original
             new_statements.append(node)
             
-            args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name)]
+            args_out_json = [f'\\"{key}\\": \\"{c_type_to_printf.get(self.variables.get(key))}\\"' for key in self.components_outputs.get(func_name, [])]
             json_entry_after_call = r'"'+(
             f'\\"out\\": {{{",".join(args_out_json)}}}'
             ) + r'},"'
             args_after_call = ','.join(
-            [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name)]
+            [f'{self.output_variables.get(key)}{key}' if key in self.output_variables.keys() else key for key in self.components_outputs.get(func_name, [])]
             )
             if args_after_call: args_after_call = ", " + args_after_call
             

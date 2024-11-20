@@ -10,12 +10,12 @@ MSG_DRIVER_EXECUTING = "Running Test Driver..."
 
 ERROR_NO_VALID_LINES = "ERROR: No valid lines in the Test Vector"
 ERROR_SUT_FCN_NOT_FOUND = "ERROR: function 'wrong_name' not found."
-ERROR_SUT_NOT_TESTABLE = "ERROR: Instrumentation not executed properly." #is this right?
+ERROR_SUT_NOT_TESTABLE = "ERROR: function 'SUT' has no parameters."
 ERROR_EXEC_ERROR = "ERROR: TestDrive not executed properly. Execution error"
 ERROR_SUT_WRONG_TYPE = "ERROR: SUT is not a C file"
 ERROR_TESTVEC_WRONG_TYPE = "Cannot detect file format"
 ERROR_TESTVEC_MISSING_COL = "ERROR: Test vector does not have a size equivalent to the desired function. SUT columns: 9 Test_vec columns: 8"
-ERROR_LOG_BUFFER_TOO_SHORT = "ERROR: TestDrive not executed properly. Execution error" #is this right?
+ERROR_LOG_BUFFER_TOO_SHORT = "ERROR: TestDrive not executed properly. Execution error" 
 
 PATH_PROJ_OUTPUT = "output"
 PATH_INSTRUMENTED_SUT_C = "output\\InstrumentedSUT\\instrumented_SUT.c"

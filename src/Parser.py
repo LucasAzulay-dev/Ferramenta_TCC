@@ -18,8 +18,8 @@ class FuncDefVisitor(c_ast.NodeVisitor):
 
             # Verifica se a função possui parâmetros
             if node.decl.type.args is None or len(node.decl.type.args.params) == 0:
-                self.error_message = f"ERROR: function '{self.func_name}' has no parameters."
-                return
+                error = f"ERROR: function '{self.func_name}' has no parameters."
+                raise Exception(error)
            
             # Obtendo os parâmetros da função
             params = node.decl.type.args.params
@@ -171,7 +171,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
     def visit_FuncDef(self, node):
         # Verifica se o nó é a função alvo
         if node.decl.name == self.func_name:
-            params = node.decl.type.args.params
+            params = node.decl.type.args.params if node.decl.type.args else []
             # Processa os parâmetros da função
             for param in params:
                 param_name = param.name  # Nome da variável

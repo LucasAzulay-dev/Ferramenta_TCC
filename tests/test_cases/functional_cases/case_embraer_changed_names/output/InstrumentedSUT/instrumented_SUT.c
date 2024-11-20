@@ -11,7 +11,7 @@ int f1(int x, float y)
 
 void f2(float x, float *y, float *z)
 {
-  *z = 2 * x;
+  *z = 2 * 1;
   if ((*z) > 3)
   {
     *y = *z;
@@ -91,7 +91,7 @@ void sut(int i1, float i2, int i3, int *o1, int *o2, float *o3)
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"f1\", \"executionOrder\": \"1\", \"not_used\": {},\"in\": {\"i1\": \"%d\",\"i2\": \"%.3f\"},", i1,i2);
   a = f1(i1, i2);
   sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"a\": \"%d\"}},", a);
-  sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"f2\", \"executionOrder\": \"2\", \"not_used\": {},\"in\": {\"i2\": \"%.3f\",\"h\": \"%.3f\"},", i2,h);
+  sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"f2\", \"executionOrder\": \"2\", \"not_used\": {\"i2\": \"%.3f\"},\"in\": {\"h\": \"%.3f\"},", i2,h);
   f2(i2, &b, &h);
   sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"b\": \"%.3f\",\"h\": \"%.3f\"}},", b,h);
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"f3\", \"executionOrder\": \"3\", \"not_used\": {},\"in\": {\"i2\": \"%.3f\",\"i3\": \"%d\",\"h\": \"%.3f\"},", i2,i3,h);

@@ -13,7 +13,7 @@ int f1(int x, float y){
 }
 
 void f2(float x, float *y, float *z){
-    *z = 2 * x;
+    *z = 2 * 1;
     if(*z > 3){
         *y = *z;
     }

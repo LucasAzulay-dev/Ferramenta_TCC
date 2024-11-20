@@ -24,9 +24,6 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
     #Parse da quantidade de inputs e outputs, e seus tipos 
     resultado = ParseInputOutputs(ast, function_name)
 
-    if(isinstance(resultado, str)):
-        return resultado
-
     #Definindo o numero de colunas do SUT
     num_colunas = resultado[0]
 

@@ -1,0 +1,4 @@
+[coverage:run]
+omit =
+    src/utils.py
+    src/graphical_interface.py

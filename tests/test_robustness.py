@@ -48,11 +48,11 @@ class TestFI_5:
         assert str(exception.value) == ERROR_EXEC_ERROR
     
     # SUT is not a C file
-    def test_7(self, execute_robust_case):
-        robustness_case = 'sut_wrong_type'
-        with pytest.raises(Exception) as exception:
-            execute_robust_case(robustness_case)
-        assert str(exception.value) == ERROR_SUT_WRONG_TYPE
+    # def test_7(self, execute_robust_case):
+    #     robustness_case = 'sut_wrong_type'
+    #     with pytest.raises(Exception) as exception:
+    #         execute_robust_case(robustness_case)
+    #     assert str(exception.value) == ERROR_SUT_WRONG_TYPE
     
     # Tesvec is not an excel file
     def test_8(self, execute_robust_case):

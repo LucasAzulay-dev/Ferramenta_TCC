@@ -162,7 +162,7 @@ class PDF(FPDF):
         self.set_text_color(*color)
         self.cell(32, 10, f"- Coupling ID: {coupling['id']}", 10)
         independent_exercised_string = "Yes" if independent_exercised else "No"
-        self.cell(58, 10, f" | Independently Exercised: {independent_exercised_string}", 10)
+        self.cell(60, 10, f" | Independently Exercised: {independent_exercised_string}", 10)
         independent_exercised_and_sut_output_affected_string = "Yes" if independent_exercised_and_sut_output_affected else "No"
         self.cell(0, 10, f"  | Sut Output Affected: {independent_exercised_and_sut_output_affected_string+text_to_append}", 10, 1)
         self.set_text_color(0,0,0)

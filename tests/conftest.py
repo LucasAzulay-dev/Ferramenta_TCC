@@ -89,6 +89,13 @@ ROBUSTNESS_CASES = {
         'testvec_name' : 'TestVec.xls',
         'buffer_length' : 1
     },
+    'sut_no_outputs' :{
+        'case_folder' : 'sut_no_outputs',
+        'sut_file_name': 'SUT_no_outputs.c',
+        'sut_fcn_name' : 'SUT',
+        'testvec_name' : 'TestVec_no_outputs.xlsx',
+        'buffer_length' : 1
+    },
 }
 
 # Get path to all functional test cases

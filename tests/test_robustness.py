@@ -74,3 +74,10 @@ class TestFI_5:
         with pytest.raises(Exception) as exception:
             execute_robust_case(robustness_case)
         assert str(exception.value) == ERROR_LOG_BUFFER_TOO_SHORT
+            
+    # SUT has no outputs
+    def test_11(self, execute_robust_case):
+        robustness_case = 'sut_no_outputs'
+        with pytest.raises(Exception) as exception:
+            execute_robust_case(robustness_case)
+        assert str(exception.value) == ERROR_SUT_NO_OUTPUTS

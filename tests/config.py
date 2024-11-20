@@ -16,6 +16,7 @@ ERROR_SUT_WRONG_TYPE = "ERROR: SUT is not a C file"
 ERROR_TESTVEC_WRONG_TYPE = "Cannot detect file format"
 ERROR_TESTVEC_MISSING_COL = "ERROR: Test vector does not have a size equivalent to the desired function. SUT columns: 9 Test_vec columns: 8"
 ERROR_LOG_BUFFER_TOO_SHORT = "ERROR: TestDrive not executed properly. Execution error" 
+ERROR_SUT_NO_OUTPUTS = "ERROR: No outputs detected" 
 
 PATH_PROJ_OUTPUT = "output"
 PATH_INSTRUMENTED_SUT_C = "output\\InstrumentedSUT\\instrumented_SUT.c"

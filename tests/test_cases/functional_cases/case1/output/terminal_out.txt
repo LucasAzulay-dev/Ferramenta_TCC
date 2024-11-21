@@ -11,8 +11,8 @@ Test Driver executed successfully.
 Generating DC/CC report...
 Generating SUT Diagram
 SUT Diagram sucessfully generated
-Tests Passed: 0.0%
-Tests Failed (Vector Line): 1,2,3,4
+Tests Passed: 100.0%
+Tests Failed (Vector Line): 
 DC/CC Coverage: 20.0%
 Identified Couplings: 5
 Couplings Exercised Independently and Affecting Outputs: 1

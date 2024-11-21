@@ -1,6 +1,4 @@
-/* This source code is intended to exercise the DC/CC tool developed by Embraer PES3 */
-/* Author: jdavison */
-/* Revision 0.3 (Nov 04, 2024)*/
+// Case with a pointer being assigned another address.
 
 #include <stdio.h>
 #include "sut.h"
@@ -13,7 +11,7 @@ int f1(int i1, float i2){
 }
 
 void f2(float i2, float *b, float *h){
-    b = h;
+    b = h; // pointer assigned
     *h = 2 * i2;
     if(*h > 3){
         *b = *h;

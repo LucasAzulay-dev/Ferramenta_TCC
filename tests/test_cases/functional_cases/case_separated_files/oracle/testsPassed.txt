@@ -1,5 +1,5 @@
 # put 'true' or 'false' if each test will pass or not
-false
-false
-false
-false
+true
+true
+true
+true

@@ -4,7 +4,7 @@
 extern char log_buffer[33554432];
 void CompA(int AI1, int AI2, int AI3, int *AO1, int *AO2)
 {
-  *AO1 = AI1 + AI2;
+  *AO1 = AI1 / AI2;
   *AO2 = AI1 * AI3;
 }
 
@@ -34,9 +34,9 @@ int BO1;
 int CO1;
 void SUT(int SUTI1, int SUTI2, int SUTI3, int SUTI4, int SUTI5, int SUTI6, int SUTI7, int *SUTO1, long *SUTO2)
 {
-  sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"CompA\", \"executionOrder\": \"1\", \"not_used\": {},\"in\": {\"SUTI1\": \"%d\",\"SUTI2\": \"%d\",\"SUTI3\": \"%d\"},", SUTI1,SUTI2,SUTI3);
-  CompA(SUTI1, SUTI2, SUTI3, &AO1, &AO2);
-  sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"AO1\": \"%d\",\"AO2\": \"%d\"}},", AO1,AO2);
+  sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"CompA\", \"executionOrder\": \"1\", \"not_used\": {},\"in\": {\"SUTI1\": \"%d\",\"SUTI3\": \"%d\",\"AO2\": \"%d\"},", SUTI1,SUTI3,AO2);
+  CompA(SUTI1, 0, SUTI3, &AO1, &AO2);
+  sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"AO2\": \"%d\",\"AO2\": \"%d\"}},", AO2,AO2);
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"CompB\", \"executionOrder\": \"2\", \"not_used\": {},\"in\": {\"SUTI4\": \"%d\",\"SUTI5\": \"%d\",\"SUTI6\": \"%d\"},", SUTI4,SUTI5,SUTI6);
   CompB(SUTI4, SUTI5, SUTI6, &BO1);
   sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"BO1\": \"%d\"}},", BO1);

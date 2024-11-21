@@ -15,9 +15,9 @@ int main(){
   int test_vecs_SUTI5[4] = {11, 11, 11, 40};
   int test_vecs_SUTI6[4] = {13, 13, 13, 50};
   int test_vecs_SUTI7[4] = {11, 13, 11, 60};
-  int test_vecs_SUTO1[4] = {4, 3, 2, 1};
-  long test_vecs_SUTO2[4] = {1, 2, 3, 4};
-  int test_vecs_SUTO3[4] = {2, 1, 4, 3};
+  int test_vecs_SUTO1[4] = {90886800, 22147600, 26752390, 0};
+  long test_vecs_SUTO2[4] = {-1669942071, 311346025, 560316241, 1213825600};
+  int test_vecs_SUTO3[4] = {51236, 17646, 23672, -34839};
   snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"sutFunction\": \"sut\",\"numberOfTests\": \"4\",  \"skipedlines\":[],\"inputs\":[\"SUTI1\", \"SUTI2\", \"SUTI3\", \"SUTI4\", \"SUTI5\", \"SUTI6\", \"SUTI7\"],\"outputs\": [\"SUTO1\", \"SUTO2\", \"teste_return\"],\"executions\": [");
     for(int i=0;i<4;i++){
             snprintf(log_buffer + strlen(log_buffer),BUFFER_SIZE - strlen(log_buffer),"{\"testNumber\":\"%d\",\"analysis\": [",i+1);

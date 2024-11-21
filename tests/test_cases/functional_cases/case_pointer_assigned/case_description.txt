@@ -1,1 +1,1 @@
-Case given by Embraer.
+Case with a pointer being assigned another address.

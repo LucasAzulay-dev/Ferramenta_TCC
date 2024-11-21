@@ -19,20 +19,28 @@ class CouplingAnalyzer:
         }
 
     def identify_couplings_exercised(self):
+        all_passed = self._analyse_test_result()
+        if not all_passed: return {                
+                'dc_cc_coverage': 0, 
+                'dc_cc_coverage_2': 0,
+                'test_results': self.test_results,
+                'all_passed': all_passed,
+                'skiped_lines': self.log_data['skipedlines']
+                }
         self._process_log_data()
         self._generate_couplings()
         self._set_couplings_sut_outputs_related()
         self._analyze_couplings_execution()
         self._analyze_individual_coupling_exercises_component_level()
         self._determine_dc_cc_coverage()
-        self._analyse_test_result()
         return {
                 'couplings': self.couplings, 'individual_coupling_exercises': self.individual_coupling_exercises, 
                 'dc_cc_coverage': self.dc_cc_coverage, 'dc_cc_coverage_2': self.dc_cc_coverage_2,
                 'couplings_individually_exercised':self.couplings_individually_exercised, 
                 'couplings_individually_exercised_affected_sut': self.couplings_individually_exercised_affected_sut,
                 'test_results': self.test_results,
-                'skiped_lines': self.log_data['skipedlines']
+                'skiped_lines': self.log_data['skipedlines'],
+                'all_passed': all_passed
                 }
 
     def _process_log_data(self):
@@ -386,9 +394,12 @@ class CouplingAnalyzer:
 
         
     def _analyse_test_result(self):
-        self.test_results['total_tests'] = self.log_data['numberOfTests']
+        self.test_results['total_tests'] = int(self.log_data['numberOfTests'])  + len(self.log_data['skipedlines'])
         self.test_results['total_tests_passed'] = len([passed for passed in self.log_data['executions'] if passed['pass'] == 'true'])
-        self.test_results['total_tests_failed'] = len([failed for failed in self.log_data['executions'] if failed['pass'] == 'false'])
+        self.test_results['total_tests_failed'] = len([failed for failed in self.log_data['executions'] if failed['pass'] == 'false']) + len(self.log_data['skipedlines'])
         for index, failed in enumerate(self.log_data['executions']):
             if failed['pass'] == 'false':
                 self.test_results['tests_failed'].append({'expected_result': failed['expectedResult'], 'actual_result': failed['actualResult'], 'vector_line': self._adjusted_index(index)})
+        if self.test_results['total_tests_failed'] or self.log_data['skipedlines']: 
+            return False
+        return True

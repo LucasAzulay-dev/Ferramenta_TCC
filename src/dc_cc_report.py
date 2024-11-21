@@ -23,7 +23,7 @@ class PDF(FPDF):
         test_percentage = (self.data['test_results']['total_tests_passed'])/(int)(self.data['test_results']['total_tests']) * 100
         
         tab_space = 5  # Define o valor do recuo desejado        
-        color = (0, 128, 0) if test_percentage >= 100 else (255, 69, 0)
+        color = (0, 128, 0) if test_percentage >= 100 else (255, 0, 0)
         adicionar_ao_log(f"Tests Passed: {test_percentage:.1f}%")
         
         # Exibe a porcentagem de cobertura
@@ -35,13 +35,6 @@ class PDF(FPDF):
         self.set_text_color(0, 0, 0)
         self.ln(5)
         
-        # Exibe a LINHAS SKIPED
-        self.set_x(self.get_x() + tab_space)
-        self.set_font("Arial", "B", 12)
-        self.cell(30, 5, "Tests skiped: ", 0)
-        self.cell(0, 5, f"{self.data['skiped_lines']}", 0, 1)
-        self.ln(5)
-        
         # Exibe total de testes
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
@@ -49,6 +42,13 @@ class PDF(FPDF):
         self.set_font("Arial", "", 12)
         self.cell(0, 5, f"{self.data['test_results']['total_tests']}", 0, 1)
         self.set_text_color(0, 0, 0)
+        self.ln(5)
+        
+        # Exibe a LINHAS SKIPED
+        self.set_x(self.get_x() + tab_space)
+        self.set_font("Arial", "B", 12)
+        self.cell(30, 5, "Tests skiped: ", 0)
+        self.cell(0, 5, f"{self.data['skiped_lines']}", 0, 1)
         self.ln(5)
         
         # Exibe total de testes falharam
@@ -74,7 +74,7 @@ class PDF(FPDF):
         
     def add_resume_test_failed(self, test_failed):
         tab_space = 10
-        color = (255, 69, 0)
+        color = (255, 0, 0)
         self.set_text_color(*color)
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
@@ -97,6 +97,9 @@ class PDF(FPDF):
         self.cell(0, 5, f"DC/CC Coverage: {coverage_percentage:.1f}%", 30, 30)
         self.set_text_color(0, 0, 0)
         self.ln(5)
+        
+        if not self.data['all_passed']:
+            return False
         
         # Exibe total de acoplamentos identificados
         identified_coupligs = len(self.data['couplings'])
@@ -131,6 +134,7 @@ class PDF(FPDF):
         for coupling in self.data['couplings'].values():
             self.add_resume_coupling_analysis(coupling)
         self.ln(5)
+        return True
         
     def add_div(self):
         self.set_line_width(0.5)
@@ -153,7 +157,7 @@ class PDF(FPDF):
                     independent_exercised_and_sut_output_affected = True
                     break
                 
-        self.couplings_color[coupling['id']] =  (0, 100, 0) if independent_exercised_and_sut_output_affected else (255, 0, 0) if independent_exercised else (240, 150, 60)
+        self.couplings_color[coupling['id']] =  (0, 100, 0) if independent_exercised_and_sut_output_affected else (255, 0, 0) if independent_exercised else (255, 0, 0)
         
         if('unused_var' in coupling and (coupling['unused_var'] == True)):
             text_to_append = '  | Unused'
@@ -322,14 +326,15 @@ def create_report(data, pdf_file_path):
     pdf.add_page()
     
     pdf.add_test_results()
+
     pdf.add_div()    
+    all_passed = pdf.add_dc_cc_coverage_section()
     
-    pdf.add_dc_cc_coverage_section()
-    pdf.add_div()
-        
-    pdf.chapter_title('Detailed Coupling Description')
-    for coupling in data['couplings'].values():
-        pdf.add_coupling_section(coupling)
+    if all_passed:
+        pdf.add_div()
+        pdf.chapter_title('Detailed Coupling Description')
+        for coupling in data['couplings'].values():
+            pdf.add_coupling_section(coupling)
 
     pdf.output(pdf_file_path)
     print(f"PDF report created: {pdf_file_path}")

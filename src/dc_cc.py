@@ -26,4 +26,4 @@ def DC_CC_Report_Generator(log_buffer_path):
         data = analyzer.identify_couplings_exercised()
         path_report = 'output\\Report\\dc_cc_analysis_report.pdf'
         create_report(data, path_report)
-        return [path_diagram, path_report]
+        return [path_report, path_diagram]

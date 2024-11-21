@@ -320,25 +320,25 @@ class CouplingAnalyzer:
         for non_varying_params_values, values_executions in non_varying_params_values_executions.items():
             if len(values_executions) > 1:
                 for i, value_execution in enumerate(values_executions):
-                    for j in range(i + 1, len(values_executions)):
-                        pair_values_execution = [value_execution, values_executions[j]]
-                        if(value_execution['var_value'] != values_executions[j]['var_value']):
-                            suts_outputs_could_be_affected = self._check_outputs_suts_could_be_affected(pair_values_execution, self.couplings_executions[id])
-                            suts_outputs_affected = self._check_outputs_suts_affected(pair_values_execution, suts_outputs_could_be_affected, self.couplings_executions[id])
-                            self.individual_coupling_exercises.append({
-                                    'id': id, 
-                                    'var': self.couplings[id]['var'], 
-                                    'test_vector_pair_lines': tuple(self._determine_test_vector_pair_lines(pair_values_execution)),
-                                    'output_component': self.couplings[id]['output_component'],
-                                    'input_component': self.couplings[id]['input_component'],
-                                    'non_varying_params': list(non_varying_params.keys()),
-                                    'non_varying_params_values': list(non_varying_params_values),
-                                    'sut_outputs_related': self.couplings_executions[id]['sut_outputs_related'],
-                                    'values_executions': pair_values_execution,
-                                    'suts_outputs_could_be_affected': suts_outputs_could_be_affected,
-                                    'suts_outputs_affected': suts_outputs_affected,
-                                    'sut_output_affected': False
-                                    })
+                    if i < len(values_executions) - 1:
+                            pair_values_execution = [value_execution, values_executions[i + 1]]
+                            if(value_execution['var_value'] != values_executions[i + 1]['var_value']):
+                                suts_outputs_could_be_affected = self._check_outputs_suts_could_be_affected(pair_values_execution, self.couplings_executions[id])
+                                suts_outputs_affected = self._check_outputs_suts_affected(pair_values_execution, suts_outputs_could_be_affected, self.couplings_executions[id])
+                                self.individual_coupling_exercises.append({
+                                        'id': id, 
+                                        'var': self.couplings[id]['var'], 
+                                        'test_vector_pair_lines': tuple(self._determine_test_vector_pair_lines(pair_values_execution)),
+                                        'output_component': self.couplings[id]['output_component'],
+                                        'input_component': self.couplings[id]['input_component'],
+                                        'non_varying_params': list(non_varying_params.keys()),
+                                        'non_varying_params_values': list(non_varying_params_values),
+                                        'sut_outputs_related': self.couplings_executions[id]['sut_outputs_related'],
+                                        'values_executions': pair_values_execution,
+                                        'suts_outputs_could_be_affected': suts_outputs_could_be_affected,
+                                        'suts_outputs_affected': suts_outputs_affected,
+                                        'sut_output_affected': False
+                                        })
 
                         
     def _check_sut_affected(self, exercise, coupling):

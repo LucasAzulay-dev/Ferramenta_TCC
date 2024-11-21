@@ -44,13 +44,6 @@ class PDF(FPDF):
         self.set_text_color(0, 0, 0)
         self.ln(5)
         
-        # Exibe a LINHAS SKIPED
-        self.set_x(self.get_x() + tab_space)
-        self.set_font("Arial", "B", 12)
-        self.cell(30, 5, "Tests skiped: ", 0)
-        self.cell(0, 5, f"{self.data['skiped_lines']}", 0, 1)
-        self.ln(5)
-        
         # Exibe total de testes falharam
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
@@ -63,17 +56,30 @@ class PDF(FPDF):
         self.set_x(self.get_x() + tab_space)
         self.set_font("Arial", "B", 12)
         test_failed_vector_lines = []
-        if(len(self.data['test_results']['tests_failed'])):
+        if(len(self.data['test_results']['tests_failed']) or self.data['skiped_lines']):
             self.cell(0, 5, "Test Failed Description:", 0, 1)
+            # Exibe a LINHAS SKIPED
+            self.ln(3)
+            tab_space = 10
+            self.set_x(self.get_x() + tab_space)
+            self.set_font("Arial", "B", 12)
+            self.cell(30, 5, "Tests skiped: ", 0)
+            color = (255, 0, 0)
+            self.set_text_color(*color)
+            self.cell(0, 5, f"{self.data['skiped_lines']}", 0, 1)
             self.set_text_color(0, 0, 0)
+            self.ln(3)
+            self.set_x(self.get_x() + tab_space)
+            self.cell(30, 5, "Unexpected Results:", 0, 1)
+            self.ln(3)
             for test_failed in self.data['test_results']['tests_failed']:
                 self.add_resume_test_failed(test_failed)
                 test_failed_vector_lines.append(test_failed['vector_line'])
-            self.ln(5)
+            self.ln(3)
         adicionar_ao_log(f"Tests Failed (Vector Line): {','.join(map(str, test_failed_vector_lines))}")
         
     def add_resume_test_failed(self, test_failed):
-        tab_space = 10
+        tab_space = 15
         color = (255, 0, 0)
         self.set_text_color(*color)
         self.set_x(self.get_x() + tab_space)

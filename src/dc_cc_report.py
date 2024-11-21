@@ -284,7 +284,7 @@ class PDF(FPDF):
                 self.set_font("Arial", "B", 12)
                 self.set_font("Arial", "B", 12)
                 self.cell(variable_size, 5, "Variable", 1)
-                self.cell(output_size, 5, 'Outputs', 1)
+                if sut_outputs_could_affected_index: self.cell(output_size, 5, 'Outputs', 1)
                 self.ln()
                 
                 # Tabela para exibir os exercícios de acoplamento individuais

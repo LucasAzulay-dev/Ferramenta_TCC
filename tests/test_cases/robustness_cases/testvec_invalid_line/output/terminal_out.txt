@@ -11,8 +11,8 @@ Test Driver executed successfully.
 Generating DC/CC report...
 Generating SUT Diagram
 SUT Diagram sucessfully generated
-Tests Passed: 0.0%
-Tests Failed (Vector Line): 1,4
+Tests Passed: 50.0%
+Tests Failed (Vector Line): 
 DC/CC Coverage: 0.0%
 PDF report created: output\Report\dc_cc_analysis_report.pdf
 [pytest] Coping project output to case output...

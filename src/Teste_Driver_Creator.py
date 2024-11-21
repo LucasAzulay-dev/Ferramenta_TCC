@@ -39,7 +39,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
     inputsOutputs = NumberInputsOutputs(excel_file_path, columns_to_skip)
 
     # Leia o arquivo Excel
-    df = pd.read_excel(excel_file_path,header=1, engine='calamine', usecols=used_cols, dtype=object, skiprows=skipedlines)
+    df = pd.read_excel(excel_file_path,header=1, engine='calamine', usecols=used_cols, dtype=object, skiprows=[line+1 for line in skipedlines])
 
     num_linhas = len(df.index)    
 

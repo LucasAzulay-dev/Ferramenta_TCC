@@ -287,7 +287,7 @@ def Create_Instrumented_Code(ast, function_name, bufferLength):
         instrumented_code_with_header = header + instrumented_code
 
         # Escreva o código instrumentado em um novo arquivo
-        instrumented_code_path = 'output\InstrumentedSUT\instrumented_SUT.c'
+        instrumented_code_path = 'output\\InstrumentedSUT\\instrumented_SUT.c'
         with open(instrumented_code_path, 'w') as f:
             f.write(instrumented_code_with_header)
 

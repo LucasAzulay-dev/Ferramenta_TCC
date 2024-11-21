@@ -77,7 +77,7 @@ def diagram_generator(log_data, diagram_directory, diagram_filename):
         dot.edge(source, target, color='red', arrowhead='onormal')
 
     # Renderizar o diagrama sem abrir
-    dot.render(diagram_filename, diagram_directory, format="pdf")  # Use "pdf" ou "png" conforme a necessidade
+    dot.render(diagram_filename, directory=diagram_directory, format="pdf")  # Use "pdf" ou "png" conforme a necessidade
 
     report = {
         "totalTests": log_data["numberOfTests"],

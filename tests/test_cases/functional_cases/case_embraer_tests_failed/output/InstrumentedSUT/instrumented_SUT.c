@@ -94,6 +94,7 @@ void sut(int i1, float i2, int i3, int *o1, int *o2, float *o3)
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"f2\", \"executionOrder\": \"2\", \"not_used\": {},\"in\": {\"i2\": \"%.3f\",\"h\": \"%.3f\"},", i2,h);
   f2(i2, &b, &h);
   sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"b\": \"%.3f\",\"h\": \"%.3f\"}},", b,h);
+  h = 3;
   sprintf(log_buffer + strlen(log_buffer), "{\"function\": \"f3\", \"executionOrder\": \"3\", \"not_used\": {},\"in\": {\"i2\": \"%.3f\",\"i3\": \"%d\",\"h\": \"%.3f\"},", i2,i3,h);
   f3(i2, i3, &h, &e, &g);
   sprintf(log_buffer + strlen(log_buffer), "\"out\": {\"e\": \"%d\",\"g\": \"%.3f\"}},", e,g);

@@ -1,0 +1,1 @@
+ERROR: SUT is not a C file

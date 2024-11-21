@@ -5,7 +5,16 @@ from dc_cc import DC_CC_Report_Generator
 from utils import adicionar_ao_log, Create_output_folder
 from Parser import generate_ast
 
-def executar_ferramenta(excel_file_path, code_path, function_name, compiler, bufferLength = 33554432): 
+def executar_ferramenta(excel_file_path : str, code_path : str, function_name : str, compiler : str, bufferLength = 33554432): 
+
+    if not code_path.endswith('.c'):
+        raise Exception("ERROR: SUT is not a C file")
+
+    if not (excel_file_path.endswith('.xls') or excel_file_path.endswith('.xlsx')):
+        raise Exception("ERROR: TestVector is not a xls or xlsx file")
+    
+    if not (compiler == 'gcc' or compiler == 'clang'):
+        raise Exception("ERROR: Compiler must be gcc or clang")
 
     Create_output_folder()
 

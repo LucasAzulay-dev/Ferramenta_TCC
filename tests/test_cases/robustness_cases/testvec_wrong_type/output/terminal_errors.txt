@@ -1,1 +1,1 @@
-Cannot detect file format
+ERROR: TestVector is not a xls or xlsx file

@@ -1,7 +1,3 @@
-/* This source code is intended to exercise the DC/CC tool developed by Embraer PES3 */
-/* Author: jdavison */
-/* Revision 0.3 (Nov 04, 2024)*/
-
 #include <stdio.h>
 #include "sut.h"
 

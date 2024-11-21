@@ -156,7 +156,7 @@ class PDF(FPDF):
         self.couplings_color[coupling['id']] =  (0, 100, 0) if independent_exercised_and_sut_output_affected else (255, 0, 0) if independent_exercised else (240, 150, 60)
         
         if('unused_var' in coupling and (coupling['unused_var'] == True)):
-            text_to_append = ' | Unused'
+            text_to_append = '  | Unused'
             self.couplings_color[coupling['id']] = (74, 37, 17)
             
         
@@ -165,7 +165,7 @@ class PDF(FPDF):
         self.set_text_color(*color)
         self.cell(32, 10, f"- Coupling ID: {coupling['id']}", 10)
         independent_exercised_string = "Yes" if independent_exercised else "No"
-        self.cell(60, 10, f" | Independently Exercised: {independent_exercised_string}", 10)
+        self.cell(63, 10, f" | Independently Exercised: {independent_exercised_string}", 10)
         independent_exercised_and_sut_output_affected_string = "Yes" if independent_exercised_and_sut_output_affected else "No"
         self.cell(0, 10, f"  | Sut Output Affected: {independent_exercised_and_sut_output_affected_string+text_to_append}", 10, 1)
         self.set_text_color(0,0,0)

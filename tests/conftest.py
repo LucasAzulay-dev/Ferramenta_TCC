@@ -16,7 +16,7 @@ FUNCTIONAL_CASES = [
     'case_embraer_base',
     'case_embraer_changed_names',
     'case_embraer_tests_failed',
-    'case1',
+    'case_dev_base',
     'case_100_coverage',
     'case_unused_var',
     'case_sut_return',
@@ -33,6 +33,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'wrong_name',
         'testvec_name' : 'testvec.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'sut_not_testable' :{
@@ -40,6 +41,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT_not_testable.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'sut_runtime_error' :{
@@ -47,6 +49,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT_exec_error.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'sut_wrong_type' :{
@@ -54,6 +57,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT_wrong_type.cpp',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'testvec_all_invalid_lines' :{
@@ -61,6 +65,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec_all_invalid_lines.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'testvec_invalid_line' :{
@@ -68,6 +73,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec_invalid_line.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'testvec_missing_column' :{
@@ -75,6 +81,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec_missing_column.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'testvec_wrong_type' :{
@@ -82,6 +89,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec_wrong_type.csv',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'log_buffer_too_short' :{
@@ -89,6 +97,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'sut.c',
         'sut_fcn_name' : 'sut',
         'testvec_name' : 'TestVec.xls',
+        'compiler' : 'gcc',
         'buffer_length' : 1
     },
     'sut_no_outputs' :{
@@ -96,6 +105,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT_no_outputs.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'TestVec_no_outputs.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'sut_no_inputs' :{
@@ -103,6 +113,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT_no_inputs.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'TestVec_no_inputs.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'sut_compilation_error' :{
@@ -110,6 +121,7 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'sut_compile_error.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec.xlsx',
+        'compiler' : 'gcc',
         'buffer_length' : None
     },
     'sut_instrumentation_error' :{
@@ -117,6 +129,15 @@ ROBUSTNESS_CASES = {
         'sut_file_name': 'SUT_instrumentation_error.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec.xlsx',
+        'compiler' : 'gcc',
+        'buffer_length' : None
+    },
+    'compiler_wrong_name' :{
+        'case_folder' : 'compiler_wrong_name',
+        'sut_file_name': 'sut.c',
+        'sut_fcn_name' : 'sut',
+        'testvec_name' : 'TestVec.xls',
+        'compiler'     : 'invalid',
         'buffer_length' : None
     },
 }
@@ -127,6 +148,7 @@ class FunctionalTestConfig:
         self.case_dir = str(Path(PATH_FUNC_TEST_CASES+'\\'+case).absolute())
         self.sut_path = str(Path(PATH_FUNC_TEST_CASES+'\\'+case+'\\src\\sut.c').absolute())
         self.sut_name = 'sut'
+        self.compiler = 'gcc'
         self.buffer_length = None
         self.testvec = str(Path(PATH_FUNC_TEST_CASES+'\\'+case+'\\testInputs\\testvec.xls').absolute())
         if not os.path.isfile(self.testvec):
@@ -144,6 +166,7 @@ class RobustnessTestConfig:
         self.case_dir = str(Path(PATH_ROBS_TEST_CASES +'\\'+ case['case_folder']).absolute())
         self.sut_path = str(Path(PATH_ROBS_TEST_CASES +'\\'+ case['case_folder']+'\\'+case['sut_file_name']).absolute())
         self.sut_name = case['sut_fcn_name']
+        self.compiler = case['compiler']
         self.buffer_length = case['buffer_length']
         self.testvec = str(Path(PATH_ROBS_TEST_CASES +'\\'+ case['case_folder']+'\\'+case['testvec_name']).absolute())
         # output
@@ -318,14 +341,14 @@ def _get_case_config(case, isRobust=False):
                             # proj_dir=case_config.proj_dir,
                             sut_name=case_config.sut_name,
                             testvec=case_config.testvec,
-                            compiler='gcc')
+                            compiler=case_config.compiler)
     else:
         case_params = ToolParameters(sut_path=case_config.sut_path,
                             # proj_dir=case_config.proj_dir,
                             sut_name=case_config.sut_name,
                             testvec=case_config.testvec,
                             buffer_length=case_config.buffer_length,
-                            compiler='gcc')
+                            compiler=case_config.compiler)
     return case_params, case_config
 
 def _clean_test_output_dir(case_path : FunctionalTestConfig | RobustnessTestConfig):

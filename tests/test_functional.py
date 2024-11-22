@@ -22,7 +22,7 @@ class TestFI_1:
     def test_2(self, dont_open_report):
         case_path = 'tests\\test_cases\\functional_cases\\case_embraer_base'
         executar_ferramenta(
-            excel_file_path=case_path + '\\testInputs\\TestVec.xls',
+            excel_file_path=case_path + '\\testInputs\\TestVec.xlsx',
             code_path=case_path+"\\src\\sut.c",
             function_name='sut',
             compiler='clang',
@@ -41,7 +41,9 @@ class TestFI_3:
 
 # FI#4: The Test Driver must execute tests using the instrumented code.
 class TestFI_4:
-    pass
+    def test_1(self, case_path, execute_functional_case):
+        with open(os.path.join(case_path,PATH_TEST_DRIVER_C)) as test_driver:
+            assert '#include "instrumented_SUT.h"' in test_driver.read()
 
 # FI#6: The Test Driver must generate an execution log of the tests performed on the instrumented code.
 class TestFI_6:

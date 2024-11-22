@@ -17,7 +17,7 @@ class TestFI_5:
         robustness_case = 'testvec_invalid_line'
         execute_robust_case(robustness_case)
         json_out = get_log_json(robustness_case)
-        assert json_out['skipedlines'] != []
+        assert json_out['skipedlines'] == [2, 3] and json_out['numberOfTests'] == '2'
 
     # all lines are invalid in testvec
     def test_3(self, execute_robust_case):
@@ -48,11 +48,11 @@ class TestFI_5:
         assert str(exception.value) == ERROR_EXEC_ERROR
     
     # SUT is not a C file
-    # def test_7(self, execute_robust_case):
-    #     robustness_case = 'sut_wrong_type'
-    #     with pytest.raises(Exception) as exception:
-    #         execute_robust_case(robustness_case)
-    #     assert str(exception.value) == ERROR_SUT_WRONG_TYPE
+    def test_7(self, execute_robust_case):
+        robustness_case = 'sut_wrong_type'
+        with pytest.raises(Exception) as exception:
+            execute_robust_case(robustness_case)
+        assert str(exception.value) == ERROR_SUT_WRONG_TYPE
     
     # Tesvec is not an excel file
     def test_8(self, execute_robust_case):
@@ -102,3 +102,10 @@ class TestFI_5:
         with pytest.raises(Exception) as exception:
             execute_robust_case(robustness_case)
         assert str(exception.value) == ERROR_SUT_INSTRUMENTATION_ERROR
+
+    # Compiler not accepted
+    def test_15(self, execute_robust_case):
+        robustness_case = 'compiler_wrong_name'
+        with pytest.raises(Exception) as exception:
+            execute_robust_case(robustness_case)
+        assert str(exception.value) == ERROR_COMPILER_NOT_ACCEPTED

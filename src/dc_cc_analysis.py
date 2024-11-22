@@ -303,11 +303,10 @@ class CouplingAnalyzer:
                         suts_outputs_affected[sut_output] = True
         return suts_outputs_affected
     
-    def _adjusted_index(self,index):
+    def _adjusted_index(self, index):
         adjusted = index + 1
-        for i in range(index + 1):
-                while adjusted in self.log_data['skipedlines']:
-                    adjusted += 1
+        skipped_count = sum(1 for x in self.log_data['skipedlines'] if x <= adjusted)
+        adjusted += skipped_count
         return adjusted
     
     def _determine_test_vector_pair_lines(self, pair_values_execution):

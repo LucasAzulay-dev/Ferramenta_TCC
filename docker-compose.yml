@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  runtime_overhead:
+    build: .
+    container_name: runtime_overhead
+    cpus: 1
+    mem_limit: 1g
+    stdin_open: true
+    tty: true

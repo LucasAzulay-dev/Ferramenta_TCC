@@ -1,0 +1,1 @@
+Case where a SUT output is return by value and by reference by the same component.

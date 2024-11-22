@@ -37,19 +37,16 @@ def adicionar_ao_log_error(mensagem):
 def Create_output_folder(base_path="output"):
     try:
         adicionar_ao_log("Creating Output folder...")
-        # Define o caminho da pasta principal
-        pasta_principal = os.path.join(base_path)
+        # Verifica se a pasta principal já existe
+        if not os.path.exists(base_path):
+            os.makedirs(base_path)
         
         # Lista com os nomes das subpastas
         subpastas = ["InstrumentedSUT", "TestDriver", "Report", "OutputBuffer"]
         
-        # Cria a pasta principal, se não existir
-        if not os.path.exists(pasta_principal):
-            os.makedirs(pasta_principal)
-        
         # Cria as subpastas dentro da pasta principal
         for subpasta in subpastas:
-            caminho_subpasta = os.path.join(pasta_principal, subpasta)
+            caminho_subpasta = os.path.join(base_path, subpasta)
             if not os.path.exists(caminho_subpasta):
                 os.makedirs(caminho_subpasta)
 
@@ -102,12 +99,12 @@ def mapear_tipo_c(valor,tipo_c):
         else:
             return 1  
     elif tipo_c == "float":
-        if (isinstance(valor, float) and (1.2E-38 <= valor <= 3.4E+38)):
+        if ((isinstance(valor, float) and (-1.2E+38 <= valor <= 3.4E+38)) or isinstance(valor, int)):
             return 0 
         else:
             return 1 
     elif tipo_c == "double":
-        if (isinstance(valor, float) and (2.3E-308 <= valor <= 1.7E+308)):
+        if ((isinstance(valor, float) and (-1.2E+38 <= valor <= 3.4E+38)) or isinstance(valor, int)):
             return 0 
         else:
             return 1 
@@ -126,7 +123,7 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
     columns_to_skip = ['Time', 'INPUT_COMMENTS', 'OUTPUT_COMMENTS']
     used_cols = lambda x: x not in columns_to_skip
 
-    df = pd.read_excel(arquivo_excel, header = 1, usecols=used_cols, dtype=object)
+    df = pd.read_excel(arquivo_excel, engine='calamine',header = 1, usecols=used_cols, dtype=object)
     
     # Verifica se o número da coluna é válido
     if numero_coluna < 0 or numero_coluna >= len(df.columns):
@@ -139,9 +136,26 @@ def skip_lines(arquivo_excel, numero_coluna, tipo_c):
     linhas_inconsistentes = []
     for indice, valor in enumerate(df[nome_coluna]):
         if (mapear_tipo_c(valor,tipo_c) == 1):
-            linhas_inconsistentes.append(indice + 2)  # +2 para ajustar o índice para o usuário
+            linhas_inconsistentes.append(indice + 1)  # +1 para ajustar o índice para o usuário
     
     return linhas_inconsistentes
+
+def NumberInputsOutputs(excel_file_path, colunas):
+    # Carrega o arquivo Excel
+    df = pd.read_excel(excel_file_path,header=1, engine='calamine', dtype=object)
+
+    # Verifica se todos os nomes de colunas estão presentes
+    if any(col not in df.columns for col in colunas):
+        return "Uma ou mais das colunas especificadas não estão presentes no arquivo."
+
+    # Localiza os índices das colunas
+    idx1, idx2, idx3 = df.columns.get_loc(colunas[0]), df.columns.get_loc(colunas[1]), df.columns.get_loc(colunas[2])
+    
+    # Conta o número de colunas entre cada par de colunas especificadas
+    colunas_entre_1_2 = abs(idx2 - idx1) - 1
+    colunas_entre_2_3 = abs(idx3 - idx2) - 1
+
+    return [colunas_entre_1_2, colunas_entre_2_3]
 
 def list_c_files(code_path, exclude):
     caminhos_c = []  # Lista para armazenar os caminhos dos arquivos .c
@@ -174,3 +188,6 @@ def list_c_directories(code_path, exclude):
         return list(directories)
     except Exception as e:
         return []
+
+if __name__ == '__main__':
+    Create_output_folder()

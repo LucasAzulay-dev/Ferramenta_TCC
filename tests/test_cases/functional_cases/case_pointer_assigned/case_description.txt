@@ -1,0 +1,1 @@
+Case with a pointer being assigned another address.

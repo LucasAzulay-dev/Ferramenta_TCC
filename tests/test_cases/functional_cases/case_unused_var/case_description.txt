@@ -1,0 +1,1 @@
+Case to achieve 100% coverage.

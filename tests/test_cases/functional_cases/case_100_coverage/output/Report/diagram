@@ -1,0 +1,50 @@
+// Estrutura Observada do SUT
+digraph {
+	compound=true
+	subgraph cluster_SUT {
+		label=SUT
+		style=dashed
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+		f1 [label=f1 shape=box]
+		f2 [label=f2 shape=box]
+		f3 [label=f3 shape=box]
+	}
+	i1 [label=i1 shape=ellipse]
+	i2 [label=i2 shape=ellipse]
+	i3 [label=i3 shape=ellipse]
+	o1 [label=o1 shape=ellipse]
+	subgraph cluster_SUT {
+		f1 -> a
+	}
+	subgraph cluster_SUT {
+		f2 -> b
+	}
+	f3 -> o1
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+	}
+	subgraph cluster_SUT {
+		a [label=a color=lightblue shape=diamond style=filled]
+	}
+	subgraph cluster_SUT {
+		b [label=b color=lightblue shape=diamond style=filled]
+	}
+	i1 -> f1
+	i2 -> f1
+	i2 -> f2
+	i3 -> f2
+	a -> f3
+	b -> f3
+}

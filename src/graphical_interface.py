@@ -10,8 +10,13 @@ pdf_files_path = []
 pdf_index = 0
 page_index = 0
 
+def clear_log():
+    log_display.config(state="normal")
+    log_display.delete(1.0, tk.END)
+    log_display.config(state="disable")
+
 def select_excel():
-    excel_file_path = filedialog.askopenfilename(title="Select Excel File", filetypes=[("Excel files", "*.xlsx")])
+    excel_file_path = filedialog.askopenfilename(title="Select Excel File", filetypes=[("Excel files", ".xlsx .xls")])
     entry_excel.delete(0, tk.END)
     entry_excel.insert(0, excel_file_path)
 
@@ -19,12 +24,6 @@ def select_sut():
     sut_file_path = filedialog.askopenfilename(title="Select SUT File", filetypes=[("C files", "*.c")])
     entry_sut.delete(0, tk.END)
     entry_sut.insert(0, sut_file_path)
-
-#é pra selecionar uma pasta com todos os arquivos para compilação
-def select_folder():
-    folder_path = filedialog.askdirectory(title="Select Folder with Files to Compile")
-    entry_folder.delete(0, tk.END)
-    entry_folder.insert(0, folder_path)
 
 def display_pdf(pdf_files_path,index, page_num=0):
     if not pdf_files_path:
@@ -82,7 +81,6 @@ def execute():
     sut_file_path = entry_sut.get()
     function_name = entry_func_name.get()
     compiler = compiler_var.get()
-    folder_path = entry_folder.get()
     buffer_length = entry_buffer_name.get()
 
     if not excel_file_path or not sut_file_path or not function_name:
@@ -98,7 +96,7 @@ def execute():
         
         global pdf_files_path
 
-        pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, folder_path, compiler,buffer_length)
+        pdf_files_path = executar_ferramenta(excel_file_path, sut_file_path, function_name, compiler,buffer_length)
         
         if(not pdf_files_path):
             adicionar_ao_log_error("ERROR: DC/CC report not generated properly.")
@@ -157,15 +155,6 @@ if __name__ == "__main__":
     button_sut = tk.Button(frame_sut, text="Select", command=select_sut, **button_style)
     button_sut.pack(side="left")
 
-    frame_folder = ttk.Frame(left_frame)
-    frame_folder.pack(pady=5, fill="x")
-    label_folder = ttk.Label(frame_folder, text="Folder with Files to Compile:", font=default_font)
-    label_folder.pack(side="left")
-    entry_folder = ttk.Entry(frame_folder, width=40, font=default_font)
-    entry_folder.pack(side="left", padx=5)
-    button_folder = tk.Button(frame_folder, text="Select", command=select_folder, **button_style)
-    button_folder.pack(side="left")
-
     frame_func = ttk.Frame(left_frame)
     frame_func.pack(pady=5, fill="x")
     label_func_name = ttk.Label(frame_func, text="Function Name:", font=default_font)
@@ -202,6 +191,9 @@ if __name__ == "__main__":
     log_display.tag_configure("red", foreground="red")
     log_display.config(state="disable")
     configurar_log_widget(log_display)
+
+    button_clear_log = tk.Button(left_frame, text="Clear Log", command=clear_log, **button_style)
+    button_clear_log.pack(pady=5)
 
     pdf_frame = ttk.Frame(right_frame)
     pdf_frame.pack(fill="both", expand=True)

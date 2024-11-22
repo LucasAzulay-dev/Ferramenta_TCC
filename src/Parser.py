@@ -1,12 +1,13 @@
-from pycparser import c_ast, parse_file
-from utils import adicionar_ao_log, list_c_directories
+from pycparser import c_ast, c_parser
+from utils import adicionar_ao_log
+import os
+import re
 
 class FuncDefVisitor(c_ast.NodeVisitor):
     def __init__(self, func_name):
         self.func_name = func_name
         self.func_found = False
-        self.num_entradas = 0
-        self.num_saidas = 0
+        self.num_param = 0
         self.resultado = []  # Lista que irá armazenar os resultados
         self.error_message = ''
    
@@ -17,29 +18,17 @@ class FuncDefVisitor(c_ast.NodeVisitor):
 
             # Verifica se a função possui parâmetros
             if node.decl.type.args is None or len(node.decl.type.args.params) == 0:
-                self.error_message = f"ERROR: function '{self.func_name}' has no parameters."
-                return
+                error = f"ERROR: function '{self.func_name}' has no parameters."
+                raise Exception(error)
            
             # Obtendo os parâmetros da função
             params = node.decl.type.args.params
             for param in params:
                 param_type = self._get_type(param.type)
-                param_kind = "O" if self._is_pointer(param.type) else "I"
-               
-                # Contagem de entradas e saídas
-                if param_kind == "I":
-                    self.num_entradas += 1
-                else:
-                    self.num_saidas += 1
-
-
-                # Adicionando à lista separadamente o tipo do parâmetro e se é Entrada (I) ou Saída (O)
-                self.resultado.append(param_kind)  # Primeiro, Entrada (I) ou Saída (O)
-                self.resultado.append(param_type)  # Depois, o tipo do parâmetro
+                self.num_param += 1
+                self.resultado.append(param_type) 
            
-            # Adiciona o número de entradas e saídas ao início da lista
-            self.resultado.insert(0, self.num_saidas)  # Segundo item: número de saídas
-            self.resultado.insert(0, self.num_entradas)  # Primeiro item: número de entradas
+            self.resultado.insert(0, self.num_param)  
    
     def _get_type(self, type_node):
         """ Função auxiliar para obter o tipo de um nó """
@@ -47,19 +36,12 @@ class FuncDefVisitor(c_ast.NodeVisitor):
             return self._get_type(type_node.type)   # Ponteiro  + '*'
         elif isinstance(type_node, c_ast.TypeDecl):
             return ' '.join(type_node.type.names)  # Tipos como "unsigned int"
-        return "desconhecido"
 
 
-    def _is_pointer(self, type_node):
-        """ Função auxiliar para verificar se um nó é ponteiro """
-        return isinstance(type_node, c_ast.PtrDecl)
-    
     def check_errors(self):
         """ Função que checa se houve erros e retorna as mensagens correspondentes """
         if not self.func_found:
             return f"ERROR: function '{self.func_name}' not found."
-        if self.error_message:
-            return self.error_message
         return None
 
 class FuncReturnVisitor(c_ast.NodeVisitor):
@@ -91,8 +73,6 @@ class FuncReturnVisitor(c_ast.NodeVisitor):
                 var_name = node.expr.name
                 var_type = self.current_declared_vars.get(var_name)
                 if var_type:
-                    # Adiciona "OR" e o tipo como itens separados na lista
-                    self.var_return_info.append("OR")
                     self.var_return_info.append(var_type)
 
 
@@ -113,7 +93,10 @@ def ParseInputOutputs(ast, target_function):
         raise Exception(error)
 
     if(len(visitor_return.var_return_info) > 0):
-        visitor.resultado[1] += 1
+        visitor.resultado[0] += 1
+        visitor.resultado.insert(1,"return")
+    else:
+        visitor.resultado.insert(1,"noreturn")
 
     lista_resultante = visitor.resultado + visitor_return.var_return_info
 
@@ -138,8 +121,8 @@ class FuncDefVisitor2(c_ast.NodeVisitor):
                 param_tipo = self._get_type(param.type)
                 param_nome = param.name if param.name else ''
                 parametros.append(f'{param_tipo} {param_nome}'.strip())
-        else:
-            parametros.append('void')
+        # else:
+        #     parametros.append('void')
 
         # Montar a declaração da função
         declaracao = f'{tipo_retorno} {nome_funcao}({", ".join(parametros)});'
@@ -152,11 +135,10 @@ class FuncDefVisitor2(c_ast.NodeVisitor):
                 return ' '.join(tipo.type.names)
         elif isinstance(tipo, c_ast.PtrDecl):  # Para tipos com ponteiros
             return self._get_type(tipo.type) + '*'
-        elif isinstance(tipo, c_ast.ArrayDecl):  # Para arrays
-            return self._get_type(tipo.type) + '[]'
+        # elif isinstance(tipo, c_ast.ArrayDecl):  # Para arrays
+        #     return self._get_type(tipo.type) + '[]'
         elif isinstance(tipo, c_ast.FuncDecl):  # Para funções como ponteiros
             return self._get_type(tipo.type)
-        return 'void'
 
 def gerar_arquivo_h_com_pycparser(ast):
     # Visitar nós de definição de função
@@ -181,14 +163,14 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
     def __init__(self, func_name):
         self.func_name = func_name
         self.inputs = []  # Lista para armazenar nomes de variáveis de entrada
-        self.outputs = []  # Lista para armazenar nomes de variáveis de saída (incluindo retornos)
+        self.outputs = {}  # Lista para armazenar nomes de variáveis de saída (incluindo retornos)
         self.current_declared_vars = {}  # Dicionário para armazenar as declarações de variáveis locais
         self.variables = {}  # Dicionário para armazenar as declarações de variáveis locais
 
     def visit_FuncDef(self, node):
         # Verifica se o nó é a função alvo
         if node.decl.name == self.func_name:
-            params = node.decl.type.args.params
+            params = node.decl.type.args.params if node.decl.type.args else []
             # Processa os parâmetros da função
             for param in params:
                 param_name = param.name  # Nome da variável
@@ -199,7 +181,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
                     self.inputs.append(param_name)
                     self.variables[param_name] = ''.join(param.type.type.names)
                 else:
-                    self.outputs.append(param_name)
+                    self.outputs[param_name] = '*'
                     self.variables[param_name] = ''.join(param.type.type.type.names)
                 
             
@@ -218,7 +200,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
         if isinstance(node.expr, c_ast.ID):
             var_name = node.expr.name
             if var_name not in self.outputs:  # Evita duplicações
-                self.outputs.append(var_name)
+                self.outputs[var_name] = ''
 
     def _is_pointer(self, type_node):
         """ Função auxiliar para verificar se um nó é ponteiro """
@@ -227,7 +209,7 @@ class FuncDefVisitor3(c_ast.NodeVisitor):
     def get_results(self):
             """ Retorna as listas de entradas e saídas como strings formatadas """
             formatted_inputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.inputs))
-            formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs))
+            formatted_outputs = '[{}]'.format(", ".join(f'\"{name}\"' for name in self.outputs.keys()))
             return formatted_inputs.replace('"', '\\"'), formatted_outputs.replace('"', '\\"')
         
     def get_variables_and_sut_outputs(self):
@@ -255,28 +237,52 @@ def ParseNameInputsOutputs(ast, target_function):
     return inputs, outputs
 
 #------------------------------------------------------------------------------------------------------
-def generate_ast(code_path, folder_path):
+def substitute_headers_with_sources(main_file):
+    combined_code = []
 
-    # Parsing do código C
-    compile_headers_path = list_c_directories(folder_path, code_path)
-    cpp_args = ['-E'] + compile_headers_path
-    return parse_file(code_path, use_cpp=True, cpp_path='gcc', cpp_args= cpp_args)
+    # Lê o arquivo principal
+    with open(main_file, 'r') as f:
+        main_file_normalized = os.path.normpath(main_file)
+        for line in f:
+            if line.strip().startswith('#include') or line.strip().startswith('# include'):
+                # Verifica se é um include de um header relativo
+                try:
+                    header_path = line.strip().split('"')[1]
+                    header_path = os.path.normpath(os.path.join(os.path.dirname(main_file), header_path))
 
-if __name__ == '__main__':
+                    # Substitui o header pelo conteúdo correspondente do .c, se disponível
+                    source_path = header_path.replace('.h', '.c')
+                    if(source_path != main_file_normalized):
+                        if os.path.exists(source_path):
+                            with open(source_path, 'r') as source_file:
+                                for line_source_file in source_file:
+                                    if not line_source_file.strip().startswith('#'):
+                                        combined_code.append(line_source_file)
+                        elif line.strip().startswith('#') :
+                            pass
+                except:
+                    pass
+            else:
+                combined_code.append(line)
 
-    # Defina o nome do arquivo .c do SUT
-    code_path = "tests/test_cases/case2/src/SUT/SUT2.c"
-    # Função alvo
-    target_function = "SUT"
+    return clean_c_code(''.join(combined_code)) # Retorna o código combinado como uma string
 
-    folder_path= "tests/test_cases/case2/src/SUT"
+def clean_c_code(code):
+    # 1. Remover comentários de linha (//)
+    code = re.sub(r'//.*$', '', code, flags=re.MULTILINE)
 
-    #resultado = ParseInputOutputs(code_path, target_function)
-    #print(resultado)
+    # 2. Remover comentários de bloco (/* ... */)
+    code = re.sub(r'/\*.*?\*/', '', code, flags=re.DOTALL)
 
-    #gerar_arquivo_h_com_pycparser(code_path)
+    # 3. Remover diretivas de pré-processador como #include, #define, #ifdef, etc.
+    code = re.sub(r'^\s*#.*$', '', code, flags=re.MULTILINE)
 
-    inputs, outputs = ParseNameInputsOutputs(code_path, folder_path ,target_function)
+    # 4. Opcional: Remover linhas em branco
+    code = re.sub(r'^\s*$', '', code, flags=re.MULTILINE)
 
-    print("Inputs:", inputs)
-    print("Outputs:", outputs)
+    return code
+
+def generate_ast(code_path):
+    code = (substitute_headers_with_sources(code_path))
+    parser = c_parser.CParser()
+    return parser.parse(code)

@@ -1,0 +1,47 @@
+{
+    "CompA": { 
+        "input_names": ["SUTI1", "SUTI2", "SUTI3"],
+        "input_values": [
+            [40, 36, 46],
+            [x, x, x],
+            [x, x, x],
+            [x, x, x]
+        ]
+    },
+    "CompB": { 
+        "input_names": ["SUTI4", "SUTI5", "SUTI6"],
+        "input_values": [
+            [35, 11, 13],
+            [x, x, x],
+            [x, x, x],
+            [x, x, x]
+        ]
+    },
+    "CompC": { 
+        "input_names": ["AO1", "BO1", "SUTI7"],
+        "input_values": [
+            [76, 598, 11],
+            [x, x, x],
+            [x, x, x],
+            [x, x, x]
+        ]
+    },
+    "CompE": { 
+        "input_names": ["CO1"],
+        "input_values": [
+            [x, x, x],
+            [x, x, x],
+            [x, x, x],
+            [x, x, x]
+        ]
+    },
+    "CompD": { 
+        "input_names": ["CO1", "AO2", "SUTIO1"],
+        "input_values": [
+            [x, x, x],
+            [x, x, x],
+            [x, x, x],
+            [x, x, x]
+        ]
+    }
+}

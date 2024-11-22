@@ -12,12 +12,8 @@ def corrigir_virgulas(conteudo):
 
 def DC_CC_Report_Generator(log_buffer_path):
     with open(log_buffer_path, 'r') as file:
-        try:
-            conteudo = corrigir_virgulas(file.read())
-            log_data = json.loads(conteudo)
-        except:
-            error = "ERROR: Failed to load log_buffer. Consider increasing the buffer length."
-            raise Exception(error)
+        conteudo = corrigir_virgulas(file.read())
+        log_data = json.loads(conteudo)
 
         adicionar_ao_log("Generating SUT Diagram")
         diagram_directory = 'output/Report/'
@@ -28,30 +24,6 @@ def DC_CC_Report_Generator(log_buffer_path):
         
         analyzer = CouplingAnalyzer(log_data)
         data = analyzer.identify_couplings_exercised()
-        path_report = 'output\Report\dc_cc_analysis_report.pdf'
+        path_report = 'output\\Report\\dc_cc_analysis_report.pdf'
         create_report(data, path_report)
-        if platform.system() == "Windows":
-            os.startfile(path_report)
-        elif platform.system() == "Darwin":  # macOS
-            os.system(f"open {path_report}")
-        else:  # Assume Linux
-            os.system(f"xdg-open {path_report}")
-        return [path_diagram, path_report]
-    
-if __name__ == '__main__':
-    with open('output/OutputBuffer/log_buffer.txt', 'r') as file:
-        conteudo = corrigir_virgulas(file.read())
-        log_data = json.loads(conteudo)
- 
-        path_diagram = diagram_generator(log_data)
-        
-        analyzer = CouplingAnalyzer(log_data)
-        data = analyzer.identify_couplings_exercised()
-        path_report = 'output/Report/dc_cc_analysis_report.pdf'
-        create_report(data, path_report)
-        if platform.system() == "Windows":
-            os.startfile(path_report)
-        elif platform.system() == "Darwin":  # macOS
-            os.system(f"open {path_report}")
-        else:  # Assume Linux
-            os.system(f"xdg-open {path_report}")
+        return [path_report, path_diagram]

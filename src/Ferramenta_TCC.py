@@ -5,11 +5,20 @@ from dc_cc import DC_CC_Report_Generator
 from utils import adicionar_ao_log, Create_output_folder
 from Parser import generate_ast
 
-def executar_ferramenta(excel_file_path, code_path, function_name, folder_path, compiler, bufferLength = 33554432): 
+def executar_ferramenta(excel_file_path : str, code_path : str, function_name : str, compiler : str, bufferLength = 33554432): 
+
+    if not code_path.endswith('.c'):
+        raise Exception("ERROR: SUT is not a C file")
+
+    if not (excel_file_path.endswith('.xls') or excel_file_path.endswith('.xlsx')):
+        raise Exception("ERROR: TestVector is not a xls or xlsx file")
+    
+    if not (compiler == 'gcc' or compiler == 'clang'):
+        raise Exception("ERROR: Compiler must be gcc or clang")
 
     Create_output_folder()
 
-    ast = generate_ast(code_path, folder_path)
+    ast = generate_ast(code_path)
 
     instrumented_code_path = Create_Instrumented_Code(ast, function_name, bufferLength)
     
@@ -21,27 +30,8 @@ def executar_ferramenta(excel_file_path, code_path, function_name, folder_path, 
 
     adicionar_ao_log("Test Driver created successfully.")
     
-    Run_Test_Driver(folder_path, code_path,instrumented_code_path, test_driver_path,compiler)
+    Run_Test_Driver(instrumented_code_path, test_driver_path,compiler)
 
     adicionar_ao_log("Generating DC/CC report...")
     
     return DC_CC_Report_Generator(log_buffer_path)  # Retorna os caminhos dos PDFs
-
-if __name__ == '__main__':
-
-    # Defina o caminho para o arquivo Excel
-    excel_file_path = "tests\\test_cases\\functional_cases\\case1\\testInputs\\testvec.xlsx"
-
-    # Defina o nome do arquivo .c do SUT
-    code_path = "tests\\test_cases\\functional_cases\\case1\\src\\SUT\\SUT.c" 
-
-    # Defina o nome do arquivo .c do SUT
-    folder_path = "tests\\test_cases\\functional_cases\\case1\\src" 
-
-    # Defina o nome da função testada
-    function_name = "SUT"
-
-    #Tipo de compilador
-    compiler = "gcc"    #gcc ou clang
-
-    executar_ferramenta(excel_file_path, code_path, function_name, folder_path, compiler)

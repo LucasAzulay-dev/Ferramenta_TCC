@@ -36,9 +36,9 @@ ROBUSTNESS_CASES = {
         'compiler' : 'gcc',
         'buffer_length' : None
     },
-    'sut_not_testable' :{
-        'case_folder' : 'sut_not_testable',
-        'sut_file_name': 'SUT_not_testable.c',
+    'sut_no_parameters' :{
+        'case_folder' : 'sut_no_parameters',
+        'sut_file_name': 'sut_no_parameters.c',
         'sut_fcn_name' : 'SUT',
         'testvec_name' : 'testvec.xlsx',
         'compiler' : 'gcc',

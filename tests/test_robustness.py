@@ -33,12 +33,12 @@ class TestFI_5:
             execute_robust_case(robustness_case)
         assert str(exception.value) == ERROR_SUT_FCN_NOT_FOUND
     
-    # SUT not testable
+    # SUT no parameters
     def test_5(self, execute_robust_case):
-        robustness_case = 'sut_not_testable'
+        robustness_case = 'sut_no_parameters'
         with pytest.raises(Exception) as exception:
             execute_robust_case(robustness_case)
-        assert str(exception.value) == ERROR_SUT_NOT_TESTABLE
+        assert str(exception.value) == ERROR_SUT_NO_PARAMETERS
 
     # SUT with runtime error
     def test_6(self, execute_robust_case):

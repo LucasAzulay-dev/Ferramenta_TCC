@@ -10,7 +10,7 @@ MSG_DRIVER_EXECUTING = "Running Test Driver..."
 
 ERROR_NO_VALID_LINES = "ERROR: No valid lines in the Test Vector"
 ERROR_SUT_FCN_NOT_FOUND = "ERROR: function 'wrong_name' not found."
-ERROR_SUT_NOT_TESTABLE = "ERROR: function 'SUT' has no parameters."
+ERROR_SUT_NO_PARAMETERS = "ERROR: function 'SUT' has no parameters."
 ERROR_EXEC_ERROR = "ERROR: TestDrive not executed properly. Execution error"
 ERROR_SUT_WRONG_TYPE = "ERROR: SUT is not a C file"
 ERROR_TESTVEC_WRONG_TYPE = "ERROR: TestVector is not a xls or xlsx file"

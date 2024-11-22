@@ -29,6 +29,7 @@ PATH_TEST_DRIVER_C = "output\\InstrumentedSUT\\Test_Driver.c"
 PATH_TEST_DRIVER_EXE = "output\\TestDriver\\Test_Driver.exe"
 PATH_LOG_BUFFER = "output\\OutputBuffer\\log_buffer.txt"
 PATH_REPORT_PDF = "output\\Report\\dc_cc_analysis_report.pdf"
+PATH_DIAGRAM_PDF = "output\\Report\\diagram.pdf"
 
 PATH_FUNC_TEST_CASES = "tests\\test_cases\\functional_cases"
 PATH_ROBS_TEST_CASES = "tests\\test_cases\\robustness_cases"

@@ -76,14 +76,7 @@ class TestFI_8:
         # Assuming that the execution order is the same for all executions
         assert actual_functions_called_ordered == oracle_functions_called_ordered * total_executions
 
-# FI#9: The execution log must report the input variables and their respective values for component execution (CC/DC).
-class TestFI_9:
-    pass
+class TestFR_1:
+    def test_1(self, case_path, execute_functional_case):        
+        assert os.path.exists(os.path.join(case_path,PATH_REPORT_PDF)) and os.path.exists(os.path.join(case_path,PATH_DIAGRAM_PDF))
 
-# FI#10: The execution log must report variables whose values may change due to each component’s execution and their values after execution.
-class TestFI_10:
-    pass
-
-# FI#11: The Tool must identify variables that are simultaneously input and output parameters between components.
-class TestFI_11:
-    pass

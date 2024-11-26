@@ -1,25 +1,35 @@
-Alterações em relação a Main:
+# DC/CC Coupling Analysis Tool
 
-V3:
-- instrument_code.py atualizado, mas não utilizado nessa versão. Os testes estão utilizando o SUT original
-- ⁠Bloco run_test_drive.py adicionado
-- Opções para compilação (gcc e clang) (clang não testado)
-- ⁠Test_Drive_Creator agora adiciona a função de contar o tempo de execução médio em microsegundos (Considera o Wall time, roda em Linux e Windows, falhas em testes pequenos e acurácia não testada)
-- ⁠Nome das funções criadas não são mais variáveis 
-- ⁠adicionado “if __name__ == ‘__main__’:” nos blocos
+This is the final delivery of the Embedded Software for the Aeronautical Industry, offered by Embraer in partnership with UFPE. 
 
-V4:
-- Integração com instrument_code.py. O test_driver agora teste corretamente o SUT instrumentado
-- ⁠Test_Drive_Creator agora é mais genérico, funciona com qualquer tipo de entrada ou saida, com a condição de que os ponteiros indicam as saidas
-- Bloco Parser.py adicionado
-    - ParseInputOutputs retorna um lista com os tipos dos parametros da função analizada
-    - gerar_arquivo_h_com_pycparser gera o arquivo instrumented_SUT.h
+This work proposes a tool for automating the execution of test cases and the measurement of data and control coupling coverage on a SUT written in ANSI C for aeronautical applications. The tool uses static code instrumentation techniques to gather information about the code execution during the test cases, facilitating a white-box approach to code verification. The tool generates a report that presents the information relevant to data and control coupling analysis.
 
-V5: 
-- Salvamento do log de execucao em um buffer 
-    - Somente no goal_instrumented_SUT.c e goal_Test_Driver.c
-    - goal_instrumented_SUT.c e goal_Test_Driver.c já interagem entre si
-    - Tamanho do buffer ainda pequeno (ainda necessario definir um bom tamanho para o buffer) 
-    - instrument_code.py e Test_Driver_Creator.y ainda não geram os goal_
-- funcoes_extras.py criado para funcoes auxiliares no Test_Driver_Creator (talvez juntar com o Parser.py)
-- Inicio da criação de mensagens de erro do Test_Driver_Creator.y
+## How to Use
+
+### Requirements
+
+This project was developed and tested for Windows. First, the latest version of **python 3** and **pip** is needed. A C code compiler is also required, it should be **gcc** or **clang**. In order to generate the code diagram, the latest verion of **graphviz** should be installed.
+
+To install the required python packages, execute the comannd in the project root folder:
+
+```pip install -r requirements.txt```
+
+### Graphical Interface
+
+In order to initiate the tool, execute the .bat file:
+
+```bat_scripts\run_dc_cc_tool.bat```
+
+or run the python command:
+
+```python src\graphical_interface.py```
+
+The tool's graphical interface will initiate. Inform the required inputs and click 'Run tool'. The report will be presented in the interface. Use the buttons below the report to navigate through the pages and other files.
+
+## Execute test cases
+
+There are some prepared test cases in the project. You can check them in the _tests\test_cases_ file. Test cases can be executed individually thought the graphical interface or, to run all the tests, execute:
+
+```bat_scripts\run_tests.bat```
+
+This will save all the outputs in the _output_ folder of each test case. Some test cases will not produce outputs if the intended behaviour is to raise some error.

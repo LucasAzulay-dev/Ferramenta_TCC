@@ -14,7 +14,7 @@ def Run_Test_Driver(instrumented_code_path, test_driver_path, compiler):
             case "clang":  
                 #Compila o programa C
                 args = ['clang']
-                args = args + list([instrumented_code_path, test_driver_path, "-o", "output/TestDriver/Test_Driver"])
+                args = args + list([instrumented_code_path, test_driver_path, "-o", "output/TestDriver/Test_Driver.exe"])
                 subprocess.run(args, check=True, text=True, capture_output=True) 
 
     except subprocess.CalledProcessError as e:
@@ -27,9 +27,6 @@ def Run_Test_Driver(instrumented_code_path, test_driver_path, compiler):
     except subprocess.CalledProcessError:
         error = f"ERROR: TestDrive not executed properly. Execution error" # {e.stderr}
         raise Exception(error)
-
-        # Executa o programa C
-        subprocess.run(["./output/TestDriver/Test_Driver.exe"], check=True)
 
     adicionar_ao_log("Test Driver executed successfully.")
     return 0

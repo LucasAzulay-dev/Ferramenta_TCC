@@ -17,7 +17,7 @@ class TestFI_1:
             function_name='sut',
             compiler='gcc',
             bufferLength=33554432
-    )
+        )
 
     def test_2(self, dont_open_report):
         """
@@ -30,7 +30,7 @@ class TestFI_1:
             function_name='sut',
             compiler='clang',
             bufferLength=33554432
-    )
+        )
         
 class TestFI_2:
     """

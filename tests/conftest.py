@@ -181,6 +181,16 @@ class ToolParameters():
         self.compiler = compiler
         self.buffer_length = buffer_length
 
+# Setup: clear the 'output' directory before executing the test
+@pytest.fixture(autouse=True)
+def clear_output_dir():
+    print("[pytest] Cleaning output directory...")
+    output_dir = str(Path("output").absolute())
+    for root, _, files in os.walk(output_dir):
+        for file in files:
+            os.remove(os.path.join(root, file))
+    yield
+
 # Setup: backup the 'output' directory
 # Teardown: restore the original 'output' directory
 @pytest.fixture(scope="session", autouse=True)
@@ -191,9 +201,9 @@ def prepare_output_directory():
     print("[pytest] Backing up output dir")    
     temp_dir = tempfile.mkdtemp()
     shutil.copytree(output_dir, os.path.join(temp_dir, backup_dir))
-    for root, _, files in os.walk(output_dir):
-        for file in files:
-            os.remove(os.path.join(root, file))
+    # for root, _, files in os.walk(output_dir):
+    #     for file in files:
+    #         os.remove(os.path.join(root, file))
     
     yield
 

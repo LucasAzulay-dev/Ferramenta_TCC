@@ -133,7 +133,7 @@ def Create_Test_Driver(excel_file_path, function_name, ast, log_buffer_path, buf
             param_outputs = param_outputs + resultado[i+2] + ' ' + 'SUTO' + f'{outputs};\n    ' 
 
             #Para verificacao dos testes
-            test_outputs = test_outputs + ' (fabs(SUTO' + f'{outputs} - SUTO' + f'{outputs}_test) < 0.0001) &&' 
+            test_outputs = test_outputs + ' (fabs((double)SUTO' + f'{outputs} - (double)SUTO' + f'{outputs}_test) < 0.0001) &&' 
 
             #Para print dos tipos de saida
             type_output = c_type_to_printf.get(resultado[i+2])

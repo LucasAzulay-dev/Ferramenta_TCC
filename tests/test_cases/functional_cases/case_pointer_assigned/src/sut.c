@@ -74,6 +74,9 @@ void sut(int i1, float i2, int i3,   int *o1, int *o2, float *o3){
     int a, e; 
     float b, c, d, f, g, h;
 
+    h = 0;
+    b = 0;
+
     a = f1(i1, i2);
     f2(i2, &b, &h);
     f3(i2, i3, &h, &e, &g);

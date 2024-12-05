@@ -1,6 +1,6 @@
 # DC/CC Coupling Analysis Tool
 
-This is the final delivery of the Embedded Software for the Aeronautical Industry, offered by Embraer in partnership with UFPE. 
+This is the final delivery of the Embedded Software for the Aeronautical Industry Specialization, offered by Embraer in partnership with UFPE. 
 
 This work proposes a tool for automating the execution of test cases and the measurement of data and control coupling coverage on a SUT written in ANSI C for aeronautical applications. The tool uses static code instrumentation techniques to gather information about the code execution during the test cases, facilitating a white-box approach to code verification. The tool generates a report that presents the information relevant to data and control coupling analysis.
 
